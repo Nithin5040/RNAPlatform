@@ -1,8 +1,10 @@
 import express from "express"
-import { verifyToken } from "../../MiddleWare/authMiddleWare/auth.js"
+import {userCreationDropDown} from "../../Controllers/User/userCreation.js"
 
 export const router = express.Router()
 
 
-//router.post("/", verifyToken, userCreation)
+router.post("/userdpdwn",  userCreationDropDown)
 
+
+export default router
