@@ -1,0 +1,253 @@
+export const SummaryApi = {
+  // Authentication
+  login: {
+    url: "/wfms-service/authService/login",
+    method: "post"
+  },
+  roles: {
+    url: "/wfms-service/roleCreation",
+    method: "post"
+  },
+  UserCreatedpdwns: {
+    url: "/wfms-service/userCreation/userDpwns",
+    method: "post"
+  },
+  UserCreation: {
+    url: "/wfms-service/userCreation",
+    method: "post"
+  },
+  changePassword: {
+    url: "/wfms-service/userCreation/changePassword",
+    method: "post"
+  },
+  loginDetails: {
+    url: "/wfms-service/authService/login/userLoginDetails",
+    method: "post"
+  },
+  dashboardCounts: {
+    url: "/wfms-service/authService/getUser",
+    method: "post"
+  },
+  UsersList: {
+    url: "/wfms-service/authService/getUser/userList",
+    method: "post"
+  },
+  EditUserList: {
+    url: "/wfms-service/authService/getUser/editUser",
+    method: "put"
+  },
+  MarketMobilising: {
+    url: "/wfms-service/MarketMobiliSation",
+    method: "post"
+  },
+  CandidateList: {
+    url: "/wfms-service/feCandiDatesList",
+    method: "post"
+  },
+  CandidateImage: {
+    url: "/wfms-service/feCandiDatesList/fetchCandidatesImage",
+    method: "post"
+  },
+  MisReportDrpdwns: {
+    url: "/wfms-service/misReport/getdropdown",
+    method: "post"
+  },
+  MisReport: {
+    url: "/wfms-service/misReport",
+    method: "post"
+  },
+  ReportingManagerList: {
+    url: "/wfms-service/reportingTo",
+    method: "post"
+  },
+  MainSites: {
+    url: "/wfms-service/mainSites",
+    method: "post"
+  },
+  SubSites: {
+    url: "/wfms-service/subSite",
+    method: "post"
+  },
+  NewPassword: {
+    url: "/wfms-service/updatenewPassword",
+    method: "post"
+  },
+  SeReport: {
+    url: "/wfms-service/misReport/seReportDpdwn",
+    method: "post"
+  },
+  ExitList: {
+    url: "/wfms-service/rejoinAdmin/fetchforExitListAdmin",
+    method: "post"
+  },
+  ReasonDpdwns: {
+    url: "/wfms-service/rejoinAdmin/fetchReasonDpdwnAdmin",
+    method: "post"
+  },
+  ExitFinalSubmit: {
+    url: "/wfms-service/rejoinAdmin/submitVerifiedCandidateExitListAdmin",
+    method: "post"
+  },
+  ExitCandidateList: {
+    url: "/wfms-service/rejoinAdmin/fetchExitListAdmin",
+    method: "post"
+  },
+  RejoinAdminList: {
+    url: "/wfms-service/rejoinAdmin/fetchRejoinAdmin",
+    method: "post"
+  },
+  RejoinFinalSubmit: {
+    url: "/wfms-service/rejoinAdmin/rejoinCandidateAdmin",
+    method: "post"
+  },
+  fetchAttendanceReport: {
+    url: "/wfms-service/misReport/fetchAttendenceReport",
+    method: "post"
+  },
+  SiteNewEntryReport: {
+    url: "/wfms-service/misReport/siteNewEntryReport",
+    method: "post"
+  },
+  fetchOtReport: {
+    url: "/wfms-service/misReport/fetchOtReport",
+    method: "post"
+  },
+  Dpdwndptdsg: {
+    url: "/wfms-service/misReport/seReportDpdwnDptDsg",
+    method: "post"
+  },
+  SiteEntryreport: {
+    url: "/wfms-service/misReport/updateSiteEntryReport",
+    method: "post"
+  },
+  FetchRejoinReport: {
+    url: "/wfms-service/misReport/fetchRejoinReport",
+    method: "post"
+  },
+  FetchExitReport: {
+    url: "/wfms-service/misReport/fetchExitReport",
+    method: "post"
+  },
+  ColonySiteEntryReport: {
+    url: "/wfms-service/misReport/colonySiteEntryReport",
+    method: "post"
+  },
+  fetchVerificationExitReport: {
+    url: "/wfms-service/misReport/fetchVerificationExitReport",
+    method: "post"
+  },
+  OnbaordCandidate: {
+    url: "/wfms-service/onboard/FetchonboardCandidate",
+    method: "post"
+  },
+  CandidateHistoryAadhaar: {
+    url: "/wfms-service/historyReport/candidateHistorybyAadhar",
+    method: "post"
+  },
+  CandidateHistoryGatePass: {
+    url: "/wfms-service/historyReport/candidateHistorybyGatePass",
+    method: "post"
+  },
+  CandidateHistoryDropdown: {
+    url: "/wfms-service/onboard/DropdownforUpdate",
+    method: "post"
+  },
+  UpdateOnboardCandidate: {
+    url: "/wfms-service/onboard/UpdateonboardCandidate",
+    method: "post"
+  },
+  ViewPan: {
+    url: "/wfms-service/onboard/viewPan",
+    method: "post"
+  },
+  ViewSign: {
+    url: "/wfms-service/onboard/viewSign",
+    method: "post"
+  },
+  ViewPhoto: {
+    url: "/wfms-service/onboard/viewPhoto",
+    method: "post"
+  },
+  ViewAadhar: {
+    url: "/wfms-service/onboard/viewAadhar",
+    method: "post"
+  },
+  ViewGatePass: {
+    url: "/wfms-service/onboard/viewGatePass",
+    method: "post"
+  },
+  ViewBankPassbook: {
+    url: "/wfms-service/onboard/viewBankPassbook",
+    method: "post"
+  },
+  DropdownforUpdate: {
+    url: "/wfms-service/onboard/DropdownforUpdate",
+    method: "post"
+  },
+  ReUploadupdateSiteEntry: {
+    url: "/wfms-service/reupload_updateSiteEntry/reUploadupdateSiteEntry",
+    method: "post"
+  },
+  loginDetailsReport: {
+    url: "/wfms-service/misReport/fetchLoginDetails",
+    method: "post"
+  },
+  CommonLoginReport: {
+    url: "/wfms-service/misReport/commonLoginDetails",
+    method: "post"
+  },
+   LoginFilter: {
+    url: "/wfms-service/reportingManager/fetchLoginFilterTypeDrpDwn",
+    method: "post"
+  },
+  RmDashboard: {
+    url: "/wfms-service/reportingManager/Fetchreportingmanager",
+    method: "post"
+  },
+  RmDashboardCounts: {
+    url: "/wfms-service/reportingManager/FetchreportingmanagerCount",
+    method: "post"
+  },
+  UpdateReportingManagerFePassword: {
+    url: "/wfms-service/reportingManager/UpdateReportingManagerFePassword",
+    method: "post"
+  },
+  RmRoleDpdwn: {
+    url: "/wfms-service/reportingManager/FetchRoleDropDown",
+    method: "post"
+  },
+  RmUserDpdwn: {
+    url: "/wfms-service/reportingManager/FetchUserDropDown",
+    method: "post"
+  },
+  RmLoginAudit: {
+    url: "/wfms-service/reportingManager/FetchReportingManagerLoginDetails",
+    method: "post"
+  },
+  TransferCandidate: {
+    url: "/wfms-service/transferCandidate/FetchCandidateDetail",
+    method: "post"
+  },
+  TransferCandidateSubmit: {
+    url: "/wfms-service/transferCandidate/TransferCandidate",
+    method: "post"
+  },
+  // RM Dashboard KPIs
+  RmDashboardKpis: {
+    url: "/wfms-service/ReportingManager/FetchLooginCountReportingManagerWeb",
+    method: "post"
+  },
+  TeamInsightsCount: {
+    url: "/wfms-service/ReportingManager/FetchTotalCountunderReportingManagerWeb",
+    method: "post"
+  },
+  MonthWiseReport: {
+    url: "/wfms-service/misReport/monthWiseReport",
+    method: "post"
+  },
+  MonthWiseReportDetails: {
+    url: "/wfms-service/misReport/monthWiseReportDetails",
+    method: "post"
+
+  }
+};
