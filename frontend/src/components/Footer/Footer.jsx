@@ -9,10 +9,10 @@ export default function Footer({ darkMode = false }) {
     <div className={`critical-footer ${darkMode ? 'dark' : ''}`}>
       <div className="critical-footer-content">
         <span className="copyright">
-          © Vishang {currentYear}-{nextYear}
+          © Vishvin {currentYear}-{nextYear}
         </span>
         <span className="company-name">
-          ANG Manpower Solutions
+          Vishvin Technologies Pvt Limited
         </span>
         <span className="rights">
           All rights reserved

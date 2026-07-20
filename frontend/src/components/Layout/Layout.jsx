@@ -65,10 +65,10 @@ export default function Layout({ children, showSidebar = true }) {
   // Check authentication - Only check if user is logged in, not their role
   useEffect(() => {
     const checkAuth = () => {
-      const token = sessionStorage.getItem("auth_token");
+      const storedUser = sessionStorage.getItem("auth_user");
       const storedRoleId = sessionStorage.getItem("roleId");
       
-      setIsLoggedIn(!!token);
+      setIsLoggedIn(!!storedUser);
       
       if (storedRoleId) {
         setRoleId(parseInt(storedRoleId));
