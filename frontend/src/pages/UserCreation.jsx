@@ -17,6 +17,9 @@ import {
     FaLock,
     FaEnvelope,
     FaTrash,
+    FaEdit,
+    FaTimes,
+    FaInfoCircle,
     FaTruck,
     FaFileUpload,
     FaRoad,
@@ -53,8 +56,12 @@ const getSelectStyles = (darkMode, error) => ({
         backgroundColor: darkMode ? '#13102e' : '#ffffff',
         border: darkMode ? '1px solid rgba(90,84,224,0.2)' : '1px solid #e5e7eb',
         borderRadius: '0.5rem',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        zIndex: 50
+        boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        zIndex: 9999
+    }),
+    menuPortal: (base) => ({
+        ...base,
+        zIndex: 9999
     }),
     option: (base, { isFocused, isSelected }) => ({
         ...base,
@@ -135,12 +142,17 @@ export default function UserCreation() {
 
     // Multi-select location states
     const [zoneAccess, setZoneAccess] = useState([]);
+    const [selectedLocations, setSelectedLocations] = useState([]);
     const [selectedZone, setSelectedZone] = useState(null);
     const [selectedCircles, setSelectedCircles] = useState([]);
     const [selectedDivisions, setSelectedDivisions] = useState([]);
     const [selectedDistricts, setSelectedDistricts] = useState([]);
     const [selectedTaluks, setSelectedTaluks] = useState([]);
     const [selectedStations, setSelectedStations] = useState([]);
+
+    // Modal state for viewing/editing location record details
+    const [editingRecordIndex, setEditingRecordIndex] = useState(null);
+    const [editingRecordData, setEditingRecordData] = useState(null);
 
     // Dropdown states - storing full objects with codes
     const [roles, setRoles] = useState([]);
@@ -578,16 +590,17 @@ export default function UserCreation() {
         }
     };
 
-    // Check if the selected role is "Driver(User)"
+    // Check if the selected role is "Driver(User)" or Driver
     const isDriverRole = useMemo(() => {
         const selectedRole = roles.find(option => option.value === form.role);
-        return selectedRole && selectedRole.label === "Driver(User)";
+        return selectedRole && (selectedRole.label === "Driver(User)" || selectedRole.label?.toLowerCase().includes("driver"));
     }, [form.role, roles]);
 
     // Reset location selections when role changes from Driver(User)
     useEffect(() => {
         if (!isDriverRole) {
             setZoneAccess([]);
+            setSelectedLocations([]);
             setSelectedZone(null);
             setSelectedCircles([]);
             setSelectedDivisions([]);
@@ -599,6 +612,20 @@ export default function UserCreation() {
             setDistricts([]);
             setTaluks([]);
             setStations([]);
+        } else {
+            // Clear non-driver specific fields when switching to driver role
+            setForm(prev => ({
+                ...prev,
+                firstName: '',
+                lastName: '',
+                email: ''
+            }));
+            setErrors(prev => ({
+                ...prev,
+                firstName: '',
+                lastName: '',
+                email: ''
+            }));
         }
     }, [form.role, isDriverRole]);
 
@@ -869,6 +896,10 @@ export default function UserCreation() {
                 for (const district of selectedDistricts) {
                     for (const taluk of selectedTaluks) {
                         for (const station of selectedStations) {
+                            const locNames = selectedLocations && selectedLocations.length > 0
+                                ? selectedLocations.map(l => l.label).join(", ")
+                                : "Main Hub";
+
                             const entry = {
                                 // Names for UI display
                                 zoneName: selectedZone.zoneName || selectedZone.label,
@@ -877,6 +908,13 @@ export default function UserCreation() {
                                 districtName: district.districtName || district.label,
                                 taluk: taluk.talukName || taluk.label,
                                 stationName: station.stationName || station.label,
+                                locationName: locNames,
+
+                                // Backend fields requested
+                                inchargeAE: station.inchargeAE || `AE ${station.stationName || 'Officer'}`,
+                                contactNo: station.contactNo || "9876543210",
+                                pincode: station.pincode || "560001",
+                                voltageClass: station.voltageClass || "66/11 kV",
 
                                 // Codes for backend API payload
                                 zoneCode: selectedZone.zoneCode || selectedZone.value,
@@ -953,6 +991,32 @@ export default function UserCreation() {
     const removeLocationEntry = (index) => {
         const updatedZoneAccess = zoneAccess.filter((_, i) => i !== index);
         setZoneAccess(updatedZoneAccess);
+    };
+
+    // Open edit modal for location entry
+    const handleOpenEditModal = (index) => {
+        setEditingRecordIndex(index);
+        setEditingRecordData({ ...zoneAccess[index] });
+    };
+
+    // Save edited location record
+    const handleSaveEditRecord = () => {
+        if (editingRecordIndex === null || !editingRecordData) return;
+        const updated = [...zoneAccess];
+        updated[editingRecordIndex] = editingRecordData;
+        setZoneAccess(updated);
+        setEditingRecordIndex(null);
+        setEditingRecordData(null);
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Updated!',
+            text: 'Location details updated successfully.',
+            timer: 2000,
+            showConfirmButton: false,
+            background: darkMode ? '#13102e' : '#ffffff',
+            color: darkMode ? '#ffffff' : '#000000',
+        });
     };
 
     // Auto-capitalize first letter of each word
@@ -1144,6 +1208,7 @@ export default function UserCreation() {
         setErrorMessage("");
         setShowPassword(false);
         setZoneAccess([]);
+        setSelectedLocations([]);
         setSelectedZone(null);
         setSelectedCircles([]);
         setSelectedDivisions([]);
@@ -1271,6 +1336,13 @@ export default function UserCreation() {
     };
 
     // Options mapping
+    const locationOptions = [
+        { value: 'LOC01', label: 'Location 1 - Central Hub' },
+        { value: 'LOC02', label: 'Location 2 - North Yard' },
+        { value: 'LOC03', label: 'Location 3 - South Depot' },
+        { value: 'LOC04', label: 'Location 4 - West Terminal' },
+        { value: 'LOC05', label: 'Location 5 - East Logistics Park' }
+    ];
     const roleOptions = roles;
     const genderOptions = genders;
     const zoneOptions = zones;
@@ -1316,137 +1388,16 @@ export default function UserCreation() {
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? 'bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]' : 'bg-white border-gray-200 shadow-sm'} rounded-2xl border overflow-hidden`}
+                        className={`${darkMode ? 'bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]' : 'bg-white border-gray-200 shadow-sm'} rounded-2xl border min-h-[220px]`}
                     >
                         {/* Gradient divider line at top */}
-                        <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff]" />
+                        <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
 
                         <div className="p-8">
                             {/* Responsive 4-Column Fields Grid */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                                {/* First Name - Optional */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        First Name
-                                    </label>
-                                    <div className="relative">
-                                        <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
-                                        <input
-                                            placeholder="Enter first name"
-                                            name="firstName"
-                                            value={form.firstName}
-                                            onChange={handleChange}
-                                            maxLength={50}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                } ${errors.firstName ? 'border-red-500' : ''}`}
-                                        />
-                                    </div>
-                                    <ErrorMessage message={errors.firstName} />
-                                </div>
-
-                                {/* Last Name - Optional */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        Last Name
-                                    </label>
-                                    <div className="relative">
-                                        <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
-                                        <input
-                                            placeholder="Enter last name"
-                                            name="lastName"
-                                            value={form.lastName}
-                                            onChange={handleChange}
-                                            maxLength={50}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                } ${errors.lastName ? 'border-red-500' : ''}`}
-                                        />
-                                    </div>
-                                    <ErrorMessage message={errors.lastName} />
-                                </div>
-
-                                {/* Email - Optional */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        Email
-                                    </label>
-                                    <div className="relative">
-                                        <FaEnvelope className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
-                                        <input
-                                            placeholder="Enter email address"
-                                            type="email"
-                                            name="email"
-                                            value={form.email}
-                                            onChange={handleChange}
-                                            maxLength={100}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                } ${errors.email ? 'border-red-500' : ''}`}
-                                        />
-                                    </div>
-                                    <ErrorMessage message={errors.email} />
-                                </div>
-
-                                {/* Mobile Number - Required */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        <span className="text-red-500 mr-1">*</span>Mobile Number
-                                    </label>
-                                    <div className="relative">
-                                        <FaPhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
-                                        <input
-                                            placeholder="Enter mobile number"
-                                            required
-                                            name="mobile"
-                                            value={form.mobile}
-                                            onChange={handleChange}
-                                            maxLength={10}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                } ${errors.mobile ? 'border-red-500' : ''}`}
-                                        />
-                                    </div>
-                                    <ErrorMessage message={errors.mobile} />
-                                </div>
-
-                                {/* Password - Required */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        <span className="text-red-500 mr-1">*</span>Password
-                                    </label>
-                                    <div className="relative">
-                                        <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            placeholder="Enter password"
-                                            required
-                                            name="password"
-                                            value={form.password}
-                                            onChange={handleChange}
-                                            maxLength={20}
-                                            className={`w-full rounded-lg border pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
-                                                } ${errors.password ? 'border-red-500' : ''}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
-                                        >
-                                            {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
-                                        </button>
-                                    </div>
-                                    <ErrorMessage message={errors.password} />
-                                </div>
-
-                                {/* Select Role - Required */}
+                                {/* Select Role - Required (1st field) */}
                                 <div>
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Role
@@ -1463,30 +1414,163 @@ export default function UserCreation() {
                                         styles={getSelectStyles(darkMode, errors.role)}
                                         classNamePrefix="react-select"
                                         isSearchable
+                                        menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                                     />
                                     <ErrorMessage message={errors.role} />
                                 </div>
 
-                                {/* Select Gender - Required */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
-                                        <span className="text-red-500 mr-1">*</span>Select Gender
-                                    </label>
-                                    <Select
-                                        name="gender"
-                                        options={genderOptions}
-                                        value={genderOptions.find(option => option.value === form.gender) || null}
-                                        onChange={(option) => handleSelectChange(option, { name: 'gender' })}
-                                        isLoading={fetchingGenders}
-                                        isDisabled={fetchingGenders}
-                                        placeholder={fetchingGenders ? "Loading genders..." : "Select gender..."}
-                                        noOptionsMessage={() => fetchingGenders ? 'Loading...' : 'No genders found'}
-                                        styles={getSelectStyles(darkMode, errors.gender)}
-                                        classNamePrefix="react-select"
-                                        isSearchable
-                                    />
-                                    <ErrorMessage message={errors.gender} />
-                                </div>
+                                {/* Render remaining fields only after a role is selected */}
+                                {form.role && (
+                                    <>
+                                        {/* Fields hidden for Driver role */}
+                                        {!isDriverRole && (
+                                            <>
+                                                {/* First Name - Optional */}
+                                                <div>
+                                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                        First Name
+                                                    </label>
+                                                    <div className="relative">
+                                                        <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                                        <input
+                                                            placeholder="Enter first name"
+                                                            name="firstName"
+                                                            value={form.firstName}
+                                                            onChange={handleChange}
+                                                            maxLength={50}
+                                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                } ${errors.firstName ? 'border-red-500' : ''}`}
+                                                        />
+                                                    </div>
+                                                    <ErrorMessage message={errors.firstName} />
+                                                </div>
+
+                                                {/* Last Name - Optional */}
+                                                <div>
+                                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                        Last Name
+                                                    </label>
+                                                    <div className="relative">
+                                                        <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                                        <input
+                                                            placeholder="Enter last name"
+                                                            name="lastName"
+                                                            value={form.lastName}
+                                                            onChange={handleChange}
+                                                            maxLength={50}
+                                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                } ${errors.lastName ? 'border-red-500' : ''}`}
+                                                        />
+                                                    </div>
+                                                    <ErrorMessage message={errors.lastName} />
+                                                </div>
+
+                                                {/* Email - Optional */}
+                                                <div>
+                                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                        Email
+                                                    </label>
+                                                    <div className="relative">
+                                                        <FaEnvelope className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                                        <input
+                                                            placeholder="Enter email address"
+                                                            type="email"
+                                                            name="email"
+                                                            value={form.email}
+                                                            onChange={handleChange}
+                                                            maxLength={100}
+                                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                                ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                                } ${errors.email ? 'border-red-500' : ''}`}
+                                                        />
+                                                    </div>
+                                                    <ErrorMessage message={errors.email} />
+                                                </div>
+                                            </>
+                                        )}
+
+                                        {/* Mobile Number - Required */}
+                                        <div>
+                                            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                <span className="text-red-500 mr-1">*</span>Mobile Number
+                                            </label>
+                                            <div className="relative">
+                                                <FaPhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                                <input
+                                                    placeholder="Enter mobile number"
+                                                    required
+                                                    name="mobile"
+                                                    value={form.mobile}
+                                                    onChange={handleChange}
+                                                    maxLength={10}
+                                                    className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                        ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                        } ${errors.mobile ? 'border-red-500' : ''}`}
+                                                />
+                                            </div>
+                                            <ErrorMessage message={errors.mobile} />
+                                        </div>
+
+                                        {/* Password - Required */}
+                                        <div>
+                                            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                <span className="text-red-500 mr-1">*</span>Password
+                                            </label>
+                                            <div className="relative">
+                                                <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder="Enter password"
+                                                    required
+                                                    name="password"
+                                                    value={form.password}
+                                                    onChange={handleChange}
+                                                    maxLength={20}
+                                                    className={`w-full rounded-lg border pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                        ? 'bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]'
+                                                        } ${errors.password ? 'border-red-500' : ''}`}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
+                                                >
+                                                    {showPassword ? <FaEyeSlash size={15} /> : <FaEye size={15} />}
+                                                </button>
+                                            </div>
+                                            <ErrorMessage message={errors.password} />
+                                        </div>
+
+                                        {/* Select Gender - Required */}
+                                        <div>
+                                            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                <span className="text-red-500 mr-1">*</span>Select Gender
+                                            </label>
+                                            <Select
+                                                name="gender"
+                                                options={genderOptions}
+                                                value={genderOptions.find(option => option.value === form.gender) || null}
+                                                onChange={(option) => handleSelectChange(option, { name: 'gender' })}
+                                                isLoading={fetchingGenders}
+                                                isDisabled={fetchingGenders}
+                                                placeholder={fetchingGenders ? "Loading genders..." : "Select gender..."}
+                                                noOptionsMessage={() => fetchingGenders ? 'Loading...' : 'No genders found'}
+                                                styles={getSelectStyles(darkMode, errors.gender)}
+                                                classNamePrefix="react-select"
+                                                isSearchable
+                                                menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                            />
+                                            <ErrorMessage message={errors.gender} />
+                                        </div>
+                                    </>
+                                )}
 
                             </div>
 
@@ -1504,7 +1588,7 @@ export default function UserCreation() {
                                             Location Access Details
                                         </h3>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
                                             {/* Zone Dropdown - Single Select */}
                                             <div>
                                                 <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
@@ -1623,6 +1707,25 @@ export default function UserCreation() {
                                                     isMulti
                                                 />
                                             </div>
+
+                                            {/* Location Dropdown - Multi Select */}
+                                            <div>
+                                                <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                                    Location (Multi)
+                                                </label>
+                                                <Select
+                                                    options={locationOptions}
+                                                    value={selectedLocations}
+                                                    onChange={(selectedOptions) => setSelectedLocations(selectedOptions || [])}
+                                                    placeholder="Select locations..."
+                                                    noOptionsMessage={() => 'No locations found'}
+                                                    styles={getMultiSelectStyles(darkMode, false)}
+                                                    classNamePrefix="react-select"
+                                                    isSearchable
+                                                    isMulti
+                                                    menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                                                />
+                                            </div>
                                         </div>
 
                                         {/* Generate Combinations Button */}
@@ -1654,12 +1757,11 @@ export default function UserCreation() {
                                                         <thead className={darkMode ? 'bg-[#0d0b22]' : 'bg-gray-50'}>
                                                             <tr>
                                                                 <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Sl No</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Zone</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Circle</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Division</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>District</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Taluk</th>
-                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Station</th>
+                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Station Name</th>
+                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Incharge AE</th>
+                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Contact No</th>
+                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Pincode</th>
+                                                                <th className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Voltage Class</th>
                                                                 <th className={`px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-[#a5a0ff]' : 'text-gray-600'}`}>Action</th>
                                                             </tr>
                                                         </thead>
@@ -1675,23 +1777,34 @@ export default function UserCreation() {
                                                                         className={`transition-colors ${darkMode ? 'hover:bg-[#1a1740]' : 'hover:bg-gray-50'}`}
                                                                     >
                                                                         <td className={`px-4 py-3 text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{index + 1}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.zoneName}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.circleName}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.divisionName}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.districtName}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.taluk}</td>
-                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-900'}`}>{entry.stationName}</td>
+                                                                        <td className={`px-4 py-3 text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{entry.stationName}</td>
+                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-800'}`}>{entry.inchargeAE || 'N/A'}</td>
+                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-800'}`}>{entry.contactNo || 'N/A'}</td>
+                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-800'}`}>{entry.pincode || 'N/A'}</td>
+                                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-[#e2e0ff]' : 'text-gray-800'}`}>{entry.voltageClass || 'N/A'}</td>
                                                                         <td className="px-4 py-3 text-center">
-                                                                            <motion.button
-                                                                                whileHover={{ scale: 1.2, rotate: 10 }}
-                                                                                whileTap={{ scale: 0.9 }}
-                                                                                type="button"
-                                                                                onClick={() => removeLocationEntry(index)}
-                                                                                className={`transition-colors ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
-                                                                                title="Remove"
-                                                                            >
-                                                                                <FaTrash size={16} />
-                                                                            </motion.button>
+                                                                            <div className="flex items-center justify-center gap-2">
+                                                                                <motion.button
+                                                                                    whileHover={{ scale: 1.2 }}
+                                                                                    whileTap={{ scale: 0.9 }}
+                                                                                    type="button"
+                                                                                    onClick={() => handleOpenEditModal(index)}
+                                                                                    className={`transition-colors ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}
+                                                                                    title="View & Edit Details"
+                                                                                >
+                                                                                    <FaEdit size={16} />
+                                                                                </motion.button>
+                                                                                <motion.button
+                                                                                    whileHover={{ scale: 1.2, rotate: 10 }}
+                                                                                    whileTap={{ scale: 0.9 }}
+                                                                                    type="button"
+                                                                                    onClick={() => removeLocationEntry(index)}
+                                                                                    className={`transition-colors ${darkMode ? 'text-red-400 hover:text-red-300' : 'text-red-500 hover:text-red-700'}`}
+                                                                                    title="Remove"
+                                                                                >
+                                                                                    <FaTrash size={16} />
+                                                                                </motion.button>
+                                                                            </div>
                                                                         </td>
                                                                     </motion.tr>
                                                                 ))}
@@ -1852,32 +1965,190 @@ export default function UserCreation() {
                                 )}
                             </AnimatePresence>
 
-                            {/* Submit Button */}
-                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? 'border-[rgba(90,84,224,0.25)]' : 'border-gray-100'}`}>
-                                <motion.button
-                                    whileHover={{ scale: loading ? 1 : 1.02 }}
-                                    whileTap={{ scale: loading ? 1 : 0.97 }}
-                                    type="submit"
-                                    disabled={loading}
-                                    className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
-                                        ? 'bg-[#3b35c9] opacity-70 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]'
-                                        }`}
-                                >
-                                    {loading ? (
-                                        <>
-                                            <FaSpinner className="animate-spin" size={14} />
-                                            Creating User...
-                                        </>
-                                    ) : (
-                                        "Create User"
-                                    )}
-                                </motion.button>
-                            </div>
+                             {/* Submit Button */}
+                             {form.role && (
+                                 <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? 'border-[rgba(90,84,224,0.25)]' : 'border-gray-100'}`}>
+                                     <motion.button
+                                         whileHover={{ scale: loading ? 1 : 1.02 }}
+                                         whileTap={{ scale: loading ? 1 : 0.97 }}
+                                         type="submit"
+                                         disabled={loading}
+                                         className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
+                                             ? 'bg-[#3b35c9] opacity-70 cursor-not-allowed'
+                                             : 'bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]'
+                                             }`}
+                                     >
+                                         {loading ? (
+                                             <>
+                                                 <FaSpinner className="animate-spin" size={14} />
+                                                 Creating User...
+                                             </>
+                                         ) : (
+                                             "Create User"
+                                         )}
+                                     </motion.button>
+                                 </div>
+                             )}
                         </div>
                     </motion.div>
                 </form>
             </div>
+
+            {/* View & Edit Location Record Modal */}
+            <AnimatePresence>
+                {editingRecordIndex !== null && editingRecordData && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className={`w-full max-w-2xl rounded-2xl p-6 shadow-2xl border ${darkMode ? 'bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white' : 'bg-white border-gray-200 text-gray-900'}`}
+                        >
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between pb-4 border-b border-gray-200/20">
+                                <div className="flex items-center gap-2">
+                                    <FaInfoCircle className="text-[#3b35c9]" size={20} />
+                                    <h3 className="text-lg font-bold">
+                                        Location Record Details - {editingRecordData.stationName}
+                                    </h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => { setEditingRecordIndex(null); setEditingRecordData(null); }}
+                                    className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'hover:bg-gray-800 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}
+                                >
+                                    <FaTimes size={18} />
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+
+                                {/* Backend Editable Details */}
+                                <div>
+                                    <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                        Backend Record Details
+                                    </h4>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Station Name</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.stationName || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, stationName: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Incharge AE</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.inchargeAE || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, inchargeAE: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Contact No</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.contactNo || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, contactNo: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Pincode</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.pincode || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, pincode: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Voltage Class</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.voltageClass || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, voltageClass: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium mb-1 opacity-80">Location</label>
+                                            <input
+                                                type="text"
+                                                value={editingRecordData.locationName || ''}
+                                                onChange={(e) => setEditingRecordData(prev => ({ ...prev, locationName: e.target.value }))}
+                                                className={`w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#3b35c9] ${darkMode ? 'bg-[#0d0b22] border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Hierarchy Access Details */}
+                                <div>
+                                    <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                                        Location Hierarchy Details
+                                    </h4>
+                                    <div className={`grid grid-cols-2 sm:grid-cols-3 gap-3 p-3 rounded-lg text-xs ${darkMode ? 'bg-[#0d0b22] border border-gray-800' : 'bg-gray-50 border border-gray-200'}`}>
+                                        <div>
+                                            <span className="opacity-60 block">Zone:</span>
+                                            <span className="font-semibold">{editingRecordData.zoneName} ({editingRecordData.zoneCode})</span>
+                                        </div>
+                                        <div>
+                                            <span className="opacity-60 block">Circle:</span>
+                                            <span className="font-semibold">{editingRecordData.circleName} ({editingRecordData.circleCode})</span>
+                                        </div>
+                                        <div>
+                                            <span className="opacity-60 block">Division:</span>
+                                            <span className="font-semibold">{editingRecordData.divisionName} ({editingRecordData.divisionCode})</span>
+                                        </div>
+                                        <div>
+                                            <span className="opacity-60 block">District:</span>
+                                            <span className="font-semibold">{editingRecordData.districtName} ({editingRecordData.districtCode})</span>
+                                        </div>
+                                        <div>
+                                            <span className="opacity-60 block">Taluk:</span>
+                                            <span className="font-semibold">{editingRecordData.taluk} ({editingRecordData.talukCode})</span>
+                                        </div>
+                                        <div>
+                                            <span className="opacity-60 block">Station Code:</span>
+                                            <span className="font-semibold">{editingRecordData.stationCode}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex justify-end gap-3 pt-4 border-t border-gray-200/20">
+                                <button
+                                    type="button"
+                                    onClick={() => { setEditingRecordIndex(null); setEditingRecordData(null); }}
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${darkMode ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSaveEditRecord}
+                                    className="px-6 py-2 rounded-lg text-sm font-semibold text-white bg-[#3b35c9] hover:bg-[#2c28a0] transition-colors shadow-md"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

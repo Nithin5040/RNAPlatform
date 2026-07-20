@@ -3,6 +3,9 @@ import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import Layout from "./components/Layout/Layout";
 import Login from "./pages/Login";
 import UserCreation from "./pages/UserCreation";
+import RouteCreation from "./pages/RouteCreation";
+import MasterRouteUpload from "./pages/MasterRouteUpload";
+import DriverCreation from "./pages/DriverCreation";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function PlaceholderPage({ title }) {
@@ -61,6 +64,30 @@ export default function App() {
             <ProtectedRoute allowedRoles={[1]}>
               <Layout showSidebar={true}>
                 <UserCreation />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/route-creation" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <RouteCreation />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/master-route-upload" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <MasterRouteUpload />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/driver-creation" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <DriverCreation />
               </Layout>
             </ProtectedRoute>
           } />
