@@ -2,8 +2,8 @@ import { Navigate } from "react-router-dom";
 
 // Helper functions to check authentication status
 const isAuthenticated = () => {
-  const token = sessionStorage.getItem("auth_token");
-  return !!token;
+  const user = sessionStorage.getItem("auth_user");
+  return !!user;
 };
 
 export default function ProtectedRoute({

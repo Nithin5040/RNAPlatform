@@ -1,18 +1,19 @@
 import React from "react";
 import "./Footer.css";
 
-export default function Footer({ darkMode = false }) {
+export default function Footer({ darkMode = false, theme = '' }) {
+  const isDark = darkMode || theme === 'dark';
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
 
   return (
-    <div className={`critical-footer ${darkMode ? 'dark' : ''}`}>
+    <div className={`critical-footer ${isDark ? 'dark' : ''}`}>
       <div className="critical-footer-content">
         <span className="copyright">
-          © Vishang {currentYear}-{nextYear}
+          © Vishvin {currentYear}-{nextYear}
         </span>
         <span className="company-name">
-          ANG Manpower Solutions
+          Vishvin Technologies Pvt Limited
         </span>
         <span className="rights">
           All rights reserved

@@ -90,7 +90,6 @@ export const FetchRoleDrpdwn = async () => {
 
 
 
-
 export const insertUser = async (client, data) => {
 
     const query = `
@@ -148,6 +147,7 @@ export const getZoneMasterId = async (
             AND "TalukCode" = $5
             AND "StationNameCode" = $6
             AND "IsDisabled" = FALSE
+
         LIMIT 1;
     `;
 
@@ -158,6 +158,7 @@ export const getZoneMasterId = async (
         zone.districtCode,
         zone.talukCode,
         zone.stationCode
+
     ];
 
     const result = await client.query(query, values);
@@ -219,4 +220,8 @@ export const checkUserExists = async (client, email, mobileNumber) => {
 
     return result.rows[0];
 
+
 };
+
+
+

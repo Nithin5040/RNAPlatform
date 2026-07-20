@@ -1,9 +1,96 @@
 export const SummaryApi = {
   // Authentication
   login: {
-    url: "/wfms-service/authService/login",
+    url: "/rna-service/authService/login",
     method: "post"
   },
+  userdpwns: {
+    url: "/rna-service/userCreation/userdpdwn",
+    method: "post"
+  },
+  createUser: {
+    url: "/rna-service/userCreation/createUser",
+    method: "post"
+  },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   roles: {
     url: "/wfms-service/roleCreation",
     method: "post"
@@ -196,7 +283,7 @@ export const SummaryApi = {
     url: "/wfms-service/misReport/commonLoginDetails",
     method: "post"
   },
-   LoginFilter: {
+  LoginFilter: {
     url: "/wfms-service/reportingManager/fetchLoginFilterTypeDrpDwn",
     method: "post"
   },

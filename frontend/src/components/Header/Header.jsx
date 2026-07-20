@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, ChevronDown, Menu, X } from "lucide-react";
+import { User, Settings, LogOut, ChevronDown, Menu, X, Sun, Moon } from "lucide-react";
 import logo from "../../assets/logo.png";
+import vishvinLogo from "../../assets/Vishvin.png";
 import axiosClient from "../../api/axiosClient";
 import { SummaryApi } from "../../api/SummaryApi";
 import Swal from 'sweetalert2';
@@ -30,12 +31,11 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
     const loadUser = () => {
       if (isLoggingOut) return;
 
-      const storedToken = sessionStorage.getItem("auth_token");
       const storedUser = sessionStorage.getItem("auth_user");
       const storedUserRole = sessionStorage.getItem("userRole");
       const storedUserName = sessionStorage.getItem("userName");
 
-      if (storedToken && storedUser) {
+      if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
           setUser({
@@ -80,39 +80,7 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
     };
   }, [menuOpen, isLoggingOut]);
 
-  // Function to get geolocation (same as login)
-  const getGeolocation = () => {
-    return new Promise((resolve) => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            });
-          },
-          (error) => {
-            console.error('Geolocation error:', error);
-            resolve({ latitude: null, longitude: null });
-          }
-        );
-      } else {
-        resolve({ latitude: null, longitude: null });
-      }
-    });
-  };
 
-  // Get current local datetime in YYYY-MM-DD HH:MM:SS format (same as login)
-  const getCurrentLocalDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
@@ -146,39 +114,7 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
         }
       });
 
-      const userLoginDetailId = sessionStorage.getItem("userLoginDetailId");
-      
-      // Get location (same as login)
-      const location = await getGeolocation();
-      const loggedOutTime = getCurrentLocalDateTime();
 
-      if (userLoginDetailId) {
-        const payload = {
-          flagId: 3,
-          UserLoginDetailId: parseInt(userLoginDetailId),
-          LogOutLatitude: location.latitude ? location.latitude.toString() : null,
-          LogOutLongitude: location.longitude ? location.longitude.toString() : null,
-          LoggedOut: loggedOutTime
-        };
-
-        console.log('Logout Audit Payload:', payload);
-
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-          await axiosClient({
-            method: SummaryApi.loginDetails.method,
-            url: SummaryApi.loginDetails.url,
-            data: payload,
-            signal: controller.signal
-          });
-
-          clearTimeout(timeoutId);
-        } catch (auditError) {
-          console.error("Error sending logout audit:", auditError);
-        }
-      }
 
       sessionStorage.clear();
       setUser(null);
@@ -266,7 +202,7 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
         <div className="header-content">
           {/* Logo Section */}
           <a
-            href="https://angmanpower.com/"
+            href="https://www.vishvin.com/"
             target="_blank"
             rel="noopener noreferrer"
             className="header-logo"
@@ -277,49 +213,55 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
               alignItems: 'center'
             }}
           >
-            <div className="logo-image" style={{ height: '50px', width: '50px' }}>
+            <div className="logo-brand-image">
               <img
-                src={logo}
-                alt="ANG Manpower Logo"
+                src={vishvinLogo}
+                alt="Vishvin Technologies Pvt Limited"
                 style={{
-                  height: '100%',
-                  width: '100%',
-                  objectFit: 'contain'
+                  height: '56px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  transform: 'scale(2.0)',
+                  transformOrigin: 'left center',
+                  filter: 'brightness(0) invert(1)'
                 }}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = "https://via.placeholder.com/50x50?text=Logo";
+                  e.target.style.display = 'none';
                 }}
               />
-            </div>
-            <div className="logo-text" style={{ marginLeft: '10px' }}>
-              <span className="logo-title" style={{ fontSize: '1.2rem' }}>ANG Manpower</span>
-              <span className="logo-subtitle" style={{ fontSize: '0.8rem' }}>Workforce Solutions</span>
             </div>
           </a>
 
           {/* Center Section - System Title */}
           <div className="header-title-container">
             <h1 className="header-system-title">
-              <span className="full-title">WORKFORCE MANAGEMENT SYSTEM</span>
-              <span className="short-title">WFMS</span>
-              <span className="title-abbr">(WFMS)</span>
+              <span className="full-title">Resilient Network Architecture</span>
+
             </h1>
           </div>
 
           {/* Right Section - All controls aligned to right */}
           <div className="header-controls">
-            {/* Date and Time Display */}
-            <div className="datetime-display">
-              <span className="date">{formatDate()}</span>
-              <span className="time">{formatTime()}</span>
-            </div>
+            {/* Theme Toggle Button */}
+            {toggleTheme && (
+              <button
+                onClick={toggleTheme}
+                className="theme-toggle-btn"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            )}
+
+
 
             {/* Auth Section and Mobile Menu */}
             <div className="auth-and-menu">
               {showMobileMenu && (
-                <button 
-                  onClick={toggleSidebar} 
+                <button
+                  onClick={toggleSidebar}
                   className="header-mobile-menu-btn"
                   aria-label={sidebarOpen ? "Close menu" : "Open menu"}
                 >
@@ -393,12 +335,6 @@ export default function Header({ toggleTheme, theme, toggleSidebar, sidebarOpen,
                       </button>
                     </div>
                   )}
-                </div>
-              ) : !isLoggingOut ? (
-                <div className="auth-buttons">
-                  <Link to="/login" className="login-btn">
-                    Login
-                  </Link>
                 </div>
               ) : null}
             </div>
