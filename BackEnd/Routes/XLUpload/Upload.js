@@ -4,6 +4,10 @@ import { uploadExcel } from "../../Controllers/Upload/xlupload.js";
 
 const router = express.Router();
 
-router.post("/Upload",upload.single("excel"),uploadExcel);
+router.post("/Upload",upload.array("excelSheet"),uploadExcel);
+
+
+
+
 
 export default router;
