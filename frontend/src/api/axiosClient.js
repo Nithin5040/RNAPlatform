@@ -28,13 +28,13 @@ export const setToken = (token) => {
 export default axiosClient;*/
 
 import axios from "axios";
-  
+
 const axiosClient = axios.create({
 
 
-  baseURL: "http://192.168.23.67:5000",
-//   baseURL: "http://192.168.23.67:5000",
-//   baseURL: "http://192.168.23.60:5000",
+  baseURL: "http://192.168.23.79:5080",
+  //   baseURL: "http://192.168.23.67:5000",
+  //   baseURL: "http://192.168.23.60:5000",
 
 
   headers: {
@@ -44,16 +44,16 @@ const axiosClient = axios.create({
 
 
 //  AUTO ATTACH TOKEN
-axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// axiosClient.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("auth_token");
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
 
-export const setToken = (token) => {
-  axiosClient.defaults.headers.Authorization = `Bearer ${token}`;
-};
+// export const setToken = (token) => {
+//   axiosClient.defaults.headers.Authorization = `Bearer ${token}`;
+// };
 
 export default axiosClient;

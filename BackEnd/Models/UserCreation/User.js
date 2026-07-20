@@ -135,23 +135,23 @@ export const getZoneMasterId = async (client, zone) => {
         SELECT "ZoneMasterId"
         FROM "LKP"."ZoneMaster"
         WHERE
-            "ZoneName"=$1
-            AND "CircleName"=$2
-            AND "DivisionName"=$3
-            AND "DistrictName"=$4
-            AND "Taluk"=$5
-            AND "StationName"=$6
+            ("ZoneCode"=$1 OR "ZoneName"=$1)
+            AND ("CircleCode"=$2 OR "CircleName"=$2)
+            AND ("DivisionCode"=$3 OR "DivisionName"=$3)
+            AND ("DistrictCode"=$4 OR "DistrictName"=$4)
+            AND ("TalukCode"=$5 OR "Taluk"=$5)
+            AND ("StationNameCode"=$6 OR "StationName"=$6 OR "DivisionCode"=$6)
             AND "IsDisabled"=false
         LIMIT 1;
     `;
 
     const values = [
-        zone.zoneName,
-        zone.circleName,
-        zone.divisionName,
-        zone.districtName,
-        zone.taluk,
-        zone.stationName
+        zone.zoneCode || zone.zoneName,
+        zone.circleCode || zone.circleName,
+        zone.divisionCode || zone.divisionName,
+        zone.districtCode || zone.districtName,
+        zone.talukCode || zone.taluk,
+        zone.stationCode || zone.stationName
     ];
 
     const result = await client.query(query, values);

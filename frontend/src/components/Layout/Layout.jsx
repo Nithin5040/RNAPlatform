@@ -65,10 +65,10 @@ export default function Layout({ children, showSidebar = true }) {
   // Check authentication - Only check if user is logged in, not their role
   useEffect(() => {
     const checkAuth = () => {
-      const token = sessionStorage.getItem("auth_token");
+      const storedUser = sessionStorage.getItem("auth_user");
       const storedRoleId = sessionStorage.getItem("roleId");
       
-      setIsLoggedIn(!!token);
+      setIsLoggedIn(!!storedUser);
       
       if (storedRoleId) {
         setRoleId(parseInt(storedRoleId));
@@ -167,11 +167,11 @@ export default function Layout({ children, showSidebar = true }) {
               {children}
             </div>
           </main>
-
-          {/* Footer - Will be positioned by its own CSS */}
-          <Footer theme={theme} />
         </div>
       </div>
+
+      {/* Footer - Full Width across layout (taking sidebar space too) */}
+      <Footer theme={theme} />
     </div>
   );
 }

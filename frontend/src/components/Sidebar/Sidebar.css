@@ -14,93 +14,93 @@
   width: 80px;
 }
 
-/* Dark Theme - Keeping same colors as light theme */
+/* Dark Theme - Proper dark sidebar */
 .sidebar.dark {
-  background: white; /* Keep white background */
-  border-right: 1px solid #e2e8f0; /* Keep light border */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  background: #13102e;
+  border-right: 1px solid rgba(90, 84, 224, 0.2);
+  box-shadow: 2px 0 16px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar.dark .brand-title {
-  color: #ffffff; /* Title stays white on gradient */
+  color: #ffffff;
 }
 
 .sidebar.dark .brand-subtitle {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .sidebar.dark .sidebar-header {
-  background: linear-gradient(135deg, rgb(36, 170, 159), rgb(145, 73, 145)); /* Keep same gradient */
-  border-bottom-color: #e2e8f0;
+  background: linear-gradient(135deg, #3b35c9, #2c28a0);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar.dark .sidebar-profile {
-  background: #f8fafc; /* Keep light background */
-  border-bottom-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .sidebar.dark .profile-name {
-  color: #0f172a; /* Keep dark text */
+  color: #e2e0ff;
 }
 
 .sidebar.dark .profile-role {
-  color: #64748b; /* Keep muted text */
+  color: rgba(165, 160, 255, 0.7);
 }
 
 .sidebar.dark .sidebar-nav-item {
-  color: #475569; /* Keep same text color */
+  color: #a5a0d4;
 }
 
 .sidebar.dark .sidebar-nav-item:hover {
-  background: #f1f5f9; /* Keep same hover background */
-  color: #0f172a;
+  background: rgba(90, 84, 224, 0.15);
+  color: #e2e0ff;
 }
 
 .sidebar.dark .sidebar-nav-item.active {
-  background: linear-gradient(135deg, rgba(36, 170, 159, 0.1), rgba(145, 73, 145, 0.1));
-  color: rgb(36, 170, 159);
-  box-shadow: 0 4px 8px rgba(36, 170, 159, 0.2);
+  background: linear-gradient(135deg, rgba(59, 53, 201, 0.35), rgba(90, 84, 224, 0.2));
+  color: #a5a0ff;
+  box-shadow: 0 4px 12px rgba(59, 53, 201, 0.3);
 }
 
 .sidebar.dark .sidebar-submenu-item {
-  color: #64748b; /* Keep same text color */
+  color: #8882c4;
 }
 
 .sidebar.dark .sidebar-submenu-item:hover {
-  background: #f1f5f9; /* Keep same hover background */
-  color: #0f172a;
+  background: rgba(90, 84, 224, 0.12);
+  color: #e2e0ff;
 }
 
 .sidebar.dark .sidebar-submenu-item.active {
-  background: linear-gradient(135deg, rgba(36, 170, 159, 0.1), rgba(145, 73, 145, 0.1));
-  color: rgb(36, 170, 159);
+  background: linear-gradient(135deg, rgba(59, 53, 201, 0.3), rgba(90, 84, 224, 0.15));
+  color: #a5a0ff;
 }
 
 .sidebar.dark .sidebar-submenu {
-  border-left-color: #e2e8f0; /* Keep light border */
+  border-left-color: rgba(90, 84, 224, 0.3);
 }
 
 .sidebar.dark .sidebar-footer {
-  border-top-color: #e2e8f0; /* Keep light border */
-  background: white; /* Keep white background */
+  border-top: 1px solid rgba(90, 84, 224, 0.2);
+  background: #0f0d23;
 }
 
 .sidebar.dark .sidebar-footer-btn {
-  color: #475569; /* Keep same text color */
+  color: #a5a0d4;
 }
 
 .sidebar.dark .sidebar-footer-btn:hover {
-  background: #f1f5f9; /* Keep same hover background */
-  color: #0f172a;
+  background: rgba(90, 84, 224, 0.15);
+  color: #ffffff;
 }
 
 .sidebar.dark .sidebar-footer-btn.logout-btn {
-  color: #ef4444; /* Keep red color */
+  color: #ff5c5c;
 }
 
 .sidebar.dark .sidebar-footer-btn.logout-btn:hover {
-  background: #fef2f2; /* Keep light red background */
-  color: #dc2626;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ff8e8e;
 }
 
 /* Mobile Sidebar Specific */
@@ -321,7 +321,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(36, 170, 159, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(59, 53, 201, 0.1), transparent);
   transition: left 0.5s ease;
 }
 
@@ -337,9 +337,9 @@
 }
 
 .sidebar-nav-item.active {
-  background: linear-gradient(135deg, rgba(36, 170, 159, 0.1), rgba(145, 73, 145, 0.1));
-  color: rgb(36, 170, 159);
-  box-shadow: 0 4px 8px rgba(36, 170, 159, 0.2);
+  background: linear-gradient(135deg, rgba(59, 53, 201, 0.1), rgba(90, 84, 224, 0.1));
+  color: #3b35c9;
+  box-shadow: 0 4px 8px rgba(59, 53, 201, 0.15);
 }
 
 .sidebar-nav-item.collapsed {
@@ -372,7 +372,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgb(36, 170, 159);
+  background: #3b35c9;
   margin-left: 4px;
   animation: pulse 2s infinite;
 }
@@ -398,7 +398,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgb(36, 170, 159);
+  background: #3b35c9;
   animation: slideIn 0.3s ease;
 }
 
@@ -511,7 +511,7 @@
 
 .sidebar-submenu-item:hover .submenu-icon {
   transform: scale(1.1);
-  color: rgb(36, 170, 159);
+  color: #3b35c9;
 }
 
 .submenu-label {
@@ -525,7 +525,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgb(36, 170, 159);
+  background: #3b35c9;
   margin-left: 4px;
   animation: pulse 2s infinite;
 }
@@ -538,11 +538,7 @@
   background: white;
 }
 
-/* Dark theme - keep same background */
-.sidebar.dark .sidebar-footer {
-  border-top-color: #e2e8f0;
-  background: white;
-}
+
 
 .sidebar-footer-btn {
   display: flex;
@@ -649,7 +645,7 @@
   transform: translateY(-50%);
   margin-left: 8px;
   padding: 8px 12px;
-  background: linear-gradient(135deg, rgb(36, 170, 159), rgb(145, 73, 145));
+  background: linear-gradient(135deg, #3b35c9, #5a54e0);
   color: white;
   font-size: 12px;
   font-weight: 400;
@@ -674,7 +670,7 @@
 
 /* Dark theme - keep same tooltip gradient */
 .sidebar.dark .sidebar-nav-item[title]:hover::after {
-  background: linear-gradient(135deg, rgb(36, 170, 159), rgb(145, 73, 145));
+  background: linear-gradient(135deg, #3b35c9, #5a54e0);
   color: #fff;
 }
 
@@ -789,20 +785,20 @@
 
 /* Active state for nav items */
 .sidebar-nav-item.active .nav-icon {
-  color: rgb(36, 170, 159);
+  color: #3b35c9;
 }
 
 /* Dark theme - keep same active icon color */
 .sidebar.dark .sidebar-nav-item.active .nav-icon {
-  color: rgb(36, 170, 159);
+  color: #a5a0ff;
 }
 
 .sidebar-submenu-item.active .submenu-icon {
-  color: rgb(36, 170, 159);
+  color: #3b35c9;
 }
 
 /* Dark theme - keep same active submenu icon color */
 .sidebar.dark .sidebar-submenu-item.active .submenu-icon {
-  color: rgb(36, 170, 159);
+  color: #a5a0ff;
 }
 

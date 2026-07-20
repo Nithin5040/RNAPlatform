@@ -2,20 +2,20 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent body scroll */
-  background-color: #f8fafc;
-  transition: background-color 0.3s ease;
-  width: 100%; /* Ensure it doesn't exceed viewport */
+  overflow: hidden;
+  background: linear-gradient(135deg, #eef0ff 0%, #f0f2ff 50%, #e8ebff 100%);
+  transition: background 0.3s ease;
+  width: 100%;
   position: relative;
 }
 
 /* Dark Theme */
 .layout.dark {
-  background-color: #1a1a1a;
+  background: radial-gradient(ellipse at top, #1e1b7a 0%, #13102e 35%, #0d0b22 70%);
 }
 
 .layout.dark .content-area {
-  background-color: #1a1a1a;
+  background: transparent;
 }
 
 /* ========== Header - Fixed at top ========== */
@@ -27,14 +27,19 @@
 }
 
 /* ========== Main Content Area ========== */
+/* ========== Main Content Area ========== */
 .layout-main {
   flex: 1;
+  min-height: 0;
   display: flex;
   overflow: hidden;
   position: relative;
   width: 100%;
-  height: calc(100vh - 70px); /* Subtract header height */
-  background-color: #f8fafc;
+  background: transparent;
+}
+
+.layout.dark .layout-main {
+  background: transparent;
 }
 
 /* ========== Desktop Sidebar ========== */
@@ -44,8 +49,13 @@
   background-color: white;
   border-right: 1px solid #e2e8f0;
   transition: width 0.3s ease;
-  overflow-y: auto; /* Allow sidebar to scroll if needed */
+  overflow-y: auto;
   overflow-x: hidden;
+}
+
+.layout.dark .sidebar-desktop {
+  background-color: #13102e;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ========== Mobile Sidebar ========== */
@@ -73,19 +83,27 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #f8fafc;
+  background: transparent;
   width: 100%;
   height: 100%;
 }
 
-/* ========== Scrollable Content - THIS IS WHERE THE MAGIC HAPPENS ========== */
+.layout.dark .content-area {
+  background: transparent;
+}
+
+/* ========== Scrollable Content ========== */
 .content-scrollable {
   flex: 1;
-  overflow-y: auto; /* THIS IS THE ONLY SCROLLABLE AREA */
+  overflow-y: auto;
   overflow-x: hidden;
-  background-color: #f8fafc;
+  background: transparent;
   padding: 0;
   width: 100%;
+}
+
+.layout.dark .content-scrollable {
+  background: transparent;
 }
 
 /* Content Wrapper - Add padding for content */
@@ -99,26 +117,29 @@
   box-sizing: border-box; /* Crucial for padding/width handling */
 }
 
-/* ========== Footer - Fixed at bottom of content area ========== */
-.content-area .critical-footer {
+/* ========== Footer - Full width across layout (including sidebar space) ========== */
+.layout .critical-footer,
+.critical-footer {
   flex-shrink: 0;
   width: 100%;
   height: 48px;
-  background-color: #1a5f5f;
+  background: linear-gradient(135deg, #3b35c9 0%, #2c28a0 100%);
   color: #fff;
   display: flex;
   align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative; /* Not fixed, but at bottom of flex column */
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
   bottom: auto;
   left: auto;
   right: auto;
-  z-index: 10;
+  z-index: 50;
 }
 
 /* Dark theme for footer */
-.layout.dark .content-area .critical-footer {
-  background-color: #124545;
+.layout.dark .critical-footer,
+.critical-footer.dark {
+  background: linear-gradient(135deg, #1a1838 0%, #0d0b22 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ========== Card/Table container - Ensures proper spacing ========== */
@@ -208,10 +229,6 @@
     height: 60px;
   }
 
-  .layout-main {
-    height: calc(100vh - 60px);
-  }
-
   .sidebar-desktop {
     display: none;
   }
@@ -220,7 +237,8 @@
     padding: 16px;
   }
 
-  .content-area .critical-footer {
+  .layout .critical-footer,
+  .critical-footer {
     height: auto;
     min-height: 60px;
   }
@@ -238,7 +256,8 @@
     padding: 12px;
   }
 
-  .content-area .critical-footer {
+  .layout .critical-footer,
+  .critical-footer {
     min-height: 70px;
   }
 }
