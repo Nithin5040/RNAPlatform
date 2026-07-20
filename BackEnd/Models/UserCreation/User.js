@@ -3,18 +3,16 @@ import { pool } from "../../Config/DbConfig.js";
 
 export const FetchZoneNameDrpdwn = async () => {
     try {
-        let query = `SELECT "ZoneName","ZoneCode" FROM "LKP"."ZoneMaster" WHERE "IsDisabled"=false`;
+        let query = `SELECT DISTINCT "ZoneName","ZoneCode" FROM "LKP"."ZoneMaster" WHERE "IsDisabled"=false`;
         let result = await pool.query(query);
         return result.rows
     } catch (error) {
         throw error
     }
 }
-
-
 export const FetchCircleDrpdwn = async (ZoneCode) => {
     try {
-        let query = `SELECT "CircleName","CircleCode" FROM "LKP"."ZoneMaster" WHERE "ZoneCode" = $1 AND "IsDisabled"=false
+        let query = `SELECT DISTINCT "CircleName","CircleCode" FROM "LKP"."ZoneMaster" WHERE "ZoneCode" = $1 AND "IsDisabled"=false
 `;
         let result = await pool.query(query, [ZoneCode]);
         return result.rows
@@ -46,7 +44,7 @@ export const FetchDistrictDrpdwn = async (divisionCode) => {
 
 export const FetchTalukDrpdwn = async (districtCode) => {
     try {
-        let query = `SELECT "Taluk","TalukCode" FROM "LKP"."ZoneMaster" WHERE "DistrictCode" = $1 "IsDisabled"=false
+        let query = `SELECT "Taluk","TalukCode" FROM "LKP"."ZoneMaster" WHERE "DistrictCode" = $1 AND "IsDisabled"=false
 `;
         let result = await pool.query(query, [districtCode]);
         return result.rows
@@ -65,7 +63,6 @@ export const FetchStationDrpdwn = async (talukCode) => {
         throw error
     }
 }
-
 
 export const FetchGenderDrpdwn = async () => {
     try {
@@ -91,6 +88,9 @@ export const FetchRoleDrpdwn = async () => {
 
 
 
+
+
+
 export const insertUser = async (client, data) => {
 
     const query = `
@@ -107,7 +107,9 @@ export const insertUser = async (client, data) => {
             "UpdatedByUserName"
         )
         VALUES
-        ($1,$2,$3,$4,$5,$6,$7,$8,$8)
+        (
+            $1,$2,$3,$4,$5,$6,$7,$8,$8
+        )
         RETURNING "UserId";
     `;
 
@@ -125,41 +127,49 @@ export const insertUser = async (client, data) => {
     const result = await client.query(query, values);
 
     return result.rows[0].UserId;
+
 };
 
 
-export const getZoneMasterId = async (client, zone) => {
+export const getZoneMasterId = async (
+    client,
+    zone
+) => {
 
     const query = `
-        SELECT "ZoneMasterId"
+        SELECT
+            "ZoneMasterId"
         FROM "LKP"."ZoneMaster"
         WHERE
-            "ZoneName"=$1
-            AND "CircleName"=$2
-            AND "DivisionName"=$3
-            AND "DistrictName"=$4
-            AND "Taluk"=$5
-            AND "StationName"=$6
-            AND "IsDisabled"=false
+            "ZoneCode" = $1
+            AND "CircleCode" = $2
+            AND "DivisionCode" = $3
+            AND "DistrictCode" = $4
+            AND "TalukCode" = $5
+            AND "StationNameCode" = $6
+            AND "IsDisabled" = FALSE
         LIMIT 1;
     `;
 
     const values = [
-        zone.zoneName,
-        zone.circleName,
-        zone.divisionName,
-        zone.districtName,
-        zone.taluk,
-        zone.stationName
+        zone.zoneCode,
+        zone.circleCode,
+        zone.divisionCode,
+        zone.districtCode,
+        zone.talukCode,
+        zone.stationCode
     ];
 
     const result = await client.query(query, values);
 
     return result.rows[0];
+
 };
-
-
-export const insertUserZoneAccess = async (client, userId, zoneMasterId, createdByUserId) => {
+export const insertUserZoneAccess = async (
+    client,
+    userId,
+    zoneMasterId
+) => {
 
     const query = `
         INSERT INTO "DATA"."UserZoneAccess"
@@ -172,12 +182,41 @@ export const insertUserZoneAccess = async (client, userId, zoneMasterId, created
             "UpdatedByUserId"
         )
         VALUES
-        ($1,$2,NOW(),$3,NOW(),$3);
+        (
+            $1,
+            $2,
+            NOW(),
+            NULL,
+            NOW(),
+            NULL
+        );
     `;
 
     await client.query(query, [
         userId,
-        zoneMasterId,
-        createdByUserId
+        zoneMasterId
     ]);
+
+};
+export const checkUserExists = async (client, email, mobileNumber) => {
+
+    const query = `
+        SELECT
+            "UserId",
+            "Email",
+            "MobileNumber"
+        FROM "DATA"."User"
+        WHERE
+            "Email" = $1
+            OR "MobileNumber" = $2
+        LIMIT 1;
+    `;
+
+    const result = await client.query(query, [
+        email,
+        mobileNumber
+    ]);
+
+    return result.rows[0];
+
 };
