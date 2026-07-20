@@ -187,6 +187,21 @@ export default function Sidebar({
       path: "/user-creation",
       label: "User Creation",
       icon: <PlusCircle size={20} />
+    },
+    {
+      path: "/route-creation",
+      label: "Route Creation",
+      icon: <MapPin size={20} />
+    },
+    {
+      path: "/master-route-upload",
+      label: "Master Route Upload",
+      icon: <FileText size={20} />
+    },
+    {
+      path: "/driver-creation",
+      label: "Driver Creation",
+      icon: <UserPlus size={20} />
     }
   ];
 
