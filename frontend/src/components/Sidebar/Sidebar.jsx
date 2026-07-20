@@ -370,7 +370,7 @@ export default function Sidebar({
         )}
 
         {/* Logout Button */}
-        <button
+        {/* <button
           onClick={handleLogout}
           disabled={isLoggingOut}
           className={`sidebar-footer-btn logout-btn ${collapsed && !isMobile ? 'collapsed' : ''}`}
@@ -378,7 +378,7 @@ export default function Sidebar({
         >
           <LogOut size={18} />
           {(!collapsed || isMobile) && <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>}
-        </button>
+        </button> */}
       </div>
     </aside>
   );

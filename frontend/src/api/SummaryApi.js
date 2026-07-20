@@ -8,6 +8,10 @@ export const SummaryApi = {
     url: "/rna-service/userCreation/userdpdwn",
     method: "post"
   },
+  createUser: {
+    url: "/rna-service/userCreation/createUser",
+    method: "post"
+  },
 
 
 
