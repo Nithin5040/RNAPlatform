@@ -12,6 +12,22 @@ export const SummaryApi = {
     url: "/rna-service/userCreation/createUser",
     method: "post"
   },
+  routeplandpdwns: {
+    url: "/rna-service/routeplan/routePlanDropdown",
+    method: "post"
+  },
+  createrouteplan: {
+    url: "/rna-service/routeplan/insertRoutePlan",
+    method: "post"
+  },
+  fetchrouteplan: {
+    url: "/rna-service/routeplan/fetchRoutePlan",
+    method: "post"
+  },
+  updaterouteplan: {
+    url: "/rna-service/routeplan/updateRoutePlan",
+    method: "post"
+  },
 
 
 
