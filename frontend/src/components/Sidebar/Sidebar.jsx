@@ -190,12 +190,12 @@ export default function Sidebar({
     },
     {
       path: "/route-creation",
-      label: "Route Creation",
+      label: "Route Plan",
       icon: <MapPin size={20} />
     },
     {
       path: "/master-route-upload",
-      label: "Master Route Upload",
+      label: "Route Access",
       icon: <FileText size={20} />
     },
     {

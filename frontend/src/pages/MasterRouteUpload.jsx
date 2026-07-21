@@ -304,11 +304,11 @@ export default function MasterRouteUpload() {
                         <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
 
                         <div className="p-8">
-                            {/* Grid Row containing all 3 fields side-by-side */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Row containing fields with small, compact dropdown widths */}
+                            <div className="flex flex-wrap items-start gap-6">
 
-                                {/* Field 1: Select Zone Dropdown (Mock Data) */}
-                                <div>
+                                {/* Field 1: Select Zone Dropdown (Small Width) */}
+                                <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Zone
                                     </label>
@@ -327,8 +327,8 @@ export default function MasterRouteUpload() {
                                     <ErrorMessage message={errors.zone} />
                                 </div>
 
-                                {/* Field 2: Select Route Point Dropdown (Mock Data) */}
-                                <div>
+                                {/* Field 2: Select Route Point Dropdown (Small Width) */}
+                                <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Route Point
                                     </label>
@@ -347,8 +347,8 @@ export default function MasterRouteUpload() {
                                     <ErrorMessage message={errors.routePoint} />
                                 </div>
 
-                                {/* Field 3: Upload Document (next to Route Point dropdown) */}
-                                <div>
+                                {/* Field 3: Upload Document */}
+                                <div className="w-full sm:w-80 md:w-96 max-w-sm">
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Upload Document
                                     </label>

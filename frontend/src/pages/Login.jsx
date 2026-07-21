@@ -288,13 +288,13 @@ export default function Login() {
       }
 
       // ================================================
-      // STORE ALL USER DATA IN SESSION STORAGE
+      // STORE USER DATA IN SESSION STORAGE - OPTIMIZED
       // ================================================
 
-      // Store the entire user object as a JSON string
+      // Store the complete user data object as JSON
       sessionStorage.setItem("auth_user", JSON.stringify(user));
 
-      // Store individual user properties for easy access
+      // Store commonly used individual fields for easy access
       sessionStorage.setItem("userId", String(user.UserId));
       sessionStorage.setItem("firstName", user.FirstName || '');
       sessionStorage.setItem("lastName", user.LastName || '');
@@ -305,7 +305,6 @@ export default function Login() {
 
       // Store mobile number
       sessionStorage.setItem("mobileNumber", user.MobileNumber || form.employeeId);
-      sessionStorage.setItem("employeeId", user.MobileNumber || form.employeeId);
 
       // Store email
       sessionStorage.setItem("userEmail", user.Email || user.email || '');
