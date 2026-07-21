@@ -458,7 +458,7 @@ export default function AdminDashboard() {
                                             <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "rgba(255,255,255,0.08)" : "#F3F4F6"} />
+                                    {/* <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "rgba(255,255,255,0.08)" : "#F3F4F6"} /> */}
                                     <XAxis dataKey="month" stroke={darkMode ? "#9CA3AF" : "#6B7280"} tick={{ fontSize: 12 }} />
                                     <YAxis stroke={darkMode ? "#9CA3AF" : "#6B7280"} tick={{ fontSize: 12 }} />
                                     <Tooltip content={<CustomTooltip />} />
