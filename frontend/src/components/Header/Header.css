@@ -1,19 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap');
+
 /* ========== App Header ========== */
 .app-header {
-  background-color: #1a5f5f; /* Dark primary/green color from your screenshot */
+  background: linear-gradient(135deg, #3b35c9 0%, #2c28a0 60%, #1e1b7a 100%);
   color: #fff;
   position: sticky;
   top: 0;
   z-index: 1000;
   height: 70px;
   width: 100%;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(59, 53, 201, 0.4);
   transition: all 0.3s ease;
 }
 
 /* Dark theme variant */
 .app-header.dark {
-  background-color: #124545; /* Slightly darker variant for dark mode */
+  background: linear-gradient(135deg, #1a1838 0%, #13102e 60%, #0d0b22 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* ========== Header Container ========== */
@@ -83,7 +86,8 @@
 
 /* Dark theme logo adjustments */
 .app-header.dark .logo-image {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 /* ========== Header Controls ========== */
@@ -119,23 +123,44 @@
 
 /* ========== Theme Toggle Button ========== */
 .theme-toggle-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .theme-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: rotate(15deg);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.22);
+  transform: rotate(20deg) scale(1.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.theme-toggle-btn:hover::before {
+  opacity: 1;
+}
+
+.theme-toggle-btn:active {
+  transform: rotate(20deg) scale(0.95);
 }
 
 /* ========== Auth Buttons ========== */
@@ -303,7 +328,7 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background-color: #1a5f5f; /* Matching header color */
+  background: linear-gradient(135deg, #3b35c9, #5a54e0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,6 +336,7 @@
   font-weight: 600;
   font-size: 18px;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(59, 53, 201, 0.35);
 }
 
 .dropdown-user-info {
@@ -461,16 +487,18 @@
 }
 
 .header-system-title {
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  font-family: 'Outfit', 'Poppins', 'Segoe UI', sans-serif;
   margin: 0;
-  color: #ffffff;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  font-weight: 800;
+  letter-spacing: 3px;
   text-transform: uppercase;
   display: flex;
   align-items: center;
   gap: 12px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ffffff 0%, #dcd9ff 60%, #a5a0ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(90, 84, 224, 0.45));
   white-space: nowrap; /* Prevent text wrapping */
 }
 

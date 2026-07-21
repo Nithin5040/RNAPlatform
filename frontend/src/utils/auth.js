@@ -7,9 +7,9 @@ export const getUserRole = () => {
   return localStorage.getItem("userRole");
 };
 
-export const isAuthenticated = () => {
-  return !!localStorage.getItem("auth_token");
-};
+// export const isAuthenticated = () => {
+//   return !!localStorage.getItem("auth_token");
+// };
 
 export const logout = () => {
   localStorage.clear();

@@ -102,39 +102,7 @@ export default function Sidebar({
     setActivePath(window.location.pathname);
   }, []);
 
-  // Function to get geolocation (same as login)
-  const getGeolocation = () => {
-    return new Promise((resolve) => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude
-            });
-          },
-          (error) => {
-            console.error('Geolocation error:', error);
-            resolve({ latitude: null, longitude: null });
-          }
-        );
-      } else {
-        resolve({ latitude: null, longitude: null });
-      }
-    });
-  };
 
-  // Get current local datetime in YYYY-MM-DD HH:MM:SS format (same as login)
-  const getCurrentLocalDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   // Handle logout with complete payload
   const handleLogout = async () => {
@@ -169,39 +137,7 @@ export default function Sidebar({
         }
       });
 
-      const userLoginDetailId = sessionStorage.getItem("userLoginDetailId");
 
-      // Get location (same as login)
-      const location = await getGeolocation();
-      const loggedOutTime = getCurrentLocalDateTime();
-
-      if (userLoginDetailId) {
-        const payload = {
-          flagId: 3,
-          UserLoginDetailId: parseInt(userLoginDetailId),
-          LogOutLatitude: location.latitude ? location.latitude.toString() : null,
-          LogOutLongitude: location.longitude ? location.longitude.toString() : null,
-          LoggedOut: loggedOutTime
-        };
-
-        console.log('Logout Audit Payload:', payload);
-
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-          await axiosClient({
-            method: SummaryApi.loginDetails.method,
-            url: SummaryApi.loginDetails.url,
-            data: payload,
-            signal: controller.signal
-          });
-
-          clearTimeout(timeoutId);
-        } catch (auditError) {
-          console.error("Error sending logout audit:", auditError);
-        }
-      }
 
       sessionStorage.clear();
       Swal.close();
@@ -248,108 +184,24 @@ export default function Sidebar({
       icon: <LayoutDashboard size={20} />
     },
     {
-      path: "/create-user",
+      path: "/user-creation",
       label: "User Creation",
       icon: <PlusCircle size={20} />
     },
     {
-      path: "/role-creation",
-      label: "Role Management",
-      icon: <Shield size={20} />
-    },
-    // {
-    //   path: "/spoc-creation",
-    //   label: "Spoc Management",
-    //   icon: <Shield size={20} />
-    // },
-    {
-      path: "/login-audit",
-      label: "Login Audit",
-      icon: <Fingerprint size={20} />
+      path: "/route-creation",
+      label: "Route Creation",
+      icon: <MapPin size={20} />
     },
     {
-      path: "/market-mobilization",
-      label: "Activity History",
-      icon: <Activity size={20} />
+      path: "/master-route-upload",
+      label: "Master Route Upload",
+      icon: <FileText size={20} />
     },
     {
-      path: "/view-candidate-uploaded-list",
-      label: "Candidate Uploaded list",
-      icon: <Users size={20} />
-    },
-    {
-      path: "/mainsite-creation",
-      label: "MainSite Creation",
-      icon: <Globe size={20} />
-    },
-    {
-      path: "/subsite-creation",
-      label: "SubSite Creation",
-      icon: <Network size={20} />
-    },
-    {
-      path: "/rejoin-candidate",
-      label: "Rejoin Candidate",
-      icon: <RotateCcw size={20} />
-    },
-    {
-      path: "/onboard-candidate",
-      label: "Onboard Candidate",
+      path: "/driver-creation",
+      label: "Driver Creation",
       icon: <UserPlus size={20} />
-    },
-    {
-      path: "/transfer-candidate",
-      label: "Transfer Candidate",
-      icon: <FaExchangeAlt size={20} />
-    },
-    {
-      path: "/candidate-history",
-      label: "Candidate History",
-      icon: <ClipboardList size={20} />
-    },
-    {
-      key: "mis-reports",
-      label: "MIS Report",
-      icon: <BarChart3 size={20} />,
-      children: [
-        {
-          key: "user-activity",
-          label: "Login Report",
-          path: "/Login-Report",
-          icon: <LogIn size={16} />
-        },
-        {
-          key: "user-activity",
-          label: "FE Report",
-          path: "/MisReport",
-          icon: <UserCheck size={16} />
-        },
-        {
-          key: "colony-site-entry",
-          label: "SE Report",
-          path: "/colony-site-entry-report",
-          icon: <Building2 size={16} />
-        }
-      ]
-    },
-    {
-      key: "exit-section",
-      label: "Exit Management",
-      icon: <ExitIcon size={20} />,
-      children: [
-        {
-          key: "exit-candidate",
-          label: "Exit Candidate",
-          path: "/exit-candidate",
-          icon: <UserMinus size={16} />
-        },
-        {
-          key: "exited-list",
-          label: "Exited List",
-          path: "/exit-list",
-          icon: <UserX size={16} />
-        }
-      ]
     }
   ];
 
@@ -359,23 +211,11 @@ export default function Sidebar({
       path: "/reporting_manager_dashboard",
       label: "Dashboard",
       icon: <LayoutDashboard size={20} />
-    },
-    {
-      path: "/rm-login-audit",
-      label: "Login Audit",
-      icon: <Fingerprint size={20} />
-    },
-    {
-      path: "/team-insights",
-      label: "Team Insights",
-      icon: <FaChartLine size={20} />   
     }
   ];
 
   // Common menu items (visible for all roles)
-  const commonItems = [
-    { path: "/change-password", label: "Change Password", icon: <Settings size={20} /> },
-  ];
+  const commonItems = [];
 
   // Get user initials for avatar
   const getUserInitials = () => {
@@ -545,7 +385,7 @@ export default function Sidebar({
         )}
 
         {/* Logout Button */}
-        <button
+        {/* <button
           onClick={handleLogout}
           disabled={isLoggingOut}
           className={`sidebar-footer-btn logout-btn ${collapsed && !isMobile ? 'collapsed' : ''}`}
@@ -553,7 +393,7 @@ export default function Sidebar({
         >
           <LogOut size={18} />
           {(!collapsed || isMobile) && <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>}
-        </button>
+        </button> */}
       </div>
     </aside>
   );
