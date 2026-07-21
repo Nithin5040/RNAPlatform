@@ -44,6 +44,14 @@ export const SummaryApi = {
     url: "/rna-service/DriverCreation/insertDriverDetails",
     method: "post"
   },
+  assignroutedpdwns: {
+    url: "/rna-service/assignDetail/fecthAssignDpdwn",
+    method: "post"
+  },
+  assignroute: {
+    url: "/rna-service/assignDetail/insertAssigndriver",
+    method: "post"
+  },
 
 
 

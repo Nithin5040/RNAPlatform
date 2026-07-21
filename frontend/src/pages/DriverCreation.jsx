@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useTheme } from "../contexts/ThemeContext";
 import * as yup from "yup";
-import Select from "react-select";
 import { motion, AnimatePresence } from "framer-motion";
 import axiosClient from "../api/axiosClient";
 import { SummaryApi } from "../api/SummaryApi";
@@ -23,11 +22,8 @@ import {
     FaFileContract,
     FaCertificate,
     FaTrashAlt,
-    FaCheckCircle,
     FaUpload,
-    FaFolderOpen,
-    FaTimes,
-    FaPaperclip
+    FaFileUpload
 } from "react-icons/fa";
 
 const ErrorMessage = ({ message }) => {
@@ -40,7 +36,6 @@ const ErrorMessage = ({ message }) => {
     );
 };
 
-// Format File Size
 const formatFileSize = (bytes) => {
     if (!bytes || bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -51,246 +46,154 @@ const formatFileSize = (bytes) => {
 
 const ALLOWED_ACCEPT = ".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf";
 
-// Map API FileTypeName to field keys
-const mapFileTypeToFieldKey = (fileTypeName) => {
-    const mapping = {
-        "DriverPhoto": "driverPhoto",
-        "DriverAadhar": "aadhaarPhoto",
-        "OdometerPhoto": "odometerPhoto",
-        "TruckPhoto": "truckPhoto",
-        "RC Card": "rcCardPhoto",
-        "FC File": "fcFile",
-        "Permit File": "permitFile"
-    };
-    return mapping[fileTypeName] || fileTypeName;
-};
+// Document field configuration
+const DOCUMENT_FIELDS = [
+    {
+        id: "driverPhoto",
+        label: "Driver Photo",
+        icon: FaCamera,
+        fileTypeName: "DriverPhoto",
+        fileTypeId: 1
+    },
+    {
+        id: "aadhaarPhoto",
+        label: "Driver Aadhaar Card",
+        icon: FaIdCard,
+        fileTypeName: "DriverAadhar",
+        fileTypeId: 2
+    },
+    {
+        id: "odometerPhoto",
+        label: "Odometer Photo",
+        icon: FaTachometerAlt,
+        fileTypeName: "OdometerPhoto",
+        fileTypeId: 3
+    },
+    {
+        id: "truckPhoto",
+        label: "Truck Photo",
+        icon: FaTruck,
+        fileTypeName: "TruckPhoto",
+        fileTypeId: 4
+    },
+    {
+        id: "rcCardPhoto",
+        label: "RC Card",
+        icon: FaAddressCard,
+        fileTypeName: "RC Card",
+        fileTypeId: 5
+    },
+    {
+        id: "fcFile",
+        label: "FC File",
+        icon: FaFileContract,
+        fileTypeName: "FC File",
+        fileTypeId: 6
+    },
+    {
+        id: "permitFile",
+        label: "Permit File",
+        icon: FaCertificate,
+        fileTypeName: "Permit File",
+        fileTypeId: 7
+    }
+];
 
-// Map API FileTypeName to icon
-const getIconForFileType = (fileTypeName) => {
-    const iconMap = {
-        "DriverPhoto": FaCamera,
-        "DriverAadhar": FaIdCard,
-        "OdometerPhoto": FaTachometerAlt,
-        "TruckPhoto": FaTruck,
-        "RC Card": FaAddressCard,
-        "FC File": FaFileContract,
-        "Permit File": FaCertificate
-    };
-    return iconMap[fileTypeName] || FaFileContract;
-};
-
-// Get label for file type
-const getFileTypeLabel = (fileTypeName) => {
-    const labelMap = {
-        "DriverPhoto": "Driver Photo Upload",
-        "DriverAadhar": "Driver Aadhaar Card Photo",
-        "OdometerPhoto": "Odometer Photo Upload",
-        "TruckPhoto": "Truck Photo Upload",
-        "RC Card": "RC Card Photo Upload",
-        "FC File": "FC File Upload",
-        "Permit File": "Permit File Upload"
-    };
-    return labelMap[fileTypeName] || fileTypeName;
-};
-
-// Compact Clean Upload Row Component inside Modal
-const ModalUploadRow = ({
-    id,
-    label,
-    icon: Icon,
-    file,
-    previewUrl,
-    error,
-    onChange,
-    darkMode
-}) => {
+// Document Upload Row Component - Styled like main fields
+const DocumentUploadRow = ({ field, file, error, onChange, darkMode }) => {
     const fileInputRef = useRef(null);
+    const Icon = field.icon;
 
-    const isImage = file && (file.type.startsWith("image/") || (previewUrl && !file.type.includes("pdf")));
-
-    const getExtBadge = (name) => {
-        if (!name) return "";
-        return name.split(".").pop().toUpperCase();
+    const removeFile = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onChange(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
-        <div className={`p-3.5 rounded-xl border transition-all ${darkMode
-            ? "bg-[#0d0b22]/80 border-gray-800 hover:border-gray-700"
-            : "bg-white border-gray-200 hover:border-gray-300 shadow-sm"
-            }`}>
+        <div>
+            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                {field.label}
+            </label>
             <input
                 ref={fileInputRef}
                 type="file"
-                id={id}
+                id={field.id}
                 accept={ALLOWED_ACCEPT}
                 onChange={(e) => onChange(e.target.files?.[0] || null)}
                 className="hidden"
             />
 
-            <div className="flex items-center justify-between gap-3">
-                {/* Field Label & Icon */}
-                <div className="flex items-center gap-3 overflow-hidden">
-                    <div className={`p-2.5 rounded-lg shrink-0 ${file
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : darkMode
-                            ? "bg-indigo-500/15 text-[#a5a0ff]"
-                            : "bg-indigo-50 text-[#3b35c9]"
-                        }`}>
-                        <Icon size={16} />
-                    </div>
-                    <div className="truncate">
-                        <p className={`text-xs font-bold truncate ${darkMode ? "text-white" : "text-gray-900"}`}>
-                            {label}
-                        </p>
+            <div className="relative">
+                <label
+                    htmlFor={field.id}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-lg border cursor-pointer transition-all ${darkMode
+                        ? "bg-[#0d0b22] border-gray-800 text-white hover:border-[#3b35c9]"
+                        : "bg-white border-gray-300 text-gray-900 hover:border-[#3b35c9]"
+                        } ${error ? "border-red-500" : ""}`}
+                >
+                    <div className="flex items-center gap-3 overflow-hidden mr-2 flex-1 min-w-0">
+                        <div className={`p-1.5 rounded-lg shrink-0 ${file
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : darkMode
+                                ? "bg-indigo-500/15 text-[#a5a0ff]"
+                                : "bg-indigo-50 text-[#3b35c9]"
+                            }`}>
+                            <Icon size={14} />
+                        </div>
+                        <span className={`text-sm truncate ${file
+                            ? "font-semibold text-emerald-500"
+                            : (darkMode ? "text-gray-400" : "text-gray-500")
+                            }`}>
+                            {file ? file.name : `Upload ${field.label}`}
+                        </span>
                         {file && (
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="text-[11px] text-emerald-500 font-semibold truncate max-w-[150px] sm:max-w-[220px]">
-                                    {file.name}
-                                </span>
-                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-400 shrink-0">
-                                    {getExtBadge(file.name)}
-                                </span>
-                                <span className={`text-[10px] ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                    ({formatFileSize(file.size)})
-                                </span>
-                            </div>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold shrink-0">
+                                {file.name.split(".").pop().toUpperCase()}
+                            </span>
+                        )}
+                        {file && (
+                            <span className={`text-[10px] shrink-0 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                ({formatFileSize(file.size)})
+                            </span>
                         )}
                     </div>
-                </div>
 
-                {/* Right Action Trigger */}
-                <div className="flex items-center gap-2 shrink-0">
                     {file ? (
-                        <div className="flex items-center gap-2">
-                            {isImage && previewUrl && (
-                                <img
-                                    src={previewUrl}
-                                    alt={label}
-                                    className="w-8 h-8 rounded object-cover border border-gray-600/30 shadow-sm"
-                                />
-                            )}
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    onChange(null);
-                                    if (fileInputRef.current) fileInputRef.current.value = "";
-                                }}
-                                className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                title="Remove File"
-                            >
-                                <FaTrashAlt size={13} />
-                            </button>
-                        </div>
-                    ) : (
                         <button
                             type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className={`px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-all flex items-center gap-1.5 ${error
-                                ? "border-red-500 text-red-500 bg-red-500/5"
-                                : darkMode
-                                    ? "border-gray-700 text-gray-200 hover:border-[#5a54e0] hover:bg-[#5a54e0]/15"
-                                    : "border-gray-300 text-gray-700 hover:border-[#3b35c9] hover:bg-indigo-50/60"
-                                }`}
+                            onClick={removeFile}
+                            className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+                            title="Remove File"
                         >
-                            <FaUpload size={11} />
-                            Upload
+                            <FaTrashAlt size={14} />
                         </button>
+                    ) : (
+                        <span className="px-3 py-1 bg-[#3b35c9] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm">
+                            <FaUpload size={11} />
+                            Browse
+                        </span>
                     )}
-                </div>
+                </label>
             </div>
-
             <ErrorMessage message={error} />
         </div>
     );
 };
 
-// React Select Styling matching UserCreation style
-const getSelectStyles = (darkMode, error) => ({
-    control: (base, state) => ({
-        ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        borderColor: error ? "#EF4444" : (state.isFocused ? "#3b35c9" : (darkMode ? "rgba(90,84,224,0.3)" : "#D1D5DB")),
-        borderWidth: "1px",
-        borderRadius: "0.5rem",
-        minHeight: "44px",
-        boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 53, 201, 0.2)" : "none",
-        "&:hover": {
-            borderColor: error ? "#EF4444" : "#3b35c9"
-        }
-    }),
-    menu: (base) => ({
-        ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        border: darkMode ? "1px solid rgba(90,84,224,0.2)" : "1px solid #e5e7eb",
-        borderRadius: "0.5rem",
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-        zIndex: 9999
-    }),
-    menuPortal: (base) => ({
-        ...base,
-        zIndex: 9999
-    }),
-    option: (base, { isFocused, isSelected }) => ({
-        ...base,
-        backgroundColor: isSelected
-            ? "#3b35c9"
-            : isFocused
-                ? (darkMode ? "rgba(90,84,224,0.15)" : "#f3f4f6")
-                : "transparent",
-        color: isSelected
-            ? "#ffffff"
-            : (darkMode ? "#e2e0ff" : "#111827"),
-        cursor: "pointer",
-        "&:active": {
-            backgroundColor: "#3b35c9"
-        }
-    }),
-    multiValue: (base) => ({
-        ...base,
-        backgroundColor: darkMode ? "rgba(90,84,224,0.2)" : "#e0e7ff",
-        borderRadius: "4px"
-    }),
-    multiValueLabel: (base) => ({
-        ...base,
-        color: darkMode ? "#e2e0ff" : "#3b35c9",
-        fontSize: "0.75rem",
-        fontWeight: "600"
-    }),
-    multiValueRemove: (base) => ({
-        ...base,
-        color: darkMode ? "#a5a0ff" : "#3b35c9",
-        "&:hover": {
-            backgroundColor: darkMode ? "rgba(90,84,224,0.3)" : "#c7d2fe",
-            color: darkMode ? "#ffffff" : "#1e1b4b"
-        }
-    }),
-    singleValue: (base) => ({
-        ...base,
-        color: darkMode ? "#e2e0ff" : "#111827"
-    }),
-    placeholder: (base) => ({
-        ...base,
-        color: darkMode ? "rgba(165,160,255,0.5)" : "#9ca3af",
-        fontSize: "0.875rem"
-    })
-});
-
 const initialFormState = {
     name: "",
     mobileNumber: "",
     truckNumber: "",
-    password: "",
-    fileTypes: [] // Array of selected file type values (FileTypeId)
+    password: ""
 };
 
-const initialFilesState = {};
-
-// Create dynamic files state based on API response
-const createInitialFilesState = (fileTypes) => {
+// Create initial files state
+const createInitialFilesState = () => {
     const state = {};
-    fileTypes.forEach(ft => {
-        const key = mapFileTypeToFieldKey(ft.FileTypeName);
-        state[key] = null;
+    DOCUMENT_FIELDS.forEach(field => {
+        state[field.id] = null;
     });
     return state;
 };
@@ -300,89 +203,16 @@ export default function DriverCreation() {
     const darkMode = theme === "dark";
     const navigate = useNavigate();
 
-    // State for dropdown options from API
-    const [fileTypeOptions, setFileTypeOptions] = useState([]);
-    const [loadingDropdown, setLoadingDropdown] = useState(true);
-
     const [form, setForm] = useState(initialFormState);
-    const [files, setFiles] = useState(initialFilesState);
+    const [files, setFiles] = useState(createInitialFilesState());
     const [filePreviews, setFilePreviews] = useState({});
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    // Fallback options in case API fails
-    const setFallbackOptions = useCallback(() => {
-        const fallbackOptions = [
-            { value: 1, label: "DriverPhoto", fileTypeName: "DriverPhoto" },
-            { value: 2, label: "DriverAadhar", fileTypeName: "DriverAadhar" },
-            { value: 3, label: "OdometerPhoto", fileTypeName: "OdometerPhoto" },
-            { value: 4, label: "TruckPhoto", fileTypeName: "TruckPhoto" },
-            { value: 5, label: "RC Card", fileTypeName: "RC Card" },
-            { value: 6, label: "FC File", fileTypeName: "FC File" },
-            { value: 7, label: "Permit File", fileTypeName: "Permit File" }
-        ];
-        setFileTypeOptions(fallbackOptions);
-        const fallbackFileTypes = [
-            { FileTypeName: "DriverPhoto" },
-            { FileTypeName: "DriverAadhar" },
-            { FileTypeName: "OdometerPhoto" },
-            { FileTypeName: "TruckPhoto" },
-            { FileTypeName: "RC Card" },
-            { FileTypeName: "FC File" },
-            { FileTypeName: "Permit File" }
-        ];
-        setFiles(createInitialFilesState(fallbackFileTypes));
-    }, []);
-
-    // Fetch file types from API
-    const fetchFileTypes = useCallback(async () => {
-        setLoadingDropdown(true);
-        try {
-            const response = await axiosClient({
-                method: SummaryApi.drivercreationdpdwns.method,
-                url: SummaryApi.drivercreationdpdwns.url,
-                data: { flagId: 1 }
-            });
-
-            // Check if we have data in the result
-            if (response.data?.result && response.data.result.length > 0) {
-                // Map API response to react-select options
-                const options = response.data.result.map(item => ({
-                    value: item.FileTypeId,
-                    label: item.FileTypeName,
-                    fileTypeId: item.FileTypeId,
-                    fileTypeName: item.FileTypeName
-                }));
-                setFileTypeOptions(options);
-
-                // Initialize files state based on API response
-                const initialFiles = createInitialFilesState(response.data.result);
-                setFiles(initialFiles);
-                setFilePreviews({});
-            } else {
-                // If no data, use fallback
-                console.warn("No file types received from API, using fallback");
-                setFallbackOptions();
-            }
-        } catch (error) {
-            console.error("Error fetching file types:", error);
-            // Use fallback options on error
-            setFallbackOptions();
-        } finally {
-            setLoadingDropdown(false);
-        }
-    }, [setFallbackOptions]);
-
-    // Fetch file types on component mount
-    useEffect(() => {
-        fetchFileTypes();
-    }, [fetchFileTypes]);
-
-    // Revoke preview URLs on unmount
+    // Clean up preview URLs on unmount
     useEffect(() => {
         return () => {
             Object.values(filePreviews).forEach((url) => {
@@ -406,16 +236,7 @@ export default function DriverCreation() {
         setErrorMessage("");
     };
 
-    // Handle File Type Multi-Select
-    const handleFileTypeChange = (selectedOptions) => {
-        const values = selectedOptions ? selectedOptions.map(opt => opt.value) : [];
-        setForm((prev) => ({ ...prev, fileTypes: values }));
-        setErrors((prev) => ({ ...prev, fileTypes: "" }));
-        setErrorMessage("");
-    };
-
-    // Handle File Field Upload & Image Preview logic with format validation
-    const handleFileChange = (fieldKey, selectedFile) => {
+    const handleFileChange = (fieldId, selectedFile) => {
         if (selectedFile) {
             const fileName = selectedFile.name.toLowerCase();
             const validExtensions = [".jpg", ".jpeg", ".png", ".pdf"];
@@ -425,36 +246,36 @@ export default function DriverCreation() {
             if (!isExtensionValid && !isMimeValid) {
                 setErrors((prev) => ({
                     ...prev,
-                    [fieldKey]: "Invalid format. Please upload JPG, JPEG, PNG or PDF format."
+                    [fieldId]: "Invalid format. Please upload JPG, JPEG, PNG or PDF format."
                 }));
                 return;
             }
 
             if (selectedFile.size > 10 * 1024 * 1024) {
-                setErrors((prev) => ({ ...prev, [fieldKey]: "File size exceeds 10MB limit" }));
+                setErrors((prev) => ({ ...prev, [fieldId]: "File size exceeds 10MB limit" }));
                 return;
             }
 
-            if (filePreviews[fieldKey]) {
-                URL.revokeObjectURL(filePreviews[fieldKey]);
+            if (filePreviews[fieldId]) {
+                URL.revokeObjectURL(filePreviews[fieldId]);
             }
 
             if (selectedFile.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(selectedFile.name)) {
                 const url = URL.createObjectURL(selectedFile);
-                setFilePreviews((prev) => ({ ...prev, [fieldKey]: url }));
+                setFilePreviews((prev) => ({ ...prev, [fieldId]: url }));
             } else {
-                setFilePreviews((prev) => ({ ...prev, [fieldKey]: null }));
+                setFilePreviews((prev) => ({ ...prev, [fieldId]: null }));
             }
 
-            setFiles((prev) => ({ ...prev, [fieldKey]: selectedFile }));
-            setErrors((prev) => ({ ...prev, [fieldKey]: "" }));
+            setFiles((prev) => ({ ...prev, [fieldId]: selectedFile }));
+            setErrors((prev) => ({ ...prev, [fieldId]: "" }));
         } else {
-            if (filePreviews[fieldKey]) {
-                URL.revokeObjectURL(filePreviews[fieldKey]);
+            if (filePreviews[fieldId]) {
+                URL.revokeObjectURL(filePreviews[fieldId]);
             }
-            setFilePreviews((prev) => ({ ...prev, [fieldKey]: null }));
-            setFiles((prev) => ({ ...prev, [fieldKey]: null }));
-            setErrors((prev) => ({ ...prev, [fieldKey]: "" }));
+            setFilePreviews((prev) => ({ ...prev, [fieldId]: null }));
+            setFiles((prev) => ({ ...prev, [fieldId]: null }));
+            setErrors((prev) => ({ ...prev, [fieldId]: "" }));
         }
         setErrorMessage("");
     };
@@ -465,11 +286,18 @@ export default function DriverCreation() {
                 name: yup.string().required("Driver Name is required").max(100, "Driver name cannot exceed 100 characters"),
                 mobileNumber: yup.string().required("Mobile Number is required").matches(/^[6-9]\d{9}$/, "Mobile number must be a valid 10-digit Indian number"),
                 truckNumber: yup.string().required("Truck Number is required").max(20, "Truck number cannot exceed 20 characters"),
-                password: yup.string().required("Password is required").min(6, "Password must be at least 6 characters"),
-                fileTypes: yup.array().min(1, "Please select at least one file type")
+                password: yup.string().required("Password is required").min(6, "Password must be at least 6 characters")
             });
 
             await schema.validate(form, { abortEarly: false });
+
+            // Check if at least one document is uploaded
+            const hasDocuments = Object.values(files).some(file => file !== null);
+            if (!hasDocuments) {
+                setErrors((prev) => ({ ...prev, documents: "Please upload at least one document" }));
+                return false;
+            }
+
             setErrors({});
             return true;
         } catch (err) {
@@ -489,45 +317,15 @@ export default function DriverCreation() {
         Object.values(filePreviews).forEach((url) => {
             if (url) URL.revokeObjectURL(url);
         });
-        // Reset files to initial state with all file types null
-        const resetFiles = {};
-        Object.keys(files).forEach(key => {
-            resetFiles[key] = null;
-        });
-        setFiles(resetFiles);
+        setFiles(createInitialFilesState());
         setFilePreviews({});
+        setSuccessMessage("");
+        setErrorMessage("");
     };
 
-    // Get file fields for selected types
-    const getSelectedFileFields = useCallback(() => {
-        const selectedFields = [];
-        form.fileTypes.forEach(fileTypeId => {
-            const option = fileTypeOptions.find(opt => opt.value === fileTypeId);
-            if (option) {
-                const fieldKey = mapFileTypeToFieldKey(option.fileTypeName);
-                const label = getFileTypeLabel(option.fileTypeName);
-                const Icon = getIconForFileType(option.fileTypeName);
-                selectedFields.push({
-                    id: fieldKey,
-                    label: label,
-                    icon: Icon,
-                    fileTypeName: option.fileTypeName,
-                    fileTypeId: option.fileTypeId
-                });
-            }
-        });
-        return selectedFields;
-    }, [form.fileTypes, fileTypeOptions]);
-
-    // Get file label mapping
-    const getFileLabels = useCallback(() => {
-        const labels = {};
-        fileTypeOptions.forEach(option => {
-            const key = mapFileTypeToFieldKey(option.fileTypeName);
-            labels[key] = getFileTypeLabel(option.fileTypeName);
-        });
-        return labels;
-    }, [fileTypeOptions]);
+    const getUploadedFilesCount = () => {
+        return Object.values(files).filter(file => file !== null).length;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -540,34 +338,8 @@ export default function DriverCreation() {
         setErrorMessage("");
 
         try {
-            const fileLabels = getFileLabels();
-
-            // Get selected file type IDs and their names
-            const selectedFileTypes = form.fileTypes.map(fileTypeId => {
-                const option = fileTypeOptions.find(opt => opt.value === fileTypeId);
-                return option ? option.fileTypeName : fileTypeId;
-            });
-
-            // Get files only for selected types
-            const selectedFiles = {};
-            const selectedFieldsList = getSelectedFileFields();
-            selectedFieldsList.forEach(({ id }) => {
-                if (files[id]) {
-                    selectedFiles[id] = files[id];
-                }
-            });
-
-            const uploadedFilesSummary = Object.entries(selectedFiles)
-                .map(([key, file]) => {
-                    const label = fileLabels[key] || key;
-                    return `<li><b>${label}:</b> ${file.name} (${formatFileSize(file.size)})</li>`;
-                })
-                .join("");
-
-            // Get CreatedByUserId from sessionStorage
             const createdByUserId = sessionStorage.getItem("userId") || 1;
 
-            // Build multipart/form-data matching the API schema
             const formData = new FormData();
             formData.append("flagId", "1");
             formData.append("DriverName", form.name);
@@ -575,11 +347,19 @@ export default function DriverCreation() {
             formData.append("TruckNumber", form.truckNumber);
             formData.append("Password", form.password);
             formData.append("CreatedByUserId", String(createdByUserId));
-            formData.append("FileTypeIds", JSON.stringify(form.fileTypes));
 
-            // Append each selected file under the key "files"
-            Object.values(selectedFiles).forEach(file => {
-                formData.append("files", file);
+            // Get file type IDs for uploaded documents
+            const uploadedFileTypeIds = DOCUMENT_FIELDS
+                .filter(field => files[field.id] !== null)
+                .map(field => field.fileTypeId);
+
+            formData.append("FileTypeIds", JSON.stringify(uploadedFileTypeIds));
+
+            // Append all uploaded files
+            DOCUMENT_FIELDS.forEach(field => {
+                if (files[field.id]) {
+                    formData.append("files", files[field.id]);
+                }
             });
 
             const response = await axiosClient({
@@ -592,6 +372,14 @@ export default function DriverCreation() {
             });
 
             if (response.data?.status) {
+                const uploadedFilesSummary = DOCUMENT_FIELDS
+                    .filter(field => files[field.id] !== null)
+                    .map(field => {
+                        const file = files[field.id];
+                        return `<li><b>${field.label}:</b> ${file.name} (${formatFileSize(file.size)})</li>`;
+                    })
+                    .join("");
+
                 await Swal.fire({
                     icon: "success",
                     title: "Driver Created Successfully!",
@@ -600,13 +388,9 @@ export default function DriverCreation() {
                             <p><b>Driver Name:</b> ${form.name}</p>
                             <p><b>Mobile Number:</b> ${form.mobileNumber}</p>
                             <p><b>Truck Number:</b> ${form.truckNumber}</p>
-                            <p><b>File Types Selected:</b> ${selectedFileTypes.join(", ")}</p>
-                            ${uploadedFilesSummary
-                            ? `<hr style="margin: 10px 0; border-color: rgba(120,120,120,0.2);"/>
-                                       <p><b>Uploaded Documents:</b></p>
-                                       <ul style="padding-left: 18px; margin-top: 4px;">${uploadedFilesSummary}</ul>`
-                            : `<p style="color: #9ca3af; font-size: 12px; margin-top: 6px;">No document files attached</p>`
-                        }
+                            <hr style="margin: 10px 0; border-color: rgba(120,120,120,0.2);"/>
+                            <p><b>Uploaded Documents:</b> (${uploadedFilesSummary.split(",").length})</p>
+                            <ul style="padding-left: 18px; margin-top: 4px;">${uploadedFilesSummary}</ul>
                         </div>
                     `,
                     confirmButtonText: "Done",
@@ -615,6 +399,7 @@ export default function DriverCreation() {
                     color: darkMode ? "#ffffff" : "#000000"
                 });
 
+                setSuccessMessage(`Driver "${form.name}" created successfully!`);
                 resetAllFields();
             } else {
                 throw new Error(response.data?.message || "Failed to create driver");
@@ -622,6 +407,7 @@ export default function DriverCreation() {
         } catch (error) {
             console.error("Driver Creation Error:", error);
             const errorMsg = error.response?.data?.message || error.response?.data?.Message || error.message || "An error occurred while creating driver.";
+            setErrorMessage(errorMsg);
             Swal.fire({
                 icon: "error",
                 title: "Creation Failed!",
@@ -635,12 +421,12 @@ export default function DriverCreation() {
         }
     };
 
-    const uploadedCount = Object.values(files).filter(Boolean).length;
-    const selectedFields = getSelectedFileFields();
+    const uploadedCount = getUploadedFilesCount();
+    const totalDocuments = DOCUMENT_FIELDS.length;
 
     return (
-        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
-            <div className="max-w-[1600px] mx-auto">
+        <div className={`min-h-screen py-8 px-4 sm:py-12 sm:px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
+            <div className="w-full max-w-[1600px] mx-auto">
 
                 {/* Status Banners */}
                 <AnimatePresence>
@@ -669,25 +455,26 @@ export default function DriverCreation() {
                     )}
                 </AnimatePresence>
 
-                {/* Main Form Container */}
                 <form onSubmit={handleSubmit} noValidate>
                     <motion.div
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
+                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border`}
                     >
-                        {/* Top Gradient Divider Line */}
+                        {/* Top Gradient Line */}
                         <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
 
-                        <div className="p-8 space-y-8">
-
-                            {/* Basic Information Form Fields */}
+                        <div className="p-4 sm:p-6 lg:p-8">
+                            {/* Driver Information Fields - 4 per row */}
                             <div>
-                                <div className="flex flex-wrap items-start gap-6">
+                                <h2 className={`text-base font-bold mb-4 sm:mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
+                                    Driver Information
+                                </h2>
 
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                     {/* Field 1: Driver Name */}
-                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
+                                    <div>
                                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Driver Name
                                         </label>
@@ -709,7 +496,7 @@ export default function DriverCreation() {
                                     </div>
 
                                     {/* Field 2: Mobile Number */}
-                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
+                                    <div>
                                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Mobile Number
                                         </label>
@@ -731,7 +518,7 @@ export default function DriverCreation() {
                                     </div>
 
                                     {/* Field 3: Truck Number */}
-                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
+                                    <div>
                                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Truck Number
                                         </label>
@@ -753,7 +540,7 @@ export default function DriverCreation() {
                                     </div>
 
                                     {/* Field 4: Password */}
-                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
+                                    <div>
                                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Password
                                         </label>
@@ -780,95 +567,58 @@ export default function DriverCreation() {
                                         </div>
                                         <ErrorMessage message={errors.password} />
                                     </div>
-
-                                    {/* Field 5: File Type Multi-Select Dropdown - Dynamic from API */}
-                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                            <span className="text-red-500 mr-1">*</span>Select File Types
-                                        </label>
-                                        <Select
-                                            name="fileTypes"
-                                            options={fileTypeOptions}
-                                            value={fileTypeOptions.filter(option => form.fileTypes.includes(option.value))}
-                                            onChange={handleFileTypeChange}
-                                            placeholder={loadingDropdown ? "Loading file types..." : "Select file types..."}
-                                            noOptionsMessage={() => loadingDropdown ? "Loading..." : "No file types available"}
-                                            styles={getSelectStyles(darkMode, errors.fileTypes)}
-                                            classNamePrefix="react-select"
-                                            isMulti
-                                            isSearchable
-                                            isLoading={loadingDropdown}
-                                            menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-                                        />
-                                        <ErrorMessage message={errors.fileTypes} />
-                                    </div>
-
                                 </div>
                             </div>
 
-                            {/* Upload Section - Only show when file types are selected */}
-                            {form.fileTypes.length > 0 && (
-                                <div className={`pt-6 border-t flex flex-col items-start gap-4 ${darkMode ? "border-gray-800/60" : "border-gray-100"}`}>
-                                    {/* Single Upload Trigger Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsUploadModalOpen(true)}
-                                        className={`px-6 py-3 rounded-xl text-sm font-semibold transition-all flex items-center gap-3 border shadow-sm ${uploadedCount > 0
-                                            ? darkMode
-                                                ? "bg-emerald-950/40 border-emerald-700/60 text-emerald-300 hover:bg-emerald-900/50"
-                                                : "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-                                            : darkMode
-                                                ? "bg-[#0d0b22] border-gray-700 text-white hover:border-[#5a54e0] hover:bg-[#5a54e0]/10"
-                                                : "bg-gray-50 border-gray-300 text-gray-800 hover:border-[#3b35c9] hover:bg-indigo-50/50"
-                                            }`}
-                                    >
-                                        <FaPaperclip size={15} className={uploadedCount > 0 ? "text-emerald-500" : "text-[#3b35c9]"} />
-                                        <span>Upload Selected Documents</span>
-                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${uploadedCount > 0
-                                            ? "bg-emerald-500 text-white"
-                                            : darkMode
-                                                ? "bg-gray-800 text-gray-300"
-                                                : "bg-gray-200 text-gray-700"
-                                            }`}>
-                                            {uploadedCount} / {form.fileTypes.length} Attached
-                                        </span>
-                                    </button>
-
-                                    {/* Attached Files Quick Chips under button if any */}
-                                    {uploadedCount > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-dashed border-gray-700/30">
-                                            {selectedFields.map(({ id, label }) => {
-                                                const file = files[id];
-                                                if (!file) return null;
-                                                return (
-                                                    <span key={id} className={`inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-lg border ${darkMode ? "bg-[#0d0b22] border-gray-800 text-gray-300" : "bg-white border-gray-200 text-gray-700 shadow-sm"
-                                                        }`}>
-                                                        <FaCheckCircle size={11} className="text-emerald-500" />
-                                                        <span className="font-semibold">{label.replace(" Upload", "")}:</span>
-                                                        <span className="truncate max-w-[120px]">{file.name}</span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleFileChange(id, null)}
-                                                            className="ml-1 text-red-400 hover:text-red-600 text-sm font-bold"
-                                                        >
-                                                            &times;
-                                                        </button>
-                                                    </span>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
+                            {/* Document Upload Section - 4 per row */}
+                            <div className={`pt-6 mt-6 border-t ${darkMode ? "border-gray-800/60" : "border-gray-100"}`}>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h2 className={`text-base font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                                            Document Uploads
+                                        </h2>
+                                        <p className={`text-xs mt-0.5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                            Supported formats: JPG, JPEG, PNG, PDF (Max 10MB per file)
+                                        </p>
+                                    </div>
+                                    <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${uploadedCount > 0
+                                        ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                                        : darkMode
+                                            ? "bg-gray-800 text-gray-400 border border-gray-700"
+                                            : "bg-gray-100 text-gray-600 border border-gray-300"
+                                        }`}>
+                                        {uploadedCount} / {totalDocuments} Uploaded
+                                    </div>
                                 </div>
-                            )}
 
-                            {/* Submit Action Button */}
-                            <div className={`pt-6 border-t flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
+                                {errors.documents && (
+                                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs">
+                                        {errors.documents}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                                    {DOCUMENT_FIELDS.map((field) => (
+                                        <DocumentUploadRow
+                                            key={field.id}
+                                            field={field}
+                                            file={files[field.id]}
+                                            error={errors[field.id]}
+                                            onChange={(file) => handleFileChange(field.id, file)}
+                                            darkMode={darkMode}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Action Row - Submit Button */}
+                            <div className={`pt-6 mt-6 border-t flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
                                 <motion.button
                                     whileHover={{ scale: loading ? 1 : 1.02 }}
                                     whileTap={{ scale: loading ? 1 : 0.97 }}
                                     type="submit"
-                                    disabled={loading || loadingDropdown}
-                                    className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${(loading || loadingDropdown)
+                                    disabled={loading}
+                                    className={`w-full sm:w-auto px-8 sm:px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
                                         ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
                                         : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
                                         }`}
@@ -877,11 +627,6 @@ export default function DriverCreation() {
                                         <>
                                             <FaSpinner className="animate-spin" size={14} />
                                             Creating Driver...
-                                        </>
-                                    ) : loadingDropdown ? (
-                                        <>
-                                            <FaSpinner className="animate-spin" size={14} />
-                                            Loading...
                                         </>
                                     ) : (
                                         <>
@@ -897,102 +642,6 @@ export default function DriverCreation() {
                 </form>
 
             </div>
-
-            {/* Modal Popup for Document Uploads */}
-            <AnimatePresence>
-                {isUploadModalOpen && (
-                    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-                        {/* Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsUploadModalOpen(false)}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                        />
-
-                        {/* Modal Dialog Box */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                            className={`relative w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] ${darkMode ? "bg-[#13102e] border-gray-800 text-white" : "bg-white border-gray-200 text-gray-900"
-                                }`}
-                        >
-                            {/* Modal Header */}
-                            <div className={`p-5 border-b flex items-center justify-between ${darkMode ? "border-gray-800 bg-[#0d0b22]" : "border-gray-100 bg-gray-50"
-                                }`}>
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2.5 rounded-xl bg-[#3b35c9] text-white">
-                                        <FaFolderOpen size={18} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-base font-bold">
-                                            Upload Selected Documents
-                                        </h3>
-                                        <p className={`text-xs mt-0.5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                            Supported Formats: JPG, JPEG, PNG, PDF (Max 10MB per file)
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setIsUploadModalOpen(false)}
-                                    className={`p-2 rounded-lg transition-colors ${darkMode ? "text-gray-400 hover:bg-gray-800 hover:text-white" : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                                        }`}
-                                >
-                                    <FaTimes size={16} />
-                                </button>
-                            </div>
-
-                            {/* Modal Body - Only show selected file types */}
-                            <div className="p-6 overflow-y-auto space-y-3 max-h-[55vh]">
-                                {selectedFields.length > 0 ? (
-                                    selectedFields.map(({ id, label, icon }) => (
-                                        <ModalUploadRow
-                                            key={id}
-                                            id={id}
-                                            label={label}
-                                            icon={icon}
-                                            file={files[id]}
-                                            previewUrl={filePreviews[id]}
-                                            error={errors[id]}
-                                            onChange={(file) => handleFileChange(id, file)}
-                                            darkMode={darkMode}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <p className={`text-sm ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                            No file types selected. Please go back and select file types.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Modal Footer */}
-                            <div className={`p-4 px-6 border-t flex justify-between items-center ${darkMode ? "border-gray-800 bg-[#0d0b22]" : "border-gray-100 bg-gray-50"
-                                }`}>
-                                <div className="flex items-center gap-2">
-                                    <FaCheckCircle size={14} className="text-emerald-500" />
-                                    <span className="text-xs font-semibold text-emerald-500">
-                                        {uploadedCount} of {form.fileTypes.length} Files Attached
-                                    </span>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setIsUploadModalOpen(false)}
-                                    className="px-6 py-2.5 bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] text-white text-xs font-semibold rounded-lg hover:shadow-lg transition-all"
-                                >
-                                    Save & Done
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 }
