@@ -56,6 +56,25 @@ export const insertXl = async ({
         }
 
         //====================================================
+// Check Excel Already Uploaded
+//====================================================
+
+const checkUpload = await client.query(
+    `
+    SELECT 1
+    FROM "DATA"."UploadRouteExcel"
+    WHERE
+        "RoutePlanId" = $1
+        AND "IsDisabled" = FALSE
+    `,
+    [RoutePlanId]
+);
+
+if (checkUpload.rowCount > 0) {
+    throw new Error("An Excel file has already been uploaded for the selected Route.");
+}
+
+        //====================================================
         // Insert UploadRouteExcel
         //====================================================
 
@@ -193,14 +212,34 @@ export const fetchZoneMaster =async()=>{
     }
 }
 
-export const fecthRoutes =async(ZoneMasterId)=>{
+export const fecthRoutes = async (ZoneMasterId) => {
     try {
-        const result = await pool.query(`
-            
-        SELECT "RoutePlanId","RoutePlanPoint" FROM "DATA"."RoutePlan" WHERE "IsDisabled" = false AND "ZoneMasterId" = $1
-        `,[ZoneMasterId])
-        return result.rows
+
+        const result = await pool.query(
+            `
+            SELECT
+                RP."RoutePlanId" AS "RoutePlanId",
+                RP."RoutePlanPoint" AS "RoutePlanPoint"
+            FROM "DATA"."RoutePlan" RP
+            WHERE
+                RP."IsDisabled" = FALSE
+                AND RP."ZoneMasterId" = $1
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM "DATA"."UploadRouteExcel" URE
+                    WHERE
+                        URE."RoutePlanId" = RP."RoutePlanId"
+                        AND URE."IsDisabled" = FALSE
+                )
+            ORDER BY
+                RP."RoutePlanPoint";
+            `,
+            [ZoneMasterId]
+        );
+
+        return result.rows;
+
     } catch (error) {
-        throw error
+        throw error;
     }
-}
+};

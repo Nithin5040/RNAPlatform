@@ -5,13 +5,13 @@ import userRoute from "../Routes/UserRoute/userRoute.js"
 import RoutePlan from "../Routes/RoutePlan/routePlan.js"
 
 
- const applyRoutes = (app) => {
-app.use(backendHelpers.USER_CREATION, userRoute);
-app.use(backendHelpers.LOGIN_USER, loginRoute);
+const applyRoutes = (app) => {
+    app.use(backendHelpers.USER_CREATION, userRoute);
+    app.use(backendHelpers.LOGIN_USER, loginRoute);
 
-//this is the master excel upload screen api 
-app.use(backendHelpers.XL_UPLOAD,uploadXl)
-app.use(backendHelpers.ROUTE_PLAN,RoutePlan)
+    //this is the master excel upload screen api 
+    app.use(backendHelpers.XL_UPLOAD, uploadXl)
+    app.use(backendHelpers.ROUTE_PLAN, RoutePlan)
 
 
 }

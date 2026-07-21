@@ -68,16 +68,16 @@ export const insertUserCreation = async (req, res) => {
         // Validate Zone Access
         //------------------------------------
 
-        if (!Array.isArray(zoneAccess) || zoneAccess.length === 0) {
+        // if (!Array.isArray(zoneAccess) || zoneAccess.length === 0) {
 
-            await client.query("ROLLBACK");
+        //     await client.query("ROLLBACK");
 
-            return res.status(400).json({
-                status: false,
-                message: "Zone Access is required."
-            });
+        //     return res.status(400).json({
+        //         status: false,
+        //         message: "Zone Access is required."
+        //     });
 
-        }
+        // }
 
         //------------------------------------
         // Check Duplicate Email / Mobile
@@ -138,35 +138,35 @@ export const insertUserCreation = async (req, res) => {
         // Insert Zone Access
         //------------------------------------
 
-        for (const zone of zoneAccess) {
+        // for (const zone of zoneAccess) {
 
-            const zoneData = await getZoneMasterId(client, zone);
+        //     const zoneData = await getZoneMasterId(client, zone);
 
-            if (!zoneData) {
+        //     if (!zoneData) {
 
-                await client.query("ROLLBACK");
+        //         await client.query("ROLLBACK");
 
-                return res.status(404).json({
-                    status: false,
-                    message:
-                        `Invalid Zone Mapping.\n` +
-                        `Zone Code : ${zone.zoneCode}\n` +
-                        `Circle Code : ${zone.circleCode}\n` +
-                        `Division Code : ${zone.divisionCode}\n` +
-                        `District Code : ${zone.districtCode}\n` +
-                        `Taluk Code : ${zone.talukCode}\n` +
-                        `Station Code : ${zone.stationCode}`
-                });
+        //         return res.status(404).json({
+        //             status: false,
+        //             message:
+        //                 `Invalid Zone Mapping.\n` +
+        //                 `Zone Code : ${zone.zoneCode}\n` +
+        //                 `Circle Code : ${zone.circleCode}\n` +
+        //                 `Division Code : ${zone.divisionCode}\n` +
+        //                 `District Code : ${zone.districtCode}\n` +
+        //                 `Taluk Code : ${zone.talukCode}\n` +
+        //                 `Station Code : ${zone.stationCode}`
+        //         });
 
-            }
+        //     }
 
-            await insertUserZoneAccess(
-                client,
-                userId,
-                zoneData.ZoneMasterId
-            );
+        //     await insertUserZoneAccess(
+        //         client,
+        //         userId,
+        //         zoneData.ZoneMasterId
+        //     );
 
-        }
+        // }
 
         //------------------------------------
         // Commit

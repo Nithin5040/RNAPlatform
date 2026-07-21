@@ -115,15 +115,14 @@ export const uploadExcel = async (req, res) => {
     }
     catch (error) {
 
-        // Delete uploaded file if processing fails
-        if (req.file && fs.existsSync(req.file.path)) {
-            fs.unlinkSync(req.file.path);
-        }
+         if (req.file && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+    }
 
-        return res.status(500).json({
-            status: false,
-            message: error.message
-        });
+    return res.status(400).json({
+        status: false,
+        message: error.message
+    });
 
     }
 

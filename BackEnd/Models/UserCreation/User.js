@@ -76,7 +76,7 @@ export const FetchGenderDrpdwn = async () => {
 
 export const FetchRoleDrpdwn = async () => {
     try {
-        let query = `SELECT "RoleName","RoleCode" FROM "LKP"."Role" WHERE "IsDisabled"=false
+        let query = `SELECT "RoleName","RoleId" FROM "LKP"."Role" WHERE "IsDisabled"=false AND "RoleId" NOT IN (3)
 `;
         let result = await pool.query(query);
         return result.rows
