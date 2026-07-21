@@ -94,6 +94,7 @@ export default function App() {
             </ProtectedRoute>
           } />
 
+
           <Route path="/assign-route" element={
             <ProtectedRoute allowedRoles={[1]}>
               <Layout showSidebar={true}>
@@ -108,7 +109,7 @@ export default function App() {
                 <AdminDashboard />
               </Layout>
             </ProtectedRoute>
-          } />
+          } /> */}
 
           {/* 404 Page */}
           <Route path="*" element={
