@@ -5,6 +5,7 @@ import userRoute from "../Routes/UserRoute/userRoute.js"
 import RoutePlan from "../Routes/RoutePlan/routePlan.js"
 import driverCreation from "../Routes/DriverCreation/driverCreation.js"
 import driverlogin from "../Routes/DriverCreation/driverlogin.js"
+import AssignRoute from "../Routes/AssignRoute/assignRoute.js"
 
 
 const applyRoutes = (app) => {
@@ -18,6 +19,11 @@ const applyRoutes = (app) => {
     //Driver Creation
     app.use(backendHelpers.DRIVER_CREATION, driverCreation);
     app.use(backendHelpers.DRIVER_LOGIN,driverlogin)
+
+
+    //AssignRoute
+    app.use(backendHelpers.ASSIGN_ROUTE, AssignRoute)
+
 
 
 

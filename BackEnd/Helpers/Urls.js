@@ -6,3 +6,4 @@ export const ROUTE_PLAN = "/rna-service/routeplan"
 
 export const DRIVER_CREATION = "/rna-service/DriverCreation"
 export const DRIVER_LOGIN="/rna-service/Driver"
+export const ASSIGN_ROUTE = "/rna-service/assignDetail"
