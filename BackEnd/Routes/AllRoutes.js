@@ -3,6 +3,8 @@ import loginRoute from "../Routes/UserRoute/loginRoute.js"
 import uploadXl from "../Routes/XLUpload/Upload.js"
 import userRoute from "../Routes/UserRoute/userRoute.js"
 import RoutePlan from "../Routes/RoutePlan/routePlan.js"
+import driverCreation from "../Routes/DriverCreation/driverCreation.js"
+import driverlogin from "../Routes/DriverCreation/driverlogin.js"
 
 
 const applyRoutes = (app) => {
@@ -12,6 +14,11 @@ const applyRoutes = (app) => {
     //this is the master excel upload screen api 
     app.use(backendHelpers.XL_UPLOAD, uploadXl)
     app.use(backendHelpers.ROUTE_PLAN, RoutePlan)
+
+    //Driver Creation
+    app.use(backendHelpers.DRIVER_CREATION, driverCreation);
+    app.use(backendHelpers.DRIVER_LOGIN,driverlogin)
+
 
 
 }
