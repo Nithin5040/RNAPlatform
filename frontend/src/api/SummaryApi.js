@@ -28,6 +28,22 @@ export const SummaryApi = {
     url: "/rna-service/routeplan/updateRoutePlan",
     method: "post"
   },
+  masterroutedpdwns: {
+    url: "/rna-service/UploadXl/masterDropdwn",
+    method: "post"
+  },
+  masterrouteexcelupload: {
+    url: "rna-service/UploadXl/Upload",
+    method: "post"
+  },
+  drivercreationdpdwns: {
+    url: "/rna-service/DriverCreation/fetchDropdown",
+    method: "post"
+  },
+  drivercreation: {
+    url: "/rna-service/DriverCreation/insertDriverDetails",
+    method: "post"
+  },
 
 
 
