@@ -202,6 +202,11 @@ export default function Sidebar({
       path: "/driver-creation",
       label: "Driver Creation",
       icon: <UserPlus size={20} />
+    },
+    {
+      path: "/assign-route",
+      label: "Assign Route",
+      icon: <UserPlus size={20} />
     }
   ];
 
