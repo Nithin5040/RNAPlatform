@@ -7,8 +7,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     FaUserCheck,
     FaSpinner,
-    FaRoute,
-    FaTruck,
     FaUser
 } from "react-icons/fa";
 import axiosClient from "../api/axiosClient";
@@ -104,29 +102,51 @@ export default function AssignRoute() {
         fetchDrivers();
     }, []);
 
-    // Fetch Zones from API
+    // Get logged-in user info from sessionStorage
+    const getLoggedInUser = () => {
+        const authUser = sessionStorage.getItem("auth_user");
+        if (authUser) {
+            try {
+                return JSON.parse(authUser);
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    };
+
+    // Get UserId from sessionStorage
+    const getUserId = () => {
+        const user = getLoggedInUser();
+        if (user) {
+            return user.UserId || user.userId || user.id || null;
+        }
+        return null;
+    };
+
+    // Fetch Zones from API using new endpoint
     const fetchZones = async () => {
         setLoadingZones(true);
         try {
             const response = await axiosClient({
-                method: SummaryApi.masterroutedpdwns.method,
-                url: SummaryApi.masterroutedpdwns.url,
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
                 data: { flagId: 1 }
             });
 
             if (response.data.status === true || response.data.status === false) {
                 const formattedZones = response.data.result.map(zone => ({
                     value: zone.ZoneMasterId.toString(),
-                    label: zone.ZonePrefix,
+                    label: zone.ZoneMasterName,
                     zoneId: zone.ZoneMasterId,
-                    zonePrefix: zone.ZonePrefix
+                    zoneName: zone.ZoneMasterName
                 }));
                 setZoneOptions(formattedZones);
             } else {
                 Swal.fire({
                     icon: "error",
                     title: "Failed to Fetch Zones",
-                    text: response.data.Message || "Failed to fetch zones",
+                    text: response.data.message || "Failed to fetch zones",
                     confirmButtonColor: "#ef4444",
                     background: darkMode ? "#13102e" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
@@ -137,7 +157,7 @@ export default function AssignRoute() {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: error.response?.data?.Message || "Failed to fetch zones. Please try again.",
+                text: error.response?.data?.message || "Failed to fetch zones. Please try again.",
                 confirmButtonColor: "#ef4444",
                 background: darkMode ? "#13102e" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
@@ -147,7 +167,7 @@ export default function AssignRoute() {
         }
     };
 
-    // Fetch Route Plans based on selected Zone
+    // Fetch Route Plans based on selected Zone using new endpoint
     const fetchRoutePlans = async (zoneMasterId) => {
         if (!zoneMasterId) {
             setRoutePlanOptions([]);
@@ -157,8 +177,8 @@ export default function AssignRoute() {
         setLoadingRoutePlans(true);
         try {
             const response = await axiosClient({
-                method: SummaryApi.masterroutedpdwns.method,
-                url: SummaryApi.masterroutedpdwns.url,
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
                 data: {
                     flagId: 2,
                     ZoneMasterId: parseInt(zoneMasterId)
@@ -167,18 +187,17 @@ export default function AssignRoute() {
 
             if (response.data.status === true || response.data.status === false) {
                 const formattedPlans = response.data.result.map(plan => ({
-                    value: plan.RoutePlanId?.toString() || plan.id?.toString(),
-                    label: plan.RoutePlanPoint || plan.RoutePointName || plan.label || "Route Plan",
+                    value: plan.RoutePlanId.toString(),
+                    label: plan.RoutePlanPoint,
                     routePlanId: plan.RoutePlanId,
-                    routePlanPoint: plan.RoutePlanPoint,
-                    zoneMasterId: plan.ZoneMasterId || zoneMasterId
+                    routePlanPoint: plan.RoutePlanPoint
                 }));
                 setRoutePlanOptions(formattedPlans);
             } else {
                 Swal.fire({
                     icon: "error",
                     title: "Failed to Fetch Route Plans",
-                    text: response.data.Message || "Failed to fetch route plans",
+                    text: response.data.message || "Failed to fetch route plans",
                     confirmButtonColor: "#ef4444",
                     background: darkMode ? "#13102e" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
@@ -190,7 +209,7 @@ export default function AssignRoute() {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: error.response?.data?.Message || "Failed to fetch route plans. Please try again.",
+                text: error.response?.data?.message || "Failed to fetch route plans. Please try again.",
                 confirmButtonColor: "#ef4444",
                 background: darkMode ? "#13102e" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
@@ -201,23 +220,22 @@ export default function AssignRoute() {
         }
     };
 
-    // Fetch Drivers from API
+    // Fetch Drivers from API using new endpoint
     const fetchDrivers = async () => {
         setLoadingDrivers(true);
         try {
             const response = await axiosClient({
-                method: SummaryApi.drivercreationdpdwns.method,
-                url: SummaryApi.drivercreationdpdwns.url,
-                data: { flagId: 2 } // Assuming flagId 2 fetches drivers
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
+                data: { flagId: 3 }
             });
 
             if (response.data.status === true || response.data.status === false) {
                 const formattedDrivers = response.data.result.map(driver => ({
-                    value: driver.DriverId?.toString() || driver.id?.toString(),
-                    label: driver.DriverName || driver.name || "Driver",
-                    driverId: driver.DriverId,
-                    driverName: driver.DriverName,
-                    mobileNumber: driver.MobileNumber
+                    value: driver.DriverDetailId.toString(),
+                    label: driver.DriverName,
+                    driverId: driver.DriverDetailId,
+                    driverName: driver.DriverName
                 }));
                 setDriverOptions(formattedDrivers);
             } else {
@@ -300,24 +318,26 @@ export default function AssignRoute() {
             const selectedDriverObj = driverOptions.find((d) => d.value === form.driver);
 
             // Get UserId from session storage
-            const userId = sessionStorage.getItem("userId");
+            const userId = getUserId();
 
             if (!userId) {
                 throw new Error("User not authenticated. Please login again.");
             }
 
-            // Prepare data for API
+            // Prepare data for API - Updated payload structure
             const assignData = {
-                ZoneMasterId: selectedZoneObj?.zoneId || form.zone,
-                RoutePlanId: selectedRoutePlanObj?.routePlanId || selectedRoutePlanObj?.value || form.routePlan,
-                DriverId: selectedDriverObj?.driverId || form.driver,
-                CreatedByUserId: userId,
-                flagId: 1 // Assuming flagId 1 for assigning route
+                flagId: 1,
+                ZoneMasterId: selectedZoneObj?.zoneId || parseInt(form.zone),
+                RoutePlanId: selectedRoutePlanObj?.routePlanId || parseInt(form.routePlan),
+                DriverDetailId: selectedDriverObj?.driverId || parseInt(form.driver),
+                CreatedByUserId: parseInt(userId)
             };
 
+            console.log("Assigning Route with payload:", assignData); // For debugging
+
             const response = await axiosClient({
-                method: SummaryApi.assignroute.method || "POST",
-                url: SummaryApi.assignroute.url || "/api/AssignRoute",
+                method: SummaryApi.assignroute.method,
+                url: SummaryApi.assignroute.url,
                 data: assignData
             });
 
@@ -349,7 +369,22 @@ export default function AssignRoute() {
                     setSuccessMessage("");
                 }, 5000);
             } else {
-                throw new Error(response.data.message || "Assignment failed");
+                // Handle specific error messages from API
+                const errorMsg = response.data.message || "Assignment failed";
+
+                // Check if it's a duplicate assignment error
+                if (errorMsg.includes("already assigned")) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Route Already Assigned!",
+                        text: errorMsg,
+                        confirmButtonColor: "#f59e0b",
+                        background: darkMode ? "#13102e" : "#ffffff",
+                        color: darkMode ? "#ffffff" : "#000000"
+                    });
+                } else {
+                    throw new Error(errorMsg);
+                }
             }
         } catch (error) {
             console.error("Assign Route Error:", error);
