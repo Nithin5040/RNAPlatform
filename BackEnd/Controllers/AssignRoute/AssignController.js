@@ -185,8 +185,6 @@ export const submitStationDetail = async (req, res) => {
         flagId,
         RouteStationStatusId,
         DriverDetailId,
-        DCNumber,
-        AnnexureNumber,
         Remarks,
         FileTypeIds
     } = req.body;
@@ -317,8 +315,6 @@ export const submitStationDetail = async (req, res) => {
 
             RouteStationStatusId,
             DriverDetailId,
-            DCNumber: DCNumber.trim(),
-            AnnexureNumber: AnnexureNumber.trim(),
             Remarks: Remarks.trim(),
             FileTypeIds: parsedFileTypeIds,
             Files: req.files

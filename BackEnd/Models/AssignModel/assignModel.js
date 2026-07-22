@@ -508,8 +508,6 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 export const insertStationDetail = async ({
     RouteStationStatusId,
     DriverDetailId,
-    DCNumber,
-    AnnexureNumber,
     Remarks,
     FileTypeIds,
     Files
@@ -595,8 +593,6 @@ export const insertStationDetail = async ({
             INSERT INTO "DATA"."StationSubmission"
             (
                 "RouteStationStatusId",
-                "DCNumber",
-                "AnnexureNumber",
                 "Remarks",
                 "CreatedAt",
                 "CreatedByDriverId"
@@ -605,17 +601,13 @@ export const insertStationDetail = async ({
             (
                 $1,
                 $2,
-                $3,
-                $4,
                 NOW(),
-                $5
+                $3
             )
             RETURNING "StationSubmissionId";
             `,
             [
                 RouteStationStatusId,
-                DCNumber,
-                AnnexureNumber,
                 Remarks,
                 DriverDetailId
             ]
