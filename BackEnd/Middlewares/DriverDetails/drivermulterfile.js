@@ -6,7 +6,7 @@ import path from "path";
 // Upload Folder
 //====================================================
 
-const uploadPath = "D:\\RNAPlatform\\RNAUpload\\DriverDetails";
+const uploadPath = "E:\\RNAPlatform\\RNAUpload\\DriverDetails";
 
 // Create folder if it doesn't exist
 
@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
         const extension = path.extname(file.originalname);
 
         const uniqueFileName =
-            `Driver_${Date.now()}_${Math.round(Math.random() * 100000)}${extension}`;
+        `Driver_${Date.now()}_${Math.round(Math.random() * 100000)}${extension}`;
 
         cb(null, uniqueFileName);
 
