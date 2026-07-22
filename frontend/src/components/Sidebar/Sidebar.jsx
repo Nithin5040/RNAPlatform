@@ -207,7 +207,13 @@ export default function Sidebar({
       path: "/assign-route",
       label: "Assign Route",
       icon: <UserPlus size={20} />
+    },
+    {
+      path: "/route-monitoring",
+      label: "Route Monitoring",
+      icon: <UserPlus size={20} />
     }
+
   ];
 
   // RM specific menu items (for roleId = 4)
