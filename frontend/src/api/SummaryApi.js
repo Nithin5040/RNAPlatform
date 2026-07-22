@@ -52,6 +52,14 @@ export const SummaryApi = {
     url: "/rna-service/assignDetail/insertAssigndriver",
     method: "post"
   },
+  driverdetails: {
+    url: "/rna-service/Fetch/FetchDriverDetails",
+    method: "post"
+  },
+  viewdriverdoc: {
+    url: "/rna-service/View/ViewDriverDetails",
+    method: "post"
+  },
 
 
 

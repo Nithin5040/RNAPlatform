@@ -23,7 +23,8 @@ import {
     FaCertificate,
     FaTrashAlt,
     FaUpload,
-    FaFileUpload
+    FaFileUpload,
+
 } from "react-icons/fa";
 
 const ErrorMessage = ({ message }) => {
@@ -186,7 +187,8 @@ const initialFormState = {
     name: "",
     mobileNumber: "",
     truckNumber: "",
-    password: ""
+    password: "",
+    odometerReading: ""
 };
 
 // Create initial files state
@@ -228,6 +230,13 @@ export default function DriverCreation() {
             if (numericValue.length <= 10) {
                 setForm((prev) => ({ ...prev, [name]: numericValue }));
             }
+        } else if (name === "odometerReading") {
+            // Allow only numbers and decimal point for odometer reading
+            const cleanedValue = value.replace(/[^0-9.]/g, '');
+            // Prevent multiple decimal points
+            const parts = cleanedValue.split('.');
+            if (parts.length > 2) return;
+            setForm((prev) => ({ ...prev, [name]: cleanedValue }));
         } else {
             setForm((prev) => ({ ...prev, [name]: value }));
         }
@@ -286,7 +295,10 @@ export default function DriverCreation() {
                 name: yup.string().required("Driver Name is required").max(100, "Driver name cannot exceed 100 characters"),
                 mobileNumber: yup.string().required("Mobile Number is required").matches(/^[6-9]\d{9}$/, "Mobile number must be a valid 10-digit Indian number"),
                 truckNumber: yup.string().required("Truck Number is required").max(20, "Truck number cannot exceed 20 characters"),
-                password: yup.string().required("Password is required").min(6, "Password must be at least 6 characters")
+                password: yup.string().required("Password is required").min(6, "Password must be at least 6 characters"),
+                odometerReading: yup.string()
+                    .required("Odometer Reading is required")
+                    .matches(/^\d+(\.\d{1,2})?$/, "Please enter a valid odometer reading (e.g., 12345.67)")
             });
 
             await schema.validate(form, { abortEarly: false });
@@ -346,6 +358,7 @@ export default function DriverCreation() {
             formData.append("MobileNumber", form.mobileNumber);
             formData.append("TruckNumber", form.truckNumber);
             formData.append("Password", form.password);
+            formData.append("OdometerReading", form.odometerReading);
             formData.append("CreatedByUserId", String(createdByUserId));
 
             // Get file type IDs for uploaded documents
@@ -388,6 +401,7 @@ export default function DriverCreation() {
                             <p><b>Driver Name:</b> ${form.name}</p>
                             <p><b>Mobile Number:</b> ${form.mobileNumber}</p>
                             <p><b>Truck Number:</b> ${form.truckNumber}</p>
+                            <p><b>Odometer Reading:</b> ${form.odometerReading} km</p>
                             <hr style="margin: 10px 0; border-color: rgba(120,120,120,0.2);"/>
                             <p><b>Uploaded Documents:</b> (${uploadedFilesSummary.split(",").length})</p>
                             <ul style="padding-left: 18px; margin-top: 4px;">${uploadedFilesSummary}</ul>
@@ -472,7 +486,7 @@ export default function DriverCreation() {
                                     Driver Information
                                 </h2>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
                                     {/* Field 1: Driver Name */}
                                     <div>
                                         <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
@@ -566,6 +580,27 @@ export default function DriverCreation() {
                                             </button>
                                         </div>
                                         <ErrorMessage message={errors.password} />
+                                    </div>
+
+                                    {/* Field 5: Odometer Reading */}
+                                    <div>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
+                                            <span className="text-red-500 mr-1">*</span>Odometer Reading
+                                        </label>
+                                        <div className="relative">
+                                            <FaTachometerAlt className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
+                                            <input
+                                                placeholder="Enter odometer reading"
+                                                name="odometerReading"
+                                                value={form.odometerReading}
+                                                onChange={handleChange}
+                                                className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                    ? "bg-[#0f172a] border-[#334155] text-white placeholder-slate-500 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    } ${errors.odometerReading ? "border-red-500" : ""}`}
+                                            />
+                                        </div>
+                                        <ErrorMessage message={errors.odometerReading} />
                                     </div>
                                 </div>
                             </div>

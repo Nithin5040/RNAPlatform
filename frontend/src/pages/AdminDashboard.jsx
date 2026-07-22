@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; // Updated for React 19
 import {
     MapPin,
     Route,
@@ -24,11 +24,7 @@ import {
     Eye,
     Navigation,
     Calendar,
-    User,
-    Phone,
-    Mail,
-    Map,
-    Home
+    User
 } from "lucide-react";
 import {
     ResponsiveContainer,
@@ -331,10 +327,11 @@ const ROUTE_MILESTONES = {
     }
 };
 
-// Custom Tooltip for Vertical Bar Chart
+// Updated Custom Tooltip for Vertical Bar Chart (with null checks for React 19)
 const CustomVerticalBarTooltip = ({ active, payload, isDark }) => {
     if (active && payload && payload.length) {
-        const data = payload[0].payload;
+        const data = payload[0]?.payload;
+        if (!data) return null;
         return (
             <div
                 style={{
@@ -369,10 +366,11 @@ const CustomVerticalBarTooltip = ({ active, payload, isDark }) => {
     return null;
 };
 
-// Custom Tooltip for Pie Chart
+// Updated Custom Tooltip for Pie Chart (with null checks for React 19)
 const CustomPieTooltip = ({ active, payload, isDark }) => {
     if (active && payload && payload.length) {
-        const data = payload[0].payload;
+        const data = payload[0]?.payload;
+        if (!data) return null;
         return (
             <div
                 style={{
