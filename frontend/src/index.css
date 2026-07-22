@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
-/* optional global styles */
+/* Global Titanium Gray & Royal Indigo Theme Styles */
 body {
-  background-color: #f0f2ff;
-  color: #111827;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body.dark {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 @keyframes fadeIn {

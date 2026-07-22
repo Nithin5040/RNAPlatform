@@ -3,15 +3,15 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: linear-gradient(135deg, #eef0ff 0%, #f0f2ff 50%, #e8ebff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
   transition: background 0.3s ease;
   width: 100%;
   position: relative;
 }
 
-/* Dark Theme */
+/* Dark Theme - Titanium Slate Navy */
 .layout.dark {
-  background: radial-gradient(ellipse at top, #1e1b7a 0%, #13102e 35%, #0d0b22 70%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
 }
 
 .layout.dark .content-area {
@@ -26,7 +26,6 @@
   width: 100%;
 }
 
-/* ========== Main Content Area ========== */
 /* ========== Main Content Area ========== */
 .layout-main {
   flex: 1;
@@ -46,7 +45,7 @@
 .sidebar-desktop {
   height: 100%;
   flex-shrink: 0;
-  background-color: white;
+  background-color: #ffffff;
   border-right: 1px solid #e2e8f0;
   transition: width 0.3s ease;
   overflow-y: auto;
@@ -54,8 +53,8 @@
 }
 
 .layout.dark .sidebar-desktop {
-  background-color: #13102e;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #1e293b;
+  border-right: 1px solid #334155;
 }
 
 /* ========== Mobile Sidebar ========== */
@@ -65,7 +64,7 @@
   left: 0;
   height: 100vh;
   width: 280px;
-  background-color: white;
+  background-color: #ffffff;
   border-right: 1px solid #e2e8f0;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
@@ -73,11 +72,16 @@
   overflow-y: auto;
 }
 
+.layout.dark .sidebar-mobile {
+  background-color: #1e293b;
+  border-right: 1px solid #334155;
+}
+
 .sidebar-mobile.open {
   transform: translateX(0);
 }
 
-/* ========== Content Area - Takes remaining space ========== */
+/* ========== Content Area ========== */
 .content-area {
   flex: 1;
   display: flex;
@@ -106,24 +110,24 @@
   background: transparent;
 }
 
-/* Content Wrapper - Add padding for content */
+/* Content Wrapper */
 .content-wrapper {
   width: 100%;
-  max-width: 100%; /* Constraint to parent */
-  min-height: 100%; /* Take full height of parent */
+  max-width: 100%;
+  min-height: 100%;
   padding: 24px;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box; /* Crucial for padding/width handling */
+  box-sizing: border-box;
 }
 
-/* ========== Footer - Full width across layout (including sidebar space) ========== */
+/* ========== Footer - Full width across layout ========== */
 .layout .critical-footer,
 .critical-footer {
   flex-shrink: 0;
   width: 100%;
   height: 48px;
-  background: linear-gradient(135deg, #3b35c9 0%, #2c28a0 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 60%, #3730a3 100%);
   color: #fff;
   display: flex;
   align-items: center;
@@ -138,24 +142,31 @@
 /* Dark theme for footer */
 .layout.dark .critical-footer,
 .critical-footer.dark {
-  background: linear-gradient(135deg, #1a1838 0%, #0d0b22 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-top: 1px solid #334155;
 }
 
-/* ========== Card/Table container - Ensures proper spacing ========== */
+/* ========== Card/Table container ========== */
 .content-wrapper > * {
-  flex-shrink: 0; /* Prevent content from shrinking */
+  flex-shrink: 0;
 }
 
-/* For pages with tables/cards, ensure they take appropriate height */
 .table-container,
 .card-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
   padding: 20px;
   margin-bottom: 20px;
   width: 100%;
+}
+
+.layout.dark .table-container,
+.layout.dark .card-container {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
 
 /* Table wrapper to handle overflow */
@@ -191,18 +202,15 @@
   }
 }
 
-
 /* ========== Mobile Overlay ========== */
 .sidebar-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(15, 23, 42, 0.6);
   z-index: 55;
   backdrop-filter: blur(4px);
   animation: overlayFade 0.3s ease;
 }
-
-
 
 /* ========== Scrollbar Styling ========== */
 .content-scrollable::-webkit-scrollbar {
@@ -221,6 +229,18 @@
 
 .content-scrollable::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+.layout.dark .content-scrollable::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+.layout.dark .content-scrollable::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.layout.dark .content-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 /* ========== Responsive ========== */
@@ -242,13 +262,6 @@
     height: auto;
     min-height: 60px;
   }
-
-  .mobile-menu-button {
-    width: 48px;
-    height: 48px;
-    bottom: 16px;
-    right: 16px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -266,9 +279,6 @@
   .sidebar-mobile {
     display: none;
   }
-  .mobile-menu-button {
-    display: none;
-  }
 }
 
 /* ========== Global Reset ========== */
@@ -284,7 +294,6 @@ html, body {
   overflow: hidden;
 }
 
-/* Animation Keyframes */
 @keyframes overlayFade {
   from { opacity: 0; }
   to { opacity: 1; }
