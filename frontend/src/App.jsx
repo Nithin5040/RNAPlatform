@@ -9,7 +9,9 @@ import DriverCreation from "./pages/DriverCreation";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AssignRoute from "./pages/AssignRoute";
-import RouteMonitoring from "./pages/RouteMonitoring"
+import RouteMonitoring from "./pages/RouteMonitoring";
+import TotalRoutes from "./pages/TotalRoutes";
+import DriverProfile from "./pages/DriverProfile";
 
 function PlaceholderPage({ title }) {
   const { theme } = useTheme();
@@ -19,7 +21,7 @@ function PlaceholderPage({ title }) {
     <div style={{ padding: '30px' }}>
       <div style={{
         backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#ffffff',
-        border: isDark ? '1px solid rgba(90, 84, 224, 0.15)' : '1px solid rgba(59, 53, 201, 0.12)',
+        border: isDark ? '1px solid rgba(79, 70, 229, 0.15)' : '1px solid rgba(59, 53, 201, 0.12)',
         borderRadius: '16px',
         padding: '40px',
         textAlign: 'left',
@@ -29,7 +31,7 @@ function PlaceholderPage({ title }) {
           fontSize: '24px',
           fontWeight: 'bold',
           margin: 0,
-          color: isDark ? '#ffffff' : '#1e1b7a'
+          color: isDark ? '#ffffff' : '#1e293b'
         }}>{title}</h2>
       </div>
     </div>
@@ -108,6 +110,22 @@ export default function App() {
             <ProtectedRoute allowedRoles={[1]}>
               <Layout showSidebar={true}>
                 <RouteMonitoring />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/total-routes" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <TotalRoutes />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/driver-profile" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <DriverProfile />
               </Layout>
             </ProtectedRoute>
           } />

@@ -19,9 +19,7 @@ const applyRoutes = (app) => {
 
     //Driver Creation
     app.use(backendHelpers.DRIVER_CREATION, driverCreation);
-    app.use(backendHelpers.DRIVER_LOGIN,driverlogin)
-
-
+    app.use(backendHelpers.DRIVER_LOGIN, driverlogin)
     //AssignRoute
     app.use(backendHelpers.ASSIGN_ROUTE, AssignRoute)
 

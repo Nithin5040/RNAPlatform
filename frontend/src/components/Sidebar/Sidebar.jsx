@@ -212,7 +212,17 @@ export default function Sidebar({
       path: "/route-monitoring",
       label: "Route Monitoring",
       icon: <UserPlus size={20} />
-    }
+    },
+    {
+      path: "/total-routes",
+      label: "Total Routes",
+      icon: <UserPlus size={20} />
+    },
+    {
+      path: "/driver-profile",
+      label: "Driver Profile",
+      icon: <UserPlus size={20} />
+    },
 
   ];
 
