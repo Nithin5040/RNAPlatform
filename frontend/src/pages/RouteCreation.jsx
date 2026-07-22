@@ -196,24 +196,24 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
     const selectStyles = {
         control: (base, state) => ({
             ...base,
-            backgroundColor: darkMode ? '#0d0b22' : '#ffffff',
+            backgroundColor: darkMode ? '#0f172a' : '#ffffff',
             borderColor: errors.zoneMasterId && touched.zoneMasterId
                 ? '#EF4444'
                 : state.isFocused
-                    ? '#3b35c9'
-                    : darkMode ? 'rgba(90,84,224,0.35)' : '#D1D5DB',
+                    ? '#4f46e5'
+                    : darkMode ? '#334155' : '#D1D5DB',
             borderWidth: '1px',
             borderRadius: '0.5rem',
             minHeight: '42px',
-            boxShadow: state.isFocused ? '0 0 0 2px rgba(59,53,201,0.2)' : 'none',
+            boxShadow: state.isFocused ? '0 0 0 2px rgba(79,70,229,0.2)' : 'none',
             '&:hover': {
-                borderColor: errors.zoneMasterId && touched.zoneMasterId ? '#EF4444' : '#3b35c9'
+                borderColor: errors.zoneMasterId && touched.zoneMasterId ? '#EF4444' : '#4f46e5'
             }
         }),
         menu: (base) => ({
             ...base,
-            backgroundColor: darkMode ? '#13102e' : '#ffffff',
-            border: darkMode ? '1px solid rgba(90,84,224,0.3)' : '1px solid #e5e7eb',
+            backgroundColor: darkMode ? '#1e293b' : '#ffffff',
+            border: darkMode ? '1px solid #334155' : '1px solid #e5e7eb',
             borderRadius: '0.5rem',
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
             zIndex: 9999
@@ -225,39 +225,39 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
         option: (base, { isFocused, isSelected }) => ({
             ...base,
             backgroundColor: isSelected
-                ? '#3b35c9'
+                ? '#4f46e5'
                 : isFocused
-                    ? (darkMode ? 'rgba(59,53,201,0.18)' : '#f3f4f6')
+                    ? (darkMode ? 'rgba(99,102,241,0.18)' : '#f1f5f9')
                     : 'transparent',
             color: isSelected
                 ? '#ffffff'
-                : (darkMode ? '#e5e7eb' : '#111827'),
+                : (darkMode ? '#f8fafc' : '#0f172a'),
             cursor: 'pointer',
             '&:active': {
-                backgroundColor: '#3b35c9'
+                backgroundColor: '#4f46e5'
             }
         }),
         singleValue: (base) => ({
             ...base,
-            color: darkMode ? '#e5e7eb' : '#111827'
+            color: darkMode ? '#f8fafc' : '#0f172a'
         }),
         placeholder: (base) => ({
             ...base,
-            color: darkMode ? 'rgba(156, 163, 175, 0.7)' : '#9ca3af',
+            color: darkMode ? '#94a3b8' : '#9ca3af',
             fontSize: '0.875rem'
         })
     };
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className={`${darkMode ? 'bg-[#13102e] border border-[rgba(90,84,224,0.3)] shadow-[0_10px_50px_rgba(0,0,0,0.5)]' : 'bg-white border border-gray-200 shadow-xl'} rounded-2xl w-full max-w-md`}>
+            <div className={`${darkMode ? 'bg-[#1e293b] border border-[rgba(79, 70, 229,0.3)] shadow-[0_10px_50px_rgba(0,0,0,0.5)]' : 'bg-white border border-gray-200 shadow-xl'} rounded-2xl w-full max-w-md`}>
 
                 {/* Modal Header */}
-                <div className={`px-6 py-4 border-b ${darkMode ? 'border-[rgba(90,84,224,0.25)]' : 'border-gray-200'}`}>
+                <div className={`px-6 py-4 border-b ${darkMode ? 'border-[rgba(79, 70, 229,0.25)]' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-xl ${darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>
-                                <FaRoute className={darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'} size={18} />
+                                <FaRoute className={darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'} size={18} />
                             </div>
                             <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                 {initialData ? "Edit Route Point" : "Create New Route Point"}
@@ -303,18 +303,18 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
 
                         {/* Route Prefix Display */}
                         {fetchingPrefix && (
-                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-[#0d0b22] border border-[rgba(90,84,224,0.2)]' : 'bg-gray-50 border border-gray-200'}`}>
+                            <div className={`p-3 rounded-lg ${darkMode ? 'bg-[#0f172a] border border-[rgba(79, 70, 229,0.2)]' : 'bg-gray-50 border border-gray-200'}`}>
                                 <div className="flex items-center gap-2">
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#3b35c9]"></div>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#4f46e5]"></div>
                                     <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Fetching prefix...</span>
                                 </div>
                             </div>
                         )}
 
                         {routePrefix && !fetchingPrefix && (
-                            <div className={`p-3 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-indigo-900/30 border border-[rgba(90,84,224,0.3)]' : 'bg-indigo-50 border border-indigo-200'}`}>
-                                <FaTag className={darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'} size={14} />
-                                <p className={`text-sm ${darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'}`}>
+                            <div className={`p-3 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-indigo-900/30 border border-[rgba(79, 70, 229,0.3)]' : 'bg-indigo-50 border border-indigo-200'}`}>
+                                <FaTag className={darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'} size={14} />
+                                <p className={`text-sm ${darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'}`}>
                                     <span className="font-semibold">Route Prefix:</span> {routePrefix}
                                 </p>
                             </div>
@@ -341,8 +341,8 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
                                     disabled={fetchingPrefix}
                                     className={`w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors
                                         ${darkMode
-                                            ? 'bg-[#0d0b22] border-[rgba(90,84,224,0.35)] text-white placeholder-gray-500 focus:ring-[#3b35c9]/30 focus:border-[#3b35c9]'
-                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9]/20 focus:border-[#3b35c9]'
+                                            ? 'bg-[#0f172a] border-[rgba(79, 70, 229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
                                         }
                                         ${fetchingPrefix ? 'opacity-60 cursor-not-allowed' : ''}
                                         ${errors.routePoint && touched.routePoint
@@ -367,12 +367,12 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
                     </div>
 
                     {/* Modal Footer */}
-                    <div className={`flex justify-end gap-3 mt-6 pt-4 border-t ${darkMode ? 'border-[rgba(90,84,224,0.25)]' : 'border-gray-200'}`}>
+                    <div className={`flex justify-end gap-3 mt-6 pt-4 border-t ${darkMode ? 'border-[rgba(79, 70, 229,0.25)]' : 'border-gray-200'}`}>
                         <button
                             type="button"
                             onClick={onClose}
                             className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${darkMode
-                                ? 'bg-white/5 text-gray-300 hover:bg-white/10 border border-[rgba(90,84,224,0.3)]'
+                                ? 'bg-white/5 text-gray-300 hover:bg-white/10 border border-[rgba(79, 70, 229,0.3)]'
                                 : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
                                 }`}
                         >
@@ -382,8 +382,8 @@ const RouteModal = ({ isOpen, onClose, onSubmit, initialData = null, loading, da
                             type="submit"
                             disabled={loading || fetchingPrefix || zones.length === 0}
                             className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center gap-2 ${(loading || fetchingPrefix || zones.length === 0)
-                                ? 'bg-[#3b35c9]/60 cursor-not-allowed'
-                                : 'bg-[#3b35c9] hover:bg-[#2e29a8]'
+                                ? 'bg-[#4f46e5]/60 cursor-not-allowed'
+                                : 'bg-[#4f46e5] hover:bg-[#2e29a8]'
                                 }`}
                         >
                             {loading ? (
@@ -519,7 +519,7 @@ export default function RouteCreation() {
                 text: "Failed to fetch routes. Please refresh the page.",
                 timer: 3000,
                 showConfirmButton: false,
-                background: darkMode ? '#13102e' : '#ffffff',
+                background: darkMode ? '#1e293b' : '#ffffff',
                 color: darkMode ? '#ffffff' : '#000000',
             });
         } finally {
@@ -554,7 +554,7 @@ export default function RouteCreation() {
                     text: response.data.message || "Route point created successfully",
                     timer: 1500,
                     showConfirmButton: false,
-                    background: darkMode ? '#13102e' : '#ffffff',
+                    background: darkMode ? '#1e293b' : '#ffffff',
                     color: darkMode ? '#ffffff' : '#000000',
                 });
                 fetchRoutes();
@@ -568,7 +568,7 @@ export default function RouteCreation() {
                 icon: "error",
                 title: "Error",
                 text: error.response?.data?.message || error.message || "Failed to create route point",
-                background: darkMode ? '#13102e' : '#ffffff',
+                background: darkMode ? '#1e293b' : '#ffffff',
                 color: darkMode ? '#ffffff' : '#000000',
             });
         } finally {
@@ -604,7 +604,7 @@ export default function RouteCreation() {
                     text: response.data.message || "Route point updated successfully",
                     timer: 1500,
                     showConfirmButton: false,
-                    background: darkMode ? '#13102e' : '#ffffff',
+                    background: darkMode ? '#1e293b' : '#ffffff',
                     color: darkMode ? '#ffffff' : '#000000',
                 });
                 fetchRoutes();
@@ -619,7 +619,7 @@ export default function RouteCreation() {
                 icon: "error",
                 title: "Error",
                 text: error.response?.data?.message || error.message || "Failed to update route point",
-                background: darkMode ? '#13102e' : '#ffffff',
+                background: darkMode ? '#1e293b' : '#ffffff',
                 color: darkMode ? '#ffffff' : '#000000',
             });
         } finally {
@@ -679,14 +679,14 @@ export default function RouteCreation() {
     };
 
     return (
-        <div className={`min-h-full py-8 px-6 transition-colors duration-300 ${darkMode ? 'bg-[#0d0b22] text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className={`min-h-full py-8 px-6 transition-colors duration-300 ${darkMode ? 'bg-[#0f172a] text-white' : 'bg-gray-50 text-gray-900'}`}>
             <div className="max-w-[1600px] mx-auto space-y-6">
 
                 {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className={`text-2xl font-bold flex items-center gap-2.5 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                            <FaRoute className={darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'} size={22} />
+                            <FaRoute className={darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'} size={22} />
                             Route Point Management
                         </h1>
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -696,7 +696,7 @@ export default function RouteCreation() {
                 </div>
 
                 {/* Search and Create Button */}
-                <div className={`p-5 rounded-2xl border ${darkMode ? 'bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <div className={`p-5 rounded-2xl border ${darkMode ? 'bg-[#1e293b] border-[rgba(79, 70, 229,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="w-full sm:w-96 relative">
                             <FaSearch
@@ -709,8 +709,8 @@ export default function RouteCreation() {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className={`w-full pl-9 pr-10 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors ${darkMode
-                                    ? 'bg-[#0d0b22] border-[rgba(90,84,224,0.35)] text-white placeholder-gray-500 focus:ring-[#3b35c9]/30 focus:border-[#3b35c9]'
-                                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9]/20 focus:border-[#3b35c9]'
+                                    ? 'bg-[#0f172a] border-[rgba(79, 70, 229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                    : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
                                     }`}
                             />
                             {searchTerm && (
@@ -728,7 +728,7 @@ export default function RouteCreation() {
                                 setEditingRoute(null);
                                 setModalOpen(true);
                             }}
-                            className="w-full sm:w-auto px-5 py-2.5 bg-[#3b35c9] text-white text-sm font-semibold rounded-lg hover:bg-[#2e29a8] transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-900/30"
+                            className="w-full sm:w-auto px-5 py-2.5 bg-[#4f46e5] text-white text-sm font-semibold rounded-lg hover:bg-[#2e29a8] transition-colors flex items-center justify-center gap-2 shadow-md shadow-indigo-900/30"
                         >
                             <FaPlus size={13} />
                             Create Route Point
@@ -737,12 +737,12 @@ export default function RouteCreation() {
                 </div>
 
                 {/* Routes Table */}
-                <div className={`rounded-2xl border overflow-hidden ${darkMode ? 'bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
+                <div className={`rounded-2xl border overflow-hidden ${darkMode ? 'bg-[#1e293b] border-[rgba(79, 70, 229,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
                     <div className="overflow-x-auto">
                         <table className="w-full min-w-[800px] text-left text-xs">
                             <thead className={`${darkMode
-                                ? 'bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] text-white'
-                                : 'bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] text-white'} uppercase tracking-wider`}>
+                                ? 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white'
+                                : 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white'} uppercase tracking-wider`}>
                                 <tr>
                                     <th className="py-3.5 px-4 font-semibold">S.No</th>
                                     <th className="py-3.5 px-4 font-semibold">Route Point</th>
@@ -752,19 +752,19 @@ export default function RouteCreation() {
                                     <th className="py-3.5 px-4 font-semibold text-center">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className={`divide-y ${darkMode ? 'divide-[rgba(90,84,224,0.12)]' : 'divide-gray-100'}`}>
+                            <tbody className={`divide-y ${darkMode ? 'divide-[rgba(79, 70, 229,0.12)]' : 'divide-gray-100'}`}>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="6" className={`px-4 py-10 text-center ${darkMode ? 'bg-[#13102e]' : 'bg-white'}`}>
+                                        <td colSpan="6" className={`px-4 py-10 text-center ${darkMode ? 'bg-[#1e293b]' : 'bg-white'}`}>
                                             <div className="flex flex-col items-center justify-center">
-                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b35c9] mb-3"></div>
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4f46e5] mb-3"></div>
                                                 <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Loading routes...</span>
                                             </div>
                                         </td>
                                     </tr>
                                 ) : paginatedRoutes.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className={`px-4 py-10 text-center ${darkMode ? 'bg-[#13102e]' : 'bg-white'}`}>
+                                        <td colSpan="6" className={`px-4 py-10 text-center ${darkMode ? 'bg-[#1e293b]' : 'bg-white'}`}>
                                             <div className="flex flex-col items-center justify-center">
                                                 <FaRoute className={`text-3xl mb-2 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`} />
                                                 <span className={`text-sm font-medium ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -774,8 +774,8 @@ export default function RouteCreation() {
                                                     <button
                                                         onClick={() => setSearchTerm("")}
                                                         className={`mt-2 text-xs px-3 py-1 rounded-lg ${darkMode
-                                                            ? 'bg-white/5 text-[#a5a0ff] hover:bg-white/10 border border-[rgba(90,84,224,0.3)]'
-                                                            : 'bg-indigo-50 text-[#3b35c9] hover:bg-indigo-100'
+                                                            ? 'bg-white/5 text-[#818cf8] hover:bg-white/10 border border-[rgba(79, 70, 229,0.3)]'
+                                                            : 'bg-indigo-50 text-[#4f46e5] hover:bg-indigo-100'
                                                             }`}
                                                     >
                                                         Clear Search
@@ -798,7 +798,7 @@ export default function RouteCreation() {
                                             <td className="py-3.5 px-4">
                                                 <div className="flex items-center gap-2">
                                                     <div className={`p-1.5 rounded-lg ${darkMode ? 'bg-indigo-900/40' : 'bg-indigo-50'}`}>
-                                                        <FaRoad className={darkMode ? 'text-[#a5a0ff]' : 'text-[#3b35c9]'} size={12} />
+                                                        <FaRoad className={darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'} size={12} />
                                                     </div>
                                                     <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                                         {route.RoutePlanPoint || 'N/A'}
@@ -833,8 +833,8 @@ export default function RouteCreation() {
                                                         setModalOpen(true);
                                                     }}
                                                     className={`p-2 rounded-lg transition-colors ${darkMode
-                                                        ? 'text-[#a5a0ff] hover:bg-white/10'
-                                                        : 'text-[#3b35c9] hover:bg-indigo-50'
+                                                        ? 'text-[#818cf8] hover:bg-white/10'
+                                                        : 'text-[#4f46e5] hover:bg-indigo-50'
                                                         }`}
                                                     title="Edit Route"
                                                 >

@@ -113,7 +113,7 @@ const DocumentUploadRow = ({ field, file, error, onChange, darkMode }) => {
 
     return (
         <div>
-            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                 {field.label}
             </label>
             <input
@@ -129,21 +129,21 @@ const DocumentUploadRow = ({ field, file, error, onChange, darkMode }) => {
                 <label
                     htmlFor={field.id}
                     className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-lg border cursor-pointer transition-all ${darkMode
-                        ? "bg-[#0d0b22] border-gray-800 text-white hover:border-[#3b35c9]"
-                        : "bg-white border-gray-300 text-gray-900 hover:border-[#3b35c9]"
+                        ? "bg-[#0f172a] border-gray-800 text-white hover:border-[#4f46e5]"
+                        : "bg-white border-gray-300 text-gray-900 hover:border-[#4f46e5]"
                         } ${error ? "border-red-500" : ""}`}
                 >
                     <div className="flex items-center gap-3 overflow-hidden mr-2 flex-1 min-w-0">
                         <div className={`p-1.5 rounded-lg shrink-0 ${file
-                            ? "bg-emerald-500/20 text-emerald-400"
+                            ? "bg-indigo-500/20 text-indigo-400"
                             : darkMode
-                                ? "bg-indigo-500/15 text-[#a5a0ff]"
-                                : "bg-indigo-50 text-[#3b35c9]"
+                                ? "bg-indigo-500/15 text-[#818cf8]"
+                                : "bg-indigo-50 text-[#4f46e5]"
                             }`}>
                             <Icon size={14} />
                         </div>
                         <span className={`text-sm truncate ${file
-                            ? "font-semibold text-emerald-500"
+                            ? "font-semibold text-indigo-400"
                             : (darkMode ? "text-gray-400" : "text-gray-500")
                             }`}>
                             {file ? file.name : `Upload ${field.label}`}
@@ -170,7 +170,7 @@ const DocumentUploadRow = ({ field, file, error, onChange, darkMode }) => {
                             <FaTrashAlt size={14} />
                         </button>
                     ) : (
-                        <span className="px-3 py-1 bg-[#3b35c9] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm">
+                        <span className="px-3 py-1 bg-[#4f46e5] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm">
                             <FaUpload size={11} />
                             Browse
                         </span>
@@ -394,8 +394,8 @@ export default function DriverCreation() {
                         </div>
                     `,
                     confirmButtonText: "Done",
-                    confirmButtonColor: "#3b35c9",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    confirmButtonColor: "#4f46e5",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
 
@@ -413,7 +413,7 @@ export default function DriverCreation() {
                 title: "Creation Failed!",
                 text: errorMsg,
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
@@ -425,7 +425,7 @@ export default function DriverCreation() {
     const totalDocuments = DOCUMENT_FIELDS.length;
 
     return (
-        <div className={`min-h-screen py-8 px-4 sm:py-12 sm:px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
+        <div className={`min-h-screen py-8 px-4 sm:py-12 sm:px-6 transition-colors duration-300 ${darkMode ? "bg-[#0f172a]" : "bg-slate-50"}`}>
             <div className="w-full max-w-[1600px] mx-auto">
 
                 {/* Status Banners */}
@@ -436,7 +436,7 @@ export default function DriverCreation() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -15, scale: 0.98 }}
                             transition={{ duration: 0.3 }}
-                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-green-950/30 border-green-800 text-green-300" : "bg-green-50 border-green-200 text-green-700"}`}
+                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-indigo-950/30 border-indigo-700 text-indigo-300" : "bg-indigo-50 border-indigo-200 text-indigo-700"}`}
                         >
                             {successMessage}
                         </motion.div>
@@ -460,10 +460,10 @@ export default function DriverCreation() {
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border`}
+                        className={`${darkMode ? "bg-[#1e293b] border-[#334155] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-slate-200 shadow-sm"} rounded-2xl border`}
                     >
                         {/* Top Gradient Line */}
-                        <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
+                        <div className="h-1.5 bg-gradient-to-r from-[#4f46e5] via-[#6366f1] to-[#818cf8] rounded-t-2xl" />
 
                         <div className="p-4 sm:p-6 lg:p-8">
                             {/* Driver Information Fields - 4 per row */}
@@ -475,7 +475,7 @@ export default function DriverCreation() {
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                                     {/* Field 1: Driver Name */}
                                     <div>
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Driver Name
                                         </label>
                                         <div className="relative">
@@ -487,8 +487,8 @@ export default function DriverCreation() {
                                                 onChange={handleChange}
                                                 maxLength={100}
                                                 className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    ? "bg-[#0f172a] border-[#334155] text-white placeholder-slate-500 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
                                                     } ${errors.name ? "border-red-500" : ""}`}
                                             />
                                         </div>
@@ -497,7 +497,7 @@ export default function DriverCreation() {
 
                                     {/* Field 2: Mobile Number */}
                                     <div>
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Mobile Number
                                         </label>
                                         <div className="relative">
@@ -509,8 +509,8 @@ export default function DriverCreation() {
                                                 onChange={handleChange}
                                                 maxLength={10}
                                                 className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    ? "bg-[#0f172a] border-[#334155] text-white placeholder-slate-500 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
                                                     } ${errors.mobileNumber ? "border-red-500" : ""}`}
                                             />
                                         </div>
@@ -519,7 +519,7 @@ export default function DriverCreation() {
 
                                     {/* Field 3: Truck Number */}
                                     <div>
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Truck Number
                                         </label>
                                         <div className="relative">
@@ -531,8 +531,8 @@ export default function DriverCreation() {
                                                 onChange={handleChange}
                                                 maxLength={20}
                                                 className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    ? "bg-[#0f172a] border-[#334155] text-white placeholder-slate-500 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
                                                     } ${errors.truckNumber ? "border-red-500" : ""}`}
                                             />
                                         </div>
@@ -541,7 +541,7 @@ export default function DriverCreation() {
 
                                     {/* Field 4: Password */}
                                     <div>
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                             <span className="text-red-500 mr-1">*</span>Password
                                         </label>
                                         <div className="relative">
@@ -553,8 +553,8 @@ export default function DriverCreation() {
                                                 value={form.password}
                                                 onChange={handleChange}
                                                 className={`w-full h-[44px] rounded-lg border pl-10 pr-10 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    ? "bg-[#0f172a] border-[#334155] text-white placeholder-slate-500 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5] focus:border-[#4f46e5]"
                                                     } ${errors.password ? "border-red-500" : ""}`}
                                             />
                                             <button
@@ -582,7 +582,7 @@ export default function DriverCreation() {
                                         </p>
                                     </div>
                                     <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${uploadedCount > 0
-                                        ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                                        ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30"
                                         : darkMode
                                             ? "bg-gray-800 text-gray-400 border border-gray-700"
                                             : "bg-gray-100 text-gray-600 border border-gray-300"
@@ -612,15 +612,15 @@ export default function DriverCreation() {
                             </div>
 
                             {/* Action Row - Submit Button */}
-                            <div className={`pt-6 mt-6 border-t flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
+                            <div className={`pt-6 mt-6 border-t flex justify-end ${darkMode ? "border-[#334155]" : "border-slate-100"}`}>
                                 <motion.button
                                     whileHover={{ scale: loading ? 1 : 1.02 }}
                                     whileTap={{ scale: loading ? 1 : 0.97 }}
                                     type="submit"
                                     disabled={loading}
                                     className={`w-full sm:w-auto px-8 sm:px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
-                                        ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
+                                        ? "bg-[#4f46e5] opacity-70 cursor-not-allowed"
+                                        : "bg-gradient-to-r from-[#4f46e5] to-[#4338ca] hover:from-[#4338ca] hover:to-[#3730a3] hover:shadow-[0_4px_25px_rgba(79,70,229,0.35)]"
                                         }`}
                                 >
                                     {loading ? (
