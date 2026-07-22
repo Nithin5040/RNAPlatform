@@ -1,15 +1,18 @@
 import { FetchZoneNameDrpdwn, FetchCircleDrpdwn, FetchDivisionDrpdwn, FetchDistrictDrpdwn, FetchTalukDrpdwn, FetchGenderDrpdwn, FetchRoleDrpdwn } from "../../Models/UserCreation/User.js"
 import {pool} from "../../Config/DbConfig.js";
+import bcrypt from "bcrypt"
 
 import {
     insertUser,
     getZoneMasterId,
-    insertUserZoneAccess
+    insertUserZoneAccess,
+    checkUserExists,
+    FetchStationDrpdwn
 } from "../../Models/UserCreation/User.js";
 
 
 export const userCreationDropDown = async (req, res) => {
-    const { flagId, zoneCode, circleCode, divisionCode, districtCode } = req.body
+    const { flagId, zoneCode, circleCode, divisionCode, districtCode,talukCode } = req.body
     try {
         let result
 
@@ -23,6 +26,8 @@ export const userCreationDropDown = async (req, res) => {
             result = await FetchDistrictDrpdwn(divisionCode)
         } else if (parseInt(flagId) === 5) {
             result = await FetchTalukDrpdwn(districtCode)
+        }else if (parseInt(flagId) === 8) {
+            result = await FetchStationDrpdwn(talukCode)
         } else if (parseInt(flagId) === 6) {
             result = await FetchGenderDrpdwn()
         } else if (parseInt(flagId) === 7) {
@@ -56,9 +61,57 @@ export const insertUserCreation = async (req, res) => {
             roleId,
             genderId,
             createdByUserName,
-            createdByUserId,
             zoneAccess
         } = req.body;
+
+        //------------------------------------
+        // Validate Zone Access
+        //------------------------------------
+
+        // if (!Array.isArray(zoneAccess) || zoneAccess.length === 0) {
+
+        //     await client.query("ROLLBACK");
+
+        //     return res.status(400).json({
+        //         status: false,
+        //         message: "Zone Access is required."
+        //     });
+
+        // }
+
+        //------------------------------------
+        // Check Duplicate Email / Mobile
+        //------------------------------------
+
+        const existingUser = await checkUserExists(
+            client,
+            email,
+            mobileNumber
+        );
+
+        if (existingUser) {
+
+            await client.query("ROLLBACK");
+
+            if (existingUser.Email === email) {
+
+                return res.status(409).json({
+                    status: false,
+                    message: "Email already exists."
+                });
+
+            }
+
+            if (existingUser.MobileNumber === mobileNumber) {
+
+                return res.status(409).json({
+                    status: false,
+                    message: "Mobile Number already exists."
+                });
+
+            }
+
+        }
 
         //------------------------------------
         // Hash Password
@@ -85,27 +138,39 @@ export const insertUserCreation = async (req, res) => {
         // Insert Zone Access
         //------------------------------------
 
-        for (const zone of zoneAccess) {
+        // for (const zone of zoneAccess) {
 
-            const zoneData = await getZoneMasterId(client, zone);
+        //     const zoneData = await getZoneMasterId(client, zone);
 
-            if (!zoneData) {
+        //     if (!zoneData) {
 
-                await client.query("ROLLBACK");
+        //         await client.query("ROLLBACK");
 
-                return res.status(404).json({
-                    status: false,
-                    message: `Zone mapping not found for Station : ${zone.stationName}`
-                });
-            }
+        //         return res.status(404).json({
+        //             status: false,
+        //             message:
+        //                 `Invalid Zone Mapping.\n` +
+        //                 `Zone Code : ${zone.zoneCode}\n` +
+        //                 `Circle Code : ${zone.circleCode}\n` +
+        //                 `Division Code : ${zone.divisionCode}\n` +
+        //                 `District Code : ${zone.districtCode}\n` +
+        //                 `Taluk Code : ${zone.talukCode}\n` +
+        //                 `Station Code : ${zone.stationCode}`
+        //         });
 
-            await insertUserZoneAccess(
-                client,
-                userId,
-                zoneData.ZoneMasterId,
-                createdByUserId
-            );
-        }
+        //     }
+
+        //     await insertUserZoneAccess(
+        //         client,
+        //         userId,
+        //         zoneData.ZoneMasterId
+        //     );
+
+        // }
+
+        //------------------------------------
+        // Commit
+        //------------------------------------
 
         await client.query("COMMIT");
 
@@ -119,11 +184,11 @@ export const insertUserCreation = async (req, res) => {
 
         await client.query("ROLLBACK");
 
-        console.error(error);
+        console.error("Insert User Error :", error);
 
         return res.status(500).json({
             status: false,
-            message: "Internal Server Error"
+            message: error.message
         });
 
     }
@@ -132,4 +197,5 @@ export const insertUserCreation = async (req, res) => {
         client.release();
 
     }
+
 };

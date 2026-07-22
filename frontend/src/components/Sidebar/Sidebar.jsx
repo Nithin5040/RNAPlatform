@@ -190,19 +190,30 @@ export default function Sidebar({
     },
     {
       path: "/route-creation",
-      label: "Route Creation",
+      label: "Route Plan",
       icon: <MapPin size={20} />
     },
     {
       path: "/master-route-upload",
-      label: "Master Route Upload",
+      label: "Route Access",
       icon: <FileText size={20} />
     },
     {
       path: "/driver-creation",
       label: "Driver Creation",
       icon: <UserPlus size={20} />
+    },
+    {
+      path: "/assign-route",
+      label: "Assign Route",
+      icon: <UserPlus size={20} />
+    },
+    {
+      path: "/route-monitoring",
+      label: "Route Monitoring",
+      icon: <UserPlus size={20} />
     }
+
   ];
 
   // RM specific menu items (for roleId = 4)

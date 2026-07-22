@@ -6,7 +6,10 @@ import UserCreation from "./pages/UserCreation";
 import RouteCreation from "./pages/RouteCreation";
 import MasterRouteUpload from "./pages/MasterRouteUpload";
 import DriverCreation from "./pages/DriverCreation";
+import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AssignRoute from "./pages/AssignRoute";
+import RouteMonitoring from "./pages/RouteMonitoring"
 
 function PlaceholderPage({ title }) {
   const { theme } = useTheme();
@@ -54,8 +57,8 @@ export default function App() {
           {/* PROTECTED ROUTES */}
           <Route path="/admin_dashboard" element={
             <ProtectedRoute allowedRoles={[1]}>
-              <Layout>
-                <PlaceholderPage title="Admin Dashboard" />
+              <Layout showSidebar={true}>
+                <AdminDashboard />
               </Layout>
             </ProtectedRoute>
           } />
@@ -92,10 +95,27 @@ export default function App() {
             </ProtectedRoute>
           } />
 
+
+          <Route path="/assign-route" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <AssignRoute />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/route-monitoring" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <RouteMonitoring />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/reporting_manager_dashboard" element={
             <ProtectedRoute allowedRoles={[4]}>
-              <Layout>
-                <PlaceholderPage title="Reporting Manager Dashboard" />
+              <Layout showSidebar={true}>
+                <AdminDashboard />
               </Layout>
             </ProtectedRoute>
           } />

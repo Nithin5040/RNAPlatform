@@ -12,6 +12,46 @@ export const SummaryApi = {
     url: "/rna-service/userCreation/createUser",
     method: "post"
   },
+  routeplandpdwns: {
+    url: "/rna-service/routeplan/routePlanDropdown",
+    method: "post"
+  },
+  createrouteplan: {
+    url: "/rna-service/routeplan/insertRoutePlan",
+    method: "post"
+  },
+  fetchrouteplan: {
+    url: "/rna-service/routeplan/fetchRoutePlan",
+    method: "post"
+  },
+  updaterouteplan: {
+    url: "/rna-service/routeplan/updateRoutePlan",
+    method: "post"
+  },
+  masterroutedpdwns: {
+    url: "/rna-service/UploadXl/masterDropdwn",
+    method: "post"
+  },
+  masterrouteexcelupload: {
+    url: "rna-service/UploadXl/Upload",
+    method: "post"
+  },
+  drivercreationdpdwns: {
+    url: "/rna-service/DriverCreation/fetchDropdown",
+    method: "post"
+  },
+  drivercreation: {
+    url: "/rna-service/DriverCreation/insertDriverDetails",
+    method: "post"
+  },
+  assignroutedpdwns: {
+    url: "/rna-service/assignDetail/fecthAssignDpdwn",
+    method: "post"
+  },
+  assignroute: {
+    url: "/rna-service/assignDetail/insertAssigndriver",
+    method: "post"
+  },
 
 
 

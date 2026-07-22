@@ -288,13 +288,13 @@ export default function Login() {
       }
 
       // ================================================
-      // STORE ALL USER DATA IN SESSION STORAGE
+      // STORE USER DATA IN SESSION STORAGE - OPTIMIZED
       // ================================================
 
-      // Store the entire user object as a JSON string
+      // Store the complete user data object as JSON
       sessionStorage.setItem("auth_user", JSON.stringify(user));
 
-      // Store individual user properties for easy access
+      // Store commonly used individual fields for easy access
       sessionStorage.setItem("userId", String(user.UserId));
       sessionStorage.setItem("firstName", user.FirstName || '');
       sessionStorage.setItem("lastName", user.LastName || '');
@@ -305,7 +305,6 @@ export default function Login() {
 
       // Store mobile number
       sessionStorage.setItem("mobileNumber", user.MobileNumber || form.employeeId);
-      sessionStorage.setItem("employeeId", user.MobileNumber || form.employeeId);
 
       // Store email
       sessionStorage.setItem("userEmail", user.Email || user.email || '');
@@ -336,7 +335,7 @@ export default function Login() {
       // END OF SESSION STORAGE
       // ================================================
 
-      Swal.fire({
+      await Swal.fire({
         icon: 'success',
         title: 'Login Successful',
         text: `Welcome ${user.FirstName || 'User'}!`,
@@ -346,15 +345,15 @@ export default function Login() {
         color: darkMode ? '#ffffff' : '#000000',
       });
 
+      const dashboardPath = getDashboardPath(user.RoleId);
+
       // Dispatch events for other components to react to auth changes
       window.dispatchEvent(new Event("auth"));
       window.dispatchEvent(new Event("storage"));
 
-      const dashboardPath = getDashboardPath(user.RoleId);
-
-      setTimeout(() => {
-        navigate(dashboardPath, { replace: true });
-      }, 100);
+      // Use window.location for reliable navigation after async login
+      // This ensures ProtectedRoute reads sessionStorage fresh on the new page
+      window.location.href = dashboardPath;
 
     } catch (error) {
       console.error("Full error object:", error);

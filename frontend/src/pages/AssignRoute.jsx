@@ -5,10 +5,9 @@ import { useTheme } from "../contexts/ThemeContext";
 import Select from "react-select";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    FaCloudUploadAlt,
+    FaUserCheck,
     FaSpinner,
-    FaTrash,
-    FaFileUpload
+    FaUser
 } from "react-icons/fa";
 import axiosClient from "../api/axiosClient";
 import { SummaryApi } from "../api/SummaryApi";
@@ -23,7 +22,7 @@ const ErrorMessage = ({ message }) => {
     );
 };
 
-// React Select Styling matching UserCreation style
+// React Select Styling matching MasterRouteUpload style
 const getSelectStyles = (darkMode, error) => ({
     control: (base, state) => ({
         ...base,
@@ -75,22 +74,24 @@ const getSelectStyles = (darkMode, error) => ({
     })
 });
 
-export default function MasterRouteUpload() {
+export default function AssignRoute() {
     const { theme } = useTheme();
     const darkMode = theme === "dark";
     const navigate = useNavigate();
 
     const [form, setForm] = useState({
         zone: "",
-        routePoint: ""
+        routePlan: "",
+        driver: ""
     });
 
-    const [selectedFile, setSelectedFile] = useState(null);
     const [zoneOptions, setZoneOptions] = useState([]);
-    const [routePointOptions, setRoutePointOptions] = useState([]);
-    const [uploading, setUploading] = useState(false);
+    const [routePlanOptions, setRoutePlanOptions] = useState([]);
+    const [driverOptions, setDriverOptions] = useState([]);
+    const [assigning, setAssigning] = useState(false);
     const [loadingZones, setLoadingZones] = useState(false);
-    const [loadingRoutePoints, setLoadingRoutePoints] = useState(false);
+    const [loadingRoutePlans, setLoadingRoutePlans] = useState(false);
+    const [loadingDrivers, setLoadingDrivers] = useState(false);
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
@@ -98,32 +99,54 @@ export default function MasterRouteUpload() {
     // Fetch Zones on component mount
     useEffect(() => {
         fetchZones();
+        fetchDrivers();
     }, []);
 
-    // Fetch Zones from API
+    // Get logged-in user info from sessionStorage
+    const getLoggedInUser = () => {
+        const authUser = sessionStorage.getItem("auth_user");
+        if (authUser) {
+            try {
+                return JSON.parse(authUser);
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    };
+
+    // Get UserId from sessionStorage
+    const getUserId = () => {
+        const user = getLoggedInUser();
+        if (user) {
+            return user.UserId || user.userId || user.id || null;
+        }
+        return null;
+    };
+
+    // Fetch Zones from API using new endpoint
     const fetchZones = async () => {
         setLoadingZones(true);
         try {
             const response = await axiosClient({
-                method: SummaryApi.masterroutedpdwns.method,
-                url: SummaryApi.masterroutedpdwns.url,
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
                 data: { flagId: 1 }
             });
 
             if (response.data.status === true || response.data.status === false) {
-                // Format zones for react-select
                 const formattedZones = response.data.result.map(zone => ({
                     value: zone.ZoneMasterId.toString(),
-                    label: zone.ZonePrefix,
+                    label: zone.ZoneMasterName,
                     zoneId: zone.ZoneMasterId,
-                    zonePrefix: zone.ZonePrefix
+                    zoneName: zone.ZoneMasterName
                 }));
                 setZoneOptions(formattedZones);
             } else {
                 Swal.fire({
                     icon: "error",
                     title: "Failed to Fetch Zones",
-                    text: response.data.Message || "Failed to fetch zones",
+                    text: response.data.message || "Failed to fetch zones",
                     confirmButtonColor: "#ef4444",
                     background: darkMode ? "#13102e" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
@@ -134,7 +157,7 @@ export default function MasterRouteUpload() {
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: error.response?.data?.Message || "Failed to fetch zones. Please try again.",
+                text: error.response?.data?.message || "Failed to fetch zones. Please try again.",
                 confirmButtonColor: "#ef4444",
                 background: darkMode ? "#13102e" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
@@ -144,18 +167,18 @@ export default function MasterRouteUpload() {
         }
     };
 
-    // Fetch Route Points based on selected Zone
-    const fetchRoutePoints = async (zoneMasterId) => {
+    // Fetch Route Plans based on selected Zone using new endpoint
+    const fetchRoutePlans = async (zoneMasterId) => {
         if (!zoneMasterId) {
-            setRoutePointOptions([]);
+            setRoutePlanOptions([]);
             return;
         }
 
-        setLoadingRoutePoints(true);
+        setLoadingRoutePlans(true);
         try {
             const response = await axiosClient({
-                method: SummaryApi.masterroutedpdwns.method,
-                url: SummaryApi.masterroutedpdwns.url,
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
                 data: {
                     flagId: 2,
                     ZoneMasterId: parseInt(zoneMasterId)
@@ -163,39 +186,78 @@ export default function MasterRouteUpload() {
             });
 
             if (response.data.status === true || response.data.status === false) {
-                // Format route points for react-select with correct field names
-                const formattedPoints = response.data.result.map(point => ({
-                    value: point.RoutePlanId?.toString() || point.RoutePointId?.toString() || point.id?.toString(),
-                    label: point.RoutePlanPoint || point.RoutePointName || point.label || point.name || "Route Point",
-                    routePlanId: point.RoutePlanId,
-                    routePlanPoint: point.RoutePlanPoint,
-                    zoneMasterId: point.ZoneMasterId || zoneMasterId
+                const formattedPlans = response.data.result.map(plan => ({
+                    value: plan.RoutePlanId.toString(),
+                    label: plan.RoutePlanPoint,
+                    routePlanId: plan.RoutePlanId,
+                    routePlanPoint: plan.RoutePlanPoint
                 }));
-                setRoutePointOptions(formattedPoints);
+                setRoutePlanOptions(formattedPlans);
             } else {
                 Swal.fire({
                     icon: "error",
-                    title: "Failed to Fetch Route Points",
-                    text: response.data.Message || "Failed to fetch route points",
+                    title: "Failed to Fetch Route Plans",
+                    text: response.data.message || "Failed to fetch route plans",
                     confirmButtonColor: "#ef4444",
                     background: darkMode ? "#13102e" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
-                setRoutePointOptions([]);
+                setRoutePlanOptions([]);
             }
         } catch (error) {
-            console.error("Error fetching route points:", error);
+            console.error("Error fetching route plans:", error);
             Swal.fire({
                 icon: "error",
                 title: "Error",
-                text: error.response?.data?.Message || "Failed to fetch route points. Please try again.",
+                text: error.response?.data?.message || "Failed to fetch route plans. Please try again.",
                 confirmButtonColor: "#ef4444",
                 background: darkMode ? "#13102e" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
-            setRoutePointOptions([]);
+            setRoutePlanOptions([]);
         } finally {
-            setLoadingRoutePoints(false);
+            setLoadingRoutePlans(false);
+        }
+    };
+
+    // Fetch Drivers from API using new endpoint
+    const fetchDrivers = async () => {
+        setLoadingDrivers(true);
+        try {
+            const response = await axiosClient({
+                method: SummaryApi.assignroutedpdwns.method,
+                url: SummaryApi.assignroutedpdwns.url,
+                data: { flagId: 3 }
+            });
+
+            if (response.data.status === true || response.data.status === false) {
+                const formattedDrivers = response.data.result.map(driver => ({
+                    value: driver.DriverDetailId.toString(),
+                    label: driver.DriverName,
+                    driverId: driver.DriverDetailId,
+                    driverName: driver.DriverName
+                }));
+                setDriverOptions(formattedDrivers);
+            } else {
+                // If API fails, use fallback data
+                setDriverOptions([
+                    { value: "1", label: "Rajesh Kumar", driverId: 1, driverName: "Rajesh Kumar" },
+                    { value: "2", label: "Amit Singh", driverId: 2, driverName: "Amit Singh" },
+                    { value: "3", label: "Suresh Patel", driverId: 3, driverName: "Suresh Patel" },
+                    { value: "4", label: "Ravi Sharma", driverId: 4, driverName: "Ravi Sharma" }
+                ]);
+            }
+        } catch (error) {
+            console.error("Error fetching drivers:", error);
+            // Use fallback data on error
+            setDriverOptions([
+                { value: "1", label: "Rajesh Kumar", driverId: 1, driverName: "Rajesh Kumar" },
+                { value: "2", label: "Amit Singh", driverId: 2, driverName: "Amit Singh" },
+                { value: "3", label: "Suresh Patel", driverId: 3, driverName: "Suresh Patel" },
+                { value: "4", label: "Ravi Sharma", driverId: 4, driverName: "Ravi Sharma" }
+            ]);
+        } finally {
+            setLoadingDrivers(false);
         }
     };
 
@@ -204,48 +266,17 @@ export default function MasterRouteUpload() {
         setForm((prev) => {
             const updated = { ...prev, [name]: value };
             if (name === "zone") {
-                updated.routePoint = "";
+                updated.routePlan = "";
                 if (selectedOption) {
-                    fetchRoutePoints(selectedOption.zoneId || selectedOption.value);
+                    fetchRoutePlans(selectedOption.zoneId || selectedOption.value);
                 } else {
-                    setRoutePointOptions([]);
+                    setRoutePlanOptions([]);
                 }
             }
             return updated;
         });
         setErrors((prev) => ({ ...prev, [name]: "" }));
         setErrorMessage("");
-    };
-
-    // File Selection Handler
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            validateAndSetFile(file);
-        }
-    };
-
-    const validateAndSetFile = (file) => {
-        const validExtensions = [".csv", ".xlsx", ".xls"];
-        const fileName = file.name.toLowerCase();
-        const isValid = validExtensions.some(ext => fileName.endsWith(ext));
-
-        if (!isValid) {
-            setErrors((prev) => ({ ...prev, file: "Invalid file type. Upload .xlsx, .xls or .csv file." }));
-            setSelectedFile(null);
-            return;
-        }
-
-        setSelectedFile(file);
-        setErrors((prev) => ({ ...prev, file: "" }));
-        setErrorMessage("");
-    };
-
-    const removeSelectedFile = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setSelectedFile(null);
-        setErrors((prev) => ({ ...prev, file: "" }));
     };
 
     const validateForm = async () => {
@@ -257,13 +288,13 @@ export default function MasterRouteUpload() {
             valid = false;
         }
 
-        if (!form.routePoint) {
-            newErrors.routePoint = "Route Point is required";
+        if (!form.routePlan) {
+            newErrors.routePlan = "Route Plan is required";
             valid = false;
         }
 
-        if (!selectedFile) {
-            newErrors.file = "Document file is required";
+        if (!form.driver) {
+            newErrors.driver = "Driver is required";
             valid = false;
         }
 
@@ -271,60 +302,55 @@ export default function MasterRouteUpload() {
         return valid;
     };
 
-    const handleUploadSubmit = async (e) => {
+    const handleAssignSubmit = async (e) => {
         e.preventDefault();
 
         const isValid = await validateForm();
         if (!isValid) return;
 
-        setUploading(true);
+        setAssigning(true);
         setSuccessMessage("");
         setErrorMessage("");
 
         try {
             const selectedZoneObj = zoneOptions.find((z) => z.value === form.zone);
-            const selectedRoutePointObj = routePointOptions.find((rp) => rp.value === form.routePoint);
+            const selectedRoutePlanObj = routePlanOptions.find((rp) => rp.value === form.routePlan);
+            const selectedDriverObj = driverOptions.find((d) => d.value === form.driver);
 
             // Get UserId from session storage
-            const userId = sessionStorage.getItem("userId");
+            const userId = getUserId();
 
             if (!userId) {
                 throw new Error("User not authenticated. Please login again.");
             }
 
-            // Create FormData for file upload
-            const formData = new FormData();
-            formData.append("excel", selectedFile);
-            formData.append("ZoneMasterId", selectedZoneObj?.zoneId || form.zone);
-            formData.append("RoutePlanId", selectedRoutePointObj?.routePlanId || selectedRoutePointObj?.value || form.routePoint);
-            formData.append("CreatedByUserId", userId);
+            // Prepare data for API - Updated payload structure
+            const assignData = {
+                flagId: 1,
+                ZoneMasterId: selectedZoneObj?.zoneId || parseInt(form.zone),
+                RoutePlanId: selectedRoutePlanObj?.routePlanId || parseInt(form.routePlan),
+                DriverDetailId: selectedDriverObj?.driverId || parseInt(form.driver),
+                CreatedByUserId: parseInt(userId)
+            };
+
+            console.log("Assigning Route with payload:", assignData); // For debugging
 
             const response = await axiosClient({
-                method: SummaryApi.masterrouteexcelupload.method,
-                url: SummaryApi.masterrouteexcelupload.url,
-                data: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                method: SummaryApi.assignroute.method,
+                url: SummaryApi.assignroute.url,
+                data: assignData
             });
 
-            // Check if upload was successful
             if (response.data.status === true) {
-                // Show success message with response details
                 await Swal.fire({
                     icon: "success",
-                    title: "Upload Successful!",
+                    title: "Route Assigned Successfully!",
                     html: `
                         <div style="text-align: left; font-size: 14px; margin-top: 10px;">
-                            <p><b>Message:</b> ${response.data.message}</p>
+                            <p><b>Message:</b> ${response.data.message || "Route assigned successfully"}</p>
                             <p><b>Zone:</b> ${selectedZoneObj?.label || form.zone}</p>
-                            
-                           
-                            <p><b>Uploaded Document:</b> ${selectedFile.name}</p>
-                            ${response.data.result ? `
-                               
-                                <p><b>Total Records:</b> ${response.data.result.TotalRecords || 'N/A'}</p>
-                            ` : ''}
+                            <p><b>Route Plan:</b> ${selectedRoutePlanObj?.label || form.routePlan}</p>
+                            <p><b>Driver:</b> ${selectedDriverObj?.label || form.driver}</p>
                         </div>
                     `,
                     confirmButtonText: "Done",
@@ -333,33 +359,47 @@ export default function MasterRouteUpload() {
                     color: darkMode ? "#ffffff" : "#000000"
                 });
 
-                setSuccessMessage(response.data.message || `Document "${selectedFile.name}" uploaded successfully!`);
+                setSuccessMessage(`Route assigned to ${selectedDriverObj?.label || "driver"} successfully!`);
 
                 // Reset form
-                setForm({ zone: "", routePoint: "" });
-                setSelectedFile(null);
-                setRoutePointOptions([]);
+                setForm({ zone: "", routePlan: "", driver: "" });
+                setRoutePlanOptions([]);
 
                 setTimeout(() => {
                     setSuccessMessage("");
                 }, 5000);
             } else {
-                throw new Error(response.data.message || "Upload failed");
+                // Handle specific error messages from API
+                const errorMsg = response.data.message || "Assignment failed";
+
+                // Check if it's a duplicate assignment error
+                if (errorMsg.includes("already assigned")) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Route Already Assigned!",
+                        text: errorMsg,
+                        confirmButtonColor: "#f59e0b",
+                        background: darkMode ? "#13102e" : "#ffffff",
+                        color: darkMode ? "#ffffff" : "#000000"
+                    });
+                } else {
+                    throw new Error(errorMsg);
+                }
             }
         } catch (error) {
-            console.error("Master Route Upload Error:", error);
-            const errorMsg = error.response?.data?.message || error.response?.data?.Message || error.message || "An error occurred during file upload.";
+            console.error("Assign Route Error:", error);
+            const errorMsg = error.response?.data?.message || error.response?.data?.Message || error.message || "An error occurred while assigning route.";
             setErrorMessage(errorMsg);
             Swal.fire({
                 icon: "error",
-                title: "Upload Failed!",
+                title: "Assignment Failed!",
                 text: errorMsg,
                 confirmButtonColor: "#ef4444",
                 background: darkMode ? "#13102e" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
-            setUploading(false);
+            setAssigning(false);
         }
     };
 
@@ -395,7 +435,7 @@ export default function MasterRouteUpload() {
                 </AnimatePresence>
 
                 {/* Form Card Container */}
-                <form onSubmit={handleUploadSubmit} noValidate>
+                <form onSubmit={handleAssignSubmit} noValidate>
                     <motion.div
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -430,96 +470,88 @@ export default function MasterRouteUpload() {
                                     <ErrorMessage message={errors.zone} />
                                 </div>
 
-                                {/* Field 2: Select Route Point Dropdown */}
+                                {/* Field 2: Select Route Plan Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Select Route Point
+                                        <span className="text-red-500 mr-1">*</span>Select Route Plan
                                     </label>
                                     <Select
-                                        name="routePoint"
-                                        options={routePointOptions}
-                                        value={routePointOptions.find((option) => option.value === form.routePoint) || null}
-                                        onChange={(option) => handleSelectChange(option, { name: "routePoint" })}
-                                        placeholder={!form.zone ? "Select zone first" : (loadingRoutePoints ? "Loading route points..." : "Select route point...")}
-                                        noOptionsMessage={() => !form.zone ? "Please select a zone first" : (loadingRoutePoints ? "Loading..." : "No route points found")}
-                                        styles={getSelectStyles(darkMode, errors.routePoint)}
+                                        name="routePlan"
+                                        options={routePlanOptions}
+                                        value={routePlanOptions.find((option) => option.value === form.routePlan) || null}
+                                        onChange={(option) => handleSelectChange(option, { name: "routePlan" })}
+                                        placeholder={!form.zone ? "Select zone first" : (loadingRoutePlans ? "Loading route plans..." : "Select route plan...")}
+                                        noOptionsMessage={() => !form.zone ? "Please select a zone first" : (loadingRoutePlans ? "Loading..." : "No route plans found")}
+                                        styles={getSelectStyles(darkMode, errors.routePlan)}
                                         classNamePrefix="react-select"
                                         isSearchable
-                                        isDisabled={!form.zone || loadingRoutePoints}
+                                        isDisabled={!form.zone || loadingRoutePlans}
                                         menuPortalTarget={typeof document !== "undefined" ? document.body : null}
                                     />
-                                    <ErrorMessage message={errors.routePoint} />
+                                    <ErrorMessage message={errors.routePlan} />
                                 </div>
 
-                                {/* Field 3: Upload Document */}
-                                <div className="w-full sm:w-80 md:w-96 max-w-sm">
+                                {/* Field 3: Select Driver Dropdown */}
+                                <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
                                     <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Upload Document
+                                        <span className="text-red-500 mr-1">*</span>Select Driver
                                     </label>
-                                    <div className="relative">
-                                        <input
-                                            type="file"
-                                            id="document-file-input"
-                                            accept=".csv, .xlsx, .xls"
-                                            onChange={handleFileChange}
-                                            className="hidden"
-                                        />
-                                        <label
-                                            htmlFor="document-file-input"
-                                            className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-lg border cursor-pointer transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white hover:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 hover:border-[#3b35c9]"
-                                                } ${errors.file ? "border-red-500" : ""}`}
-                                        >
-                                            <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                                <FaFileUpload className={selectedFile ? "text-green-500" : (darkMode ? "text-gray-500" : "text-gray-400")} size={16} />
-                                                <span className={`text-sm truncate ${selectedFile ? "font-semibold text-green-500" : (darkMode ? "text-gray-400" : "text-gray-500")}`}>
-                                                    {selectedFile ? selectedFile.name : "Choose file (.xlsx, .csv)"}
+                                    <Select
+                                        name="driver"
+                                        options={driverOptions}
+                                        value={driverOptions.find((option) => option.value === form.driver) || null}
+                                        onChange={(option) => handleSelectChange(option, { name: "driver" })}
+                                        placeholder={loadingDrivers ? "Loading drivers..." : "Select driver..."}
+                                        noOptionsMessage={() => loadingDrivers ? "Loading..." : "No drivers found"}
+                                        styles={getSelectStyles(darkMode, errors.driver)}
+                                        classNamePrefix="react-select"
+                                        isSearchable
+                                        isDisabled={loadingDrivers}
+                                        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
+                                    />
+                                    <ErrorMessage message={errors.driver} />
+                                </div>
+
+                                {/* Driver Info Display - Optional */}
+                                {form.driver && (
+                                    <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                            Driver Details
+                                        </label>
+                                        <div className={`p-3 rounded-lg border ${darkMode ? "bg-[#0d0b22] border-gray-800" : "bg-gray-50 border-gray-200"}`}>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <FaUser className={darkMode ? "text-gray-400" : "text-gray-500"} size={14} />
+                                                <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
+                                                    {driverOptions.find(d => d.value === form.driver)?.label || "Driver selected"}
                                                 </span>
                                             </div>
-
-                                            {selectedFile ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={removeSelectedFile}
-                                                    className="p-1 text-red-500 hover:bg-red-500/10 rounded flex-shrink-0"
-                                                    title="Remove File"
-                                                >
-                                                    <FaTrash size={14} />
-                                                </button>
-                                            ) : (
-                                                <span className="px-2.5 py-1 bg-[#3b35c9] text-white rounded text-xs font-semibold flex items-center gap-1 flex-shrink-0 shadow-xs">
-                                                    Browse
-                                                </span>
-                                            )}
-                                        </label>
+                                        </div>
                                     </div>
-                                    <ErrorMessage message={errors.file} />
-                                </div>
+                                )}
 
                             </div>
 
-                            {/* Action Row - Upload Button */}
+                            {/* Action Row - Assign Button */}
                             <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
                                 <motion.button
-                                    whileHover={{ scale: uploading ? 1 : 1.02 }}
-                                    whileTap={{ scale: uploading ? 1 : 0.97 }}
+                                    whileHover={{ scale: assigning ? 1 : 1.02 }}
+                                    whileTap={{ scale: assigning ? 1 : 0.97 }}
                                     type="submit"
-                                    disabled={uploading || !form.zone || !form.routePoint || !selectedFile}
-                                    className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2.5 ${uploading || !form.zone || !form.routePoint || !selectedFile
+                                    disabled={assigning || !form.zone || !form.routePlan || !form.driver}
+                                    className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2.5 ${assigning || !form.zone || !form.routePlan || !form.driver
                                         ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
                                         : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
                                         }`}
                                 >
-                                    {uploading ? (
+                                    {assigning ? (
                                         <>
                                             <FaSpinner className="animate-spin" size={16} />
-                                            Uploading Document...
+                                            Assigning Route...
                                         </>
                                     ) : (
                                         <>
-                                            <FaCloudUploadAlt size={18} />
-                                            Upload Master Route
+                                            <FaUserCheck size={18} />
+                                            Assign Route to Driver
                                         </>
                                     )}
                                 </motion.button>

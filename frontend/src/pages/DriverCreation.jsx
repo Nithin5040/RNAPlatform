@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useTheme } from "../contexts/ThemeContext";
 import * as yup from "yup";
-import Select from "react-select";
 import { motion, AnimatePresence } from "framer-motion";
+import axiosClient from "../api/axiosClient";
+import { SummaryApi } from "../api/SummaryApi";
 import {
     FaUser,
     FaPhone,
@@ -13,7 +14,16 @@ import {
     FaEye,
     FaEyeSlash,
     FaSpinner,
-    FaUserPlus
+    FaUserPlus,
+    FaCamera,
+    FaTachometerAlt,
+    FaIdCard,
+    FaAddressCard,
+    FaFileContract,
+    FaCertificate,
+    FaTrashAlt,
+    FaUpload,
+    FaFileUpload
 } from "react-icons/fa";
 
 const ErrorMessage = ({ message }) => {
@@ -26,130 +36,193 @@ const ErrorMessage = ({ message }) => {
     );
 };
 
-// React Select Styling matching UserCreation style
-const getSelectStyles = (darkMode, error) => ({
-    control: (base, state) => ({
-        ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        borderColor: error ? "#EF4444" : (state.isFocused ? "#3b35c9" : (darkMode ? "rgba(90,84,224,0.3)" : "#D1D5DB")),
-        borderWidth: "1px",
-        borderRadius: "0.5rem",
-        minHeight: "44px",
-        boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 53, 201, 0.2)" : "none",
-        "&:hover": {
-            borderColor: error ? "#EF4444" : "#3b35c9"
-        }
-    }),
-    menu: (base) => ({
-        ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        border: darkMode ? "1px solid rgba(90,84,224,0.2)" : "1px solid #e5e7eb",
-        borderRadius: "0.5rem",
-        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
-        zIndex: 9999
-    }),
-    menuPortal: (base) => ({
-        ...base,
-        zIndex: 9999
-    }),
-    option: (base, { isFocused, isSelected }) => ({
-        ...base,
-        backgroundColor: isSelected
-            ? "#3b35c9"
-            : isFocused
-                ? (darkMode ? "rgba(90,84,224,0.15)" : "#f3f4f6")
-                : "transparent",
-        color: isSelected
-            ? "#ffffff"
-            : (darkMode ? "#e2e0ff" : "#111827"),
-        cursor: "pointer",
-        "&:active": {
-            backgroundColor: "#3b35c9"
-        }
-    }),
-    singleValue: (base) => ({
-        ...base,
-        color: darkMode ? "#e2e0ff" : "#111827"
-    }),
-    placeholder: (base) => ({
-        ...base,
-        color: darkMode ? "rgba(165,160,255,0.5)" : "#9ca3af",
-        fontSize: "0.875rem"
-    })
-});
-
-// Static Mock Zones Data
-const MOCK_ZONES = [
-    { value: "Z01", label: "Zone 1 - North Zone", zoneCode: "Z01", zoneName: "North Zone" },
-    { value: "Z02", label: "Zone 2 - South Zone", zoneCode: "Z02", zoneName: "South Zone" },
-    { value: "Z03", label: "Zone 3 - East Zone", zoneCode: "Z03", zoneName: "East Zone" },
-    { value: "Z04", label: "Zone 4 - West Zone", zoneCode: "Z04", zoneName: "West Zone" },
-    { value: "Z05", label: "Zone 5 - Central Zone", zoneCode: "Z05", zoneName: "Central Zone" }
-];
-
-// Mock Route Points Data grouped by Zone
-const MOCK_ROUTE_POINTS = {
-    "Z01": [
-        { value: "RP-N-101", label: "N-101 North Expressway Corridor", zoneCode: "Z01" },
-        { value: "RP-N-102", label: "N-102 Airport Road Bypass", zoneCode: "Z01" },
-        { value: "RP-N-103", label: "N-103 Northern Industrial Park", zoneCode: "Z01" }
-    ],
-    "Z02": [
-        { value: "RP-S-201", label: "S-201 Tech Park Southern Transit", zoneCode: "Z02" },
-        { value: "RP-S-202", label: "S-202 Outer Ring Highway Junction", zoneCode: "Z02" },
-        { value: "RP-S-203", label: "S-203 South Port Terminal Depot", zoneCode: "Z02" }
-    ],
-    "Z03": [
-        { value: "RP-E-301", label: "E-301 Eastern Logistics Freight Line", zoneCode: "Z03" },
-        { value: "RP-E-302", label: "E-302 East Cargo Terminal Station", zoneCode: "Z03" }
-    ],
-    "Z04": [
-        { value: "RP-W-401", label: "W-401 Coastal Highway Route Point", zoneCode: "Z04" },
-        { value: "RP-W-402", label: "W-402 Western Express Hub", zoneCode: "Z04" }
-    ],
-    "Z05": [
-        { value: "RP-C-501", label: "C-501 Central Metro Transfer Point", zoneCode: "Z05" },
-        { value: "RP-C-502", label: "C-502 City Center Terminal Hub", zoneCode: "Z05" }
-    ]
+const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
 
-const ALL_MOCK_ROUTE_POINTS = Object.values(MOCK_ROUTE_POINTS).flat();
+const ALLOWED_ACCEPT = ".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf";
+
+// Document field configuration
+const DOCUMENT_FIELDS = [
+    {
+        id: "driverPhoto",
+        label: "Driver Photo",
+        icon: FaCamera,
+        fileTypeName: "DriverPhoto",
+        fileTypeId: 1
+    },
+    {
+        id: "aadhaarPhoto",
+        label: "Driver Aadhaar Card",
+        icon: FaIdCard,
+        fileTypeName: "DriverAadhar",
+        fileTypeId: 2
+    },
+    {
+        id: "odometerPhoto",
+        label: "Odometer Photo",
+        icon: FaTachometerAlt,
+        fileTypeName: "OdometerPhoto",
+        fileTypeId: 3
+    },
+    {
+        id: "truckPhoto",
+        label: "Truck Photo",
+        icon: FaTruck,
+        fileTypeName: "TruckPhoto",
+        fileTypeId: 4
+    },
+    {
+        id: "rcCardPhoto",
+        label: "RC Card",
+        icon: FaAddressCard,
+        fileTypeName: "RC Card",
+        fileTypeId: 5
+    },
+    {
+        id: "fcFile",
+        label: "FC File",
+        icon: FaFileContract,
+        fileTypeName: "FC File",
+        fileTypeId: 6
+    },
+    {
+        id: "permitFile",
+        label: "Permit File",
+        icon: FaCertificate,
+        fileTypeName: "Permit File",
+        fileTypeId: 7
+    }
+];
+
+// Document Upload Row Component - Styled like main fields
+const DocumentUploadRow = ({ field, file, error, onChange, darkMode }) => {
+    const fileInputRef = useRef(null);
+    const Icon = field.icon;
+
+    const removeFile = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onChange(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    return (
+        <div>
+            <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                {field.label}
+            </label>
+            <input
+                ref={fileInputRef}
+                type="file"
+                id={field.id}
+                accept={ALLOWED_ACCEPT}
+                onChange={(e) => onChange(e.target.files?.[0] || null)}
+                className="hidden"
+            />
+
+            <div className="relative">
+                <label
+                    htmlFor={field.id}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-lg border cursor-pointer transition-all ${darkMode
+                        ? "bg-[#0d0b22] border-gray-800 text-white hover:border-[#3b35c9]"
+                        : "bg-white border-gray-300 text-gray-900 hover:border-[#3b35c9]"
+                        } ${error ? "border-red-500" : ""}`}
+                >
+                    <div className="flex items-center gap-3 overflow-hidden mr-2 flex-1 min-w-0">
+                        <div className={`p-1.5 rounded-lg shrink-0 ${file
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : darkMode
+                                ? "bg-indigo-500/15 text-[#a5a0ff]"
+                                : "bg-indigo-50 text-[#3b35c9]"
+                            }`}>
+                            <Icon size={14} />
+                        </div>
+                        <span className={`text-sm truncate ${file
+                            ? "font-semibold text-emerald-500"
+                            : (darkMode ? "text-gray-400" : "text-gray-500")
+                            }`}>
+                            {file ? file.name : `Upload ${field.label}`}
+                        </span>
+                        {file && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 font-bold shrink-0">
+                                {file.name.split(".").pop().toUpperCase()}
+                            </span>
+                        )}
+                        {file && (
+                            <span className={`text-[10px] shrink-0 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                ({formatFileSize(file.size)})
+                            </span>
+                        )}
+                    </div>
+
+                    {file ? (
+                        <button
+                            type="button"
+                            onClick={removeFile}
+                            className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors shrink-0"
+                            title="Remove File"
+                        >
+                            <FaTrashAlt size={14} />
+                        </button>
+                    ) : (
+                        <span className="px-3 py-1 bg-[#3b35c9] text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shrink-0 shadow-sm">
+                            <FaUpload size={11} />
+                            Browse
+                        </span>
+                    )}
+                </label>
+            </div>
+            <ErrorMessage message={error} />
+        </div>
+    );
+};
+
+const initialFormState = {
+    name: "",
+    mobileNumber: "",
+    truckNumber: "",
+    password: ""
+};
+
+// Create initial files state
+const createInitialFilesState = () => {
+    const state = {};
+    DOCUMENT_FIELDS.forEach(field => {
+        state[field.id] = null;
+    });
+    return state;
+};
 
 export default function DriverCreation() {
     const { theme } = useTheme();
     const darkMode = theme === "dark";
     const navigate = useNavigate();
 
-    const initialFormState = {
-        zone: "",
-        routePoint: "",
-        name: "",
-        mobileNumber: "",
-        truckNumber: "",
-        password: ""
-    };
-
     const [form, setForm] = useState(initialFormState);
+    const [files, setFiles] = useState(createInitialFilesState());
+    const [filePreviews, setFilePreviews] = useState({});
     const [showPassword, setShowPassword] = useState(false);
-    const [routePointOptions, setRoutePointOptions] = useState(ALL_MOCK_ROUTE_POINTS);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
 
-    // Update Route Points options based on Zone selection
+    // Clean up preview URLs on unmount
     useEffect(() => {
-        if (!form.zone) {
-            setRoutePointOptions(ALL_MOCK_ROUTE_POINTS);
-        } else {
-            const points = MOCK_ROUTE_POINTS[form.zone] || ALL_MOCK_ROUTE_POINTS;
-            setRoutePointOptions(points);
-        }
-    }, [form.zone]);
+        return () => {
+            Object.values(filePreviews).forEach((url) => {
+                if (url) URL.revokeObjectURL(url);
+            });
+        };
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // Restrict mobile number to numeric characters only
         if (name === "mobileNumber") {
             const numericValue = value.replace(/\D/g, "");
             if (numericValue.length <= 10) {
@@ -163,24 +236,53 @@ export default function DriverCreation() {
         setErrorMessage("");
     };
 
-    const handleSelectChange = (selectedOption, { name }) => {
-        const value = selectedOption ? selectedOption.value : "";
-        setForm((prev) => {
-            const updated = { ...prev, [name]: value };
-            if (name === "zone") {
-                updated.routePoint = "";
+    const handleFileChange = (fieldId, selectedFile) => {
+        if (selectedFile) {
+            const fileName = selectedFile.name.toLowerCase();
+            const validExtensions = [".jpg", ".jpeg", ".png", ".pdf"];
+            const isExtensionValid = validExtensions.some((ext) => fileName.endsWith(ext));
+            const isMimeValid = selectedFile.type.startsWith("image/") || selectedFile.type === "application/pdf";
+
+            if (!isExtensionValid && !isMimeValid) {
+                setErrors((prev) => ({
+                    ...prev,
+                    [fieldId]: "Invalid format. Please upload JPG, JPEG, PNG or PDF format."
+                }));
+                return;
             }
-            return updated;
-        });
-        setErrors((prev) => ({ ...prev, [name]: "" }));
+
+            if (selectedFile.size > 10 * 1024 * 1024) {
+                setErrors((prev) => ({ ...prev, [fieldId]: "File size exceeds 10MB limit" }));
+                return;
+            }
+
+            if (filePreviews[fieldId]) {
+                URL.revokeObjectURL(filePreviews[fieldId]);
+            }
+
+            if (selectedFile.type.startsWith("image/") || /\.(jpg|jpeg|png|webp)$/i.test(selectedFile.name)) {
+                const url = URL.createObjectURL(selectedFile);
+                setFilePreviews((prev) => ({ ...prev, [fieldId]: url }));
+            } else {
+                setFilePreviews((prev) => ({ ...prev, [fieldId]: null }));
+            }
+
+            setFiles((prev) => ({ ...prev, [fieldId]: selectedFile }));
+            setErrors((prev) => ({ ...prev, [fieldId]: "" }));
+        } else {
+            if (filePreviews[fieldId]) {
+                URL.revokeObjectURL(filePreviews[fieldId]);
+            }
+            setFilePreviews((prev) => ({ ...prev, [fieldId]: null }));
+            setFiles((prev) => ({ ...prev, [fieldId]: null }));
+            setErrors((prev) => ({ ...prev, [fieldId]: "" }));
+        }
         setErrorMessage("");
     };
 
     const validateForm = async () => {
         try {
             const schema = yup.object().shape({
-                zone: yup.string().required("Select Zone is required"),
-                routePoint: yup.string().required("Select Route Point is required"),
                 name: yup.string().required("Driver Name is required").max(100, "Driver name cannot exceed 100 characters"),
                 mobileNumber: yup.string().required("Mobile Number is required").matches(/^[6-9]\d{9}$/, "Mobile number must be a valid 10-digit Indian number"),
                 truckNumber: yup.string().required("Truck Number is required").max(20, "Truck number cannot exceed 20 characters"),
@@ -188,6 +290,14 @@ export default function DriverCreation() {
             });
 
             await schema.validate(form, { abortEarly: false });
+
+            // Check if at least one document is uploaded
+            const hasDocuments = Object.values(files).some(file => file !== null);
+            if (!hasDocuments) {
+                setErrors((prev) => ({ ...prev, documents: "Please upload at least one document" }));
+                return false;
+            }
+
             setErrors({});
             return true;
         } catch (err) {
@@ -202,6 +312,21 @@ export default function DriverCreation() {
         }
     };
 
+    const resetAllFields = () => {
+        setForm(initialFormState);
+        Object.values(filePreviews).forEach((url) => {
+            if (url) URL.revokeObjectURL(url);
+        });
+        setFiles(createInitialFilesState());
+        setFilePreviews({});
+        setSuccessMessage("");
+        setErrorMessage("");
+    };
+
+    const getUploadedFilesCount = () => {
+        return Object.values(files).filter(file => file !== null).length;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -213,51 +338,75 @@ export default function DriverCreation() {
         setErrorMessage("");
 
         try {
-            const selectedZoneObj = MOCK_ZONES.find((z) => z.value === form.zone);
-            const selectedRoutePointObj = routePointOptions.find((rp) => rp.value === form.routePoint);
+            const createdByUserId = sessionStorage.getItem("userId") || 1;
 
-            const payload = {
-                zoneCode: selectedZoneObj?.zoneCode || form.zone,
-                zoneName: selectedZoneObj?.label || form.zone,
-                routePoint: selectedRoutePointObj?.label || form.routePoint,
-                name: form.name,
-                mobileNumber: form.mobileNumber,
-                truckNumber: form.truckNumber,
-                password: form.password
-            };
+            const formData = new FormData();
+            formData.append("flagId", "1");
+            formData.append("DriverName", form.name);
+            formData.append("MobileNumber", form.mobileNumber);
+            formData.append("TruckNumber", form.truckNumber);
+            formData.append("Password", form.password);
+            formData.append("CreatedByUserId", String(createdByUserId));
 
-            console.log("Driver Creation Payload:", payload);
+            // Get file type IDs for uploaded documents
+            const uploadedFileTypeIds = DOCUMENT_FIELDS
+                .filter(field => files[field.id] !== null)
+                .map(field => field.fileTypeId);
 
-            // Simulate server response
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            formData.append("FileTypeIds", JSON.stringify(uploadedFileTypeIds));
 
-            await Swal.fire({
-                icon: "success",
-                title: "Driver Created!",
-                html: `
-                    <div style="text-align: left; font-size: 14px; margin-top: 10px;">
-                        <p><b>Driver Name:</b> ${form.name}</p>
-                        <p><b>Mobile Number:</b> ${form.mobileNumber}</p>
-                        <p><b>Truck Number:</b> ${form.truckNumber}</p>
-                        <p><b>Zone:</b> ${selectedZoneObj?.label || form.zone}</p>
-                        <p><b>Route Point:</b> ${selectedRoutePointObj?.label || form.routePoint}</p>
-                    </div>
-                `,
-                confirmButtonText: "Done",
-                confirmButtonColor: "#3b35c9",
-                background: darkMode ? "#13102e" : "#ffffff",
-                color: darkMode ? "#ffffff" : "#000000"
+            // Append all uploaded files
+            DOCUMENT_FIELDS.forEach(field => {
+                if (files[field.id]) {
+                    formData.append("files", files[field.id]);
+                }
             });
 
-            setSuccessMessage(`Driver "${form.name}" created successfully!`);
-            setForm(initialFormState);
+            const response = await axiosClient({
+                method: SummaryApi.drivercreation.method,
+                url: SummaryApi.drivercreation.url,
+                data: formData,
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
 
-            setTimeout(() => {
-                setSuccessMessage("");
-            }, 5000);
+            if (response.data?.status) {
+                const uploadedFilesSummary = DOCUMENT_FIELDS
+                    .filter(field => files[field.id] !== null)
+                    .map(field => {
+                        const file = files[field.id];
+                        return `<li><b>${field.label}:</b> ${file.name} (${formatFileSize(file.size)})</li>`;
+                    })
+                    .join("");
+
+                await Swal.fire({
+                    icon: "success",
+                    title: "Driver Created Successfully!",
+                    html: `
+                        <div style="text-align: left; font-size: 14px; margin-top: 10px; line-height: 1.6;">
+                            <p><b>Driver Name:</b> ${form.name}</p>
+                            <p><b>Mobile Number:</b> ${form.mobileNumber}</p>
+                            <p><b>Truck Number:</b> ${form.truckNumber}</p>
+                            <hr style="margin: 10px 0; border-color: rgba(120,120,120,0.2);"/>
+                            <p><b>Uploaded Documents:</b> (${uploadedFilesSummary.split(",").length})</p>
+                            <ul style="padding-left: 18px; margin-top: 4px;">${uploadedFilesSummary}</ul>
+                        </div>
+                    `,
+                    confirmButtonText: "Done",
+                    confirmButtonColor: "#3b35c9",
+                    background: darkMode ? "#13102e" : "#ffffff",
+                    color: darkMode ? "#ffffff" : "#000000"
+                });
+
+                setSuccessMessage(`Driver "${form.name}" created successfully!`);
+                resetAllFields();
+            } else {
+                throw new Error(response.data?.message || "Failed to create driver");
+            }
         } catch (error) {
             console.error("Driver Creation Error:", error);
-            const errorMsg = error.message || "An error occurred while creating driver.";
+            const errorMsg = error.response?.data?.message || error.response?.data?.Message || error.message || "An error occurred while creating driver.";
             setErrorMessage(errorMsg);
             Swal.fire({
                 icon: "error",
@@ -272,9 +421,12 @@ export default function DriverCreation() {
         }
     };
 
+    const uploadedCount = getUploadedFilesCount();
+    const totalDocuments = DOCUMENT_FIELDS.length;
+
     return (
-        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
-            <div className="max-w-[1600px] mx-auto">
+        <div className={`min-h-screen py-8 px-4 sm:py-12 sm:px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
+            <div className="w-full max-w-[1600px] mx-auto">
 
                 {/* Status Banners */}
                 <AnimatePresence>
@@ -303,166 +455,170 @@ export default function DriverCreation() {
                     )}
                 </AnimatePresence>
 
-                {/* Main Card Container - Exactly matching UserCreation screen layout */}
                 <form onSubmit={handleSubmit} noValidate>
                     <motion.div
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
+                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border`}
                     >
-                        {/* Top Gradient Divider Line */}
+                        {/* Top Gradient Line */}
                         <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
 
-                        <div className="p-8">
-                            {/* Responsive Fields Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                        <div className="p-4 sm:p-6 lg:p-8">
+                            {/* Driver Information Fields - 4 per row */}
+                            <div>
+                                <h2 className={`text-base font-bold mb-4 sm:mb-6 ${darkMode ? "text-white" : "text-gray-900"}`}>
+                                    Driver Information
+                                </h2>
 
-                                {/* Field 1: Select Zone Dropdown (Mock Data) */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Select Zone
-                                    </label>
-                                    <Select
-                                        name="zone"
-                                        options={MOCK_ZONES}
-                                        value={MOCK_ZONES.find((option) => option.value === form.zone) || null}
-                                        onChange={(option) => handleSelectChange(option, { name: "zone" })}
-                                        placeholder="Select zone..."
-                                        noOptionsMessage={() => "No zones found"}
-                                        styles={getSelectStyles(darkMode, errors.zone)}
-                                        classNamePrefix="react-select"
-                                        isSearchable
-                                        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-                                    />
-                                    <ErrorMessage message={errors.zone} />
-                                </div>
-
-                                {/* Field 2: Select Route Point Dropdown (Mock Data) */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Select Route Point
-                                    </label>
-                                    <Select
-                                        name="routePoint"
-                                        options={routePointOptions}
-                                        value={routePointOptions.find((option) => option.value === form.routePoint) || null}
-                                        onChange={(option) => handleSelectChange(option, { name: "routePoint" })}
-                                        placeholder={form.zone ? "Select route point..." : "Select zone first or choose point..."}
-                                        noOptionsMessage={() => "No route points found"}
-                                        styles={getSelectStyles(darkMode, errors.routePoint)}
-                                        classNamePrefix="react-select"
-                                        isSearchable
-                                        menuPortalTarget={typeof document !== "undefined" ? document.body : null}
-                                    />
-                                    <ErrorMessage message={errors.routePoint} />
-                                </div>
-
-                                {/* Field 3: Driver Name */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Driver Name
-                                    </label>
-                                    <div className="relative">
-                                        <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
-                                        <input
-                                            placeholder="Enter driver name"
-                                            name="name"
-                                            value={form.name}
-                                            onChange={handleChange}
-                                            maxLength={100}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                } ${errors.name ? "border-red-500" : ""}`}
-                                        />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                                    {/* Field 1: Driver Name */}
+                                    <div>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                            <span className="text-red-500 mr-1">*</span>Driver Name
+                                        </label>
+                                        <div className="relative">
+                                            <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
+                                            <input
+                                                placeholder="Enter driver name"
+                                                name="name"
+                                                value={form.name}
+                                                onChange={handleChange}
+                                                maxLength={100}
+                                                className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    } ${errors.name ? "border-red-500" : ""}`}
+                                            />
+                                        </div>
+                                        <ErrorMessage message={errors.name} />
                                     </div>
-                                    <ErrorMessage message={errors.name} />
-                                </div>
 
-                                {/* Field 4: Mobile Number */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Mobile Number
-                                    </label>
-                                    <div className="relative">
-                                        <FaPhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
-                                        <input
-                                            placeholder="Enter 10-digit mobile"
-                                            name="mobileNumber"
-                                            value={form.mobileNumber}
-                                            onChange={handleChange}
-                                            maxLength={10}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                } ${errors.mobileNumber ? "border-red-500" : ""}`}
-                                        />
+                                    {/* Field 2: Mobile Number */}
+                                    <div>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                            <span className="text-red-500 mr-1">*</span>Mobile Number
+                                        </label>
+                                        <div className="relative">
+                                            <FaPhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
+                                            <input
+                                                placeholder="Enter 10-digit mobile"
+                                                name="mobileNumber"
+                                                value={form.mobileNumber}
+                                                onChange={handleChange}
+                                                maxLength={10}
+                                                className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    } ${errors.mobileNumber ? "border-red-500" : ""}`}
+                                            />
+                                        </div>
+                                        <ErrorMessage message={errors.mobileNumber} />
                                     </div>
-                                    <ErrorMessage message={errors.mobileNumber} />
-                                </div>
 
-                                {/* Field 5: Truck Number */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Truck Number
-                                    </label>
-                                    <div className="relative">
-                                        <FaTruck className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
-                                        <input
-                                            placeholder="Enter truck number"
-                                            name="truckNumber"
-                                            value={form.truckNumber}
-                                            onChange={handleChange}
-                                            maxLength={20}
-                                            className={`w-full rounded-lg border pl-10 pr-3 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                } ${errors.truckNumber ? "border-red-500" : ""}`}
-                                        />
+                                    {/* Field 3: Truck Number */}
+                                    <div>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                            <span className="text-red-500 mr-1">*</span>Truck Number
+                                        </label>
+                                        <div className="relative">
+                                            <FaTruck className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
+                                            <input
+                                                placeholder="Enter truck number"
+                                                name="truckNumber"
+                                                value={form.truckNumber}
+                                                onChange={handleChange}
+                                                maxLength={20}
+                                                className={`w-full h-[44px] rounded-lg border pl-10 pr-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    } ${errors.truckNumber ? "border-red-500" : ""}`}
+                                            />
+                                        </div>
+                                        <ErrorMessage message={errors.truckNumber} />
                                     </div>
-                                    <ErrorMessage message={errors.truckNumber} />
-                                </div>
 
-                                {/* Field 6: Password */}
-                                <div>
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
-                                        <span className="text-red-500 mr-1">*</span>Password
-                                    </label>
-                                    <div className="relative">
-                                        <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            placeholder="Enter password"
-                                            name="password"
-                                            value={form.password}
-                                            onChange={handleChange}
-                                            className={`w-full rounded-lg border pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white placeholder-gray-600 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
-                                                } ${errors.password ? "border-red-500" : ""}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword((prev) => !prev)}
-                                            className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"}`}
-                                        >
-                                            {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                                        </button>
+                                    {/* Field 4: Password */}
+                                    <div>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                            <span className="text-red-500 mr-1">*</span>Password
+                                        </label>
+                                        <div className="relative">
+                                            <FaLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? "text-gray-500" : "text-gray-400"}`} size={14} />
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                placeholder="Enter password"
+                                                name="password"
+                                                value={form.password}
+                                                onChange={handleChange}
+                                                className={`w-full h-[44px] rounded-lg border pl-10 pr-10 text-sm focus:outline-none focus:ring-2 transition-all ${darkMode
+                                                    ? "bg-[#13102e] border-[rgba(90,84,224,0.3)] text-white placeholder-gray-500 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    : "bg-white border-[#D1D5DB] text-gray-900 placeholder-gray-400 focus:ring-[#3b35c9] focus:border-[#3b35c9]"
+                                                    } ${errors.password ? "border-red-500" : ""}`}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${darkMode ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"}`}
+                                            >
+                                                {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+                                            </button>
+                                        </div>
+                                        <ErrorMessage message={errors.password} />
                                     </div>
-                                    <ErrorMessage message={errors.password} />
                                 </div>
-
                             </div>
 
-                            {/* Submit Action Button */}
-                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
+                            {/* Document Upload Section - 4 per row */}
+                            <div className={`pt-6 mt-6 border-t ${darkMode ? "border-gray-800/60" : "border-gray-100"}`}>
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h2 className={`text-base font-bold ${darkMode ? "text-white" : "text-gray-900"}`}>
+                                            Document Uploads
+                                        </h2>
+                                        <p className={`text-xs mt-0.5 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                            Supported formats: JPG, JPEG, PNG, PDF (Max 10MB per file)
+                                        </p>
+                                    </div>
+                                    <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 ${uploadedCount > 0
+                                        ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                                        : darkMode
+                                            ? "bg-gray-800 text-gray-400 border border-gray-700"
+                                            : "bg-gray-100 text-gray-600 border border-gray-300"
+                                        }`}>
+                                        {uploadedCount} / {totalDocuments} Uploaded
+                                    </div>
+                                </div>
+
+                                {errors.documents && (
+                                    <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-500 text-xs">
+                                        {errors.documents}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                                    {DOCUMENT_FIELDS.map((field) => (
+                                        <DocumentUploadRow
+                                            key={field.id}
+                                            field={field}
+                                            file={files[field.id]}
+                                            error={errors[field.id]}
+                                            onChange={(file) => handleFileChange(field.id, file)}
+                                            darkMode={darkMode}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Action Row - Submit Button */}
+                            <div className={`pt-6 mt-6 border-t flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
                                 <motion.button
                                     whileHover={{ scale: loading ? 1 : 1.02 }}
                                     whileTap={{ scale: loading ? 1 : 0.97 }}
                                     type="submit"
                                     disabled={loading}
-                                    className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
+                                    className={`w-full sm:w-auto px-8 sm:px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2 ${loading
                                         ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
                                         : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
                                         }`}
