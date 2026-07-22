@@ -9,7 +9,8 @@ import DriverCreation from "./pages/DriverCreation";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AssignRoute from "./pages/AssignRoute";
-import RouteMonitoring from "./pages/RouteMonitoring"
+import RouteMonitoring from "./pages/RouteMonitoring";
+import TotalRoutes from "./pages/TotalRoutes";
 
 function PlaceholderPage({ title }) {
   const { theme } = useTheme();
@@ -108,6 +109,14 @@ export default function App() {
             <ProtectedRoute allowedRoles={[1]}>
               <Layout showSidebar={true}>
                 <RouteMonitoring />
+              </Layout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/total-routes" element={
+            <ProtectedRoute allowedRoles={[1]}>
+              <Layout showSidebar={true}>
+                <TotalRoutes />
               </Layout>
             </ProtectedRoute>
           } />
