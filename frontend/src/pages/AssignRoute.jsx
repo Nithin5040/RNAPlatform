@@ -26,20 +26,20 @@ const ErrorMessage = ({ message }) => {
 const getSelectStyles = (darkMode, error) => ({
     control: (base, state) => ({
         ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        borderColor: error ? "#EF4444" : (state.isFocused ? "#3b35c9" : (darkMode ? "rgba(90,84,224,0.3)" : "#D1D5DB")),
+        backgroundColor: darkMode ? "#1e293b" : "#ffffff",
+        borderColor: error ? "#EF4444" : (state.isFocused ? "#4f46e5" : (darkMode ? "#334155" : "#D1D5DB")),
         borderWidth: "1px",
         borderRadius: "0.5rem",
         minHeight: "44px",
-        boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 53, 201, 0.2)" : "none",
+        boxShadow: state.isFocused ? "0 0 0 2px rgba(79, 70, 229, 0.2)" : "none",
         "&:hover": {
-            borderColor: error ? "#EF4444" : "#3b35c9"
+            borderColor: error ? "#EF4444" : "#4f46e5"
         }
     }),
     menu: (base) => ({
         ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        border: darkMode ? "1px solid rgba(90,84,224,0.2)" : "1px solid #e5e7eb",
+        backgroundColor: darkMode ? "#1e293b" : "#ffffff",
+        border: darkMode ? "1px solid #334155" : "1px solid #e5e7eb",
         borderRadius: "0.5rem",
         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
         zIndex: 9999
@@ -51,25 +51,25 @@ const getSelectStyles = (darkMode, error) => ({
     option: (base, { isFocused, isSelected }) => ({
         ...base,
         backgroundColor: isSelected
-            ? "#3b35c9"
+            ? "#4f46e5"
             : isFocused
-                ? (darkMode ? "rgba(90,84,224,0.15)" : "#f3f4f6")
+                ? (darkMode ? "rgba(99,102,241,0.15)" : "#f1f5f9")
                 : "transparent",
         color: isSelected
             ? "#ffffff"
-            : (darkMode ? "#e2e0ff" : "#111827"),
+            : (darkMode ? "#f8fafc" : "#0f172a"),
         cursor: "pointer",
         "&:active": {
-            backgroundColor: "#3b35c9"
+            backgroundColor: "#4f46e5"
         }
     }),
     singleValue: (base) => ({
         ...base,
-        color: darkMode ? "#e2e0ff" : "#111827"
+        color: darkMode ? "#f8fafc" : "#0f172a"
     }),
     placeholder: (base) => ({
         ...base,
-        color: darkMode ? "rgba(165,160,255,0.5)" : "#9ca3af",
+        color: darkMode ? "#94a3b8" : "#9ca3af",
         fontSize: "0.875rem"
     })
 });
@@ -148,7 +148,7 @@ export default function AssignRoute() {
                     title: "Failed to Fetch Zones",
                     text: response.data.message || "Failed to fetch zones",
                     confirmButtonColor: "#ef4444",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
             }
@@ -159,7 +159,7 @@ export default function AssignRoute() {
                 title: "Error",
                 text: error.response?.data?.message || "Failed to fetch zones. Please try again.",
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
@@ -199,7 +199,7 @@ export default function AssignRoute() {
                     title: "Failed to Fetch Route Plans",
                     text: response.data.message || "Failed to fetch route plans",
                     confirmButtonColor: "#ef4444",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
                 setRoutePlanOptions([]);
@@ -211,7 +211,7 @@ export default function AssignRoute() {
                 title: "Error",
                 text: error.response?.data?.message || "Failed to fetch route plans. Please try again.",
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
             setRoutePlanOptions([]);
@@ -354,8 +354,8 @@ export default function AssignRoute() {
                         </div>
                     `,
                     confirmButtonText: "Done",
-                    confirmButtonColor: "#3b35c9",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    confirmButtonColor: "#4f46e5",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
 
@@ -379,7 +379,7 @@ export default function AssignRoute() {
                         title: "Route Already Assigned!",
                         text: errorMsg,
                         confirmButtonColor: "#f59e0b",
-                        background: darkMode ? "#13102e" : "#ffffff",
+                        background: darkMode ? "#1e293b" : "#ffffff",
                         color: darkMode ? "#ffffff" : "#000000"
                     });
                 } else {
@@ -395,7 +395,7 @@ export default function AssignRoute() {
                 title: "Assignment Failed!",
                 text: errorMsg,
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
@@ -404,7 +404,7 @@ export default function AssignRoute() {
     };
 
     return (
-        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
+        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0f172a]" : "bg-slate-50"}`}>
             <div className="max-w-[1600px] mx-auto">
 
                 {/* Status Banners */}
@@ -415,7 +415,7 @@ export default function AssignRoute() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -15, scale: 0.98 }}
                             transition={{ duration: 0.3 }}
-                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-green-950/30 border-green-800 text-green-300" : "bg-green-50 border-green-200 text-green-700"}`}
+                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-indigo-950/30 border-indigo-700 text-indigo-300" : "bg-indigo-50 border-indigo-200 text-indigo-700"}`}
                         >
                             {successMessage}
                         </motion.div>
@@ -440,10 +440,10 @@ export default function AssignRoute() {
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
+                        className={`${darkMode ? "bg-[#1e293b] border-[#334155] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-slate-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
                     >
                         {/* Top Gradient Line */}
-                        <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
+                        <div className="h-1.5 bg-gradient-to-r from-[#4f46e5] via-[#6366f1] to-[#818cf8] rounded-t-2xl" />
 
                         <div className="p-8">
                             {/* Row containing fields */}
@@ -451,7 +451,7 @@ export default function AssignRoute() {
 
                                 {/* Field 1: Select Zone Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Zone
                                     </label>
                                     <Select
@@ -472,7 +472,7 @@ export default function AssignRoute() {
 
                                 {/* Field 2: Select Route Plan Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Route Plan
                                     </label>
                                     <Select
@@ -493,7 +493,7 @@ export default function AssignRoute() {
 
                                 {/* Field 3: Select Driver Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Driver
                                     </label>
                                     <Select
@@ -515,13 +515,13 @@ export default function AssignRoute() {
                                 {/* Driver Info Display - Optional */}
                                 {form.driver && (
                                     <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                        <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                             Driver Details
                                         </label>
-                                        <div className={`p-3 rounded-lg border ${darkMode ? "bg-[#0d0b22] border-gray-800" : "bg-gray-50 border-gray-200"}`}>
+                                        <div className={`p-3 rounded-lg border ${darkMode ? "bg-[#0f172a] border-slate-800" : "bg-slate-50 border-slate-200"}`}>
                                             <div className="flex items-center gap-2 text-sm">
-                                                <FaUser className={darkMode ? "text-gray-400" : "text-gray-500"} size={14} />
-                                                <span className={darkMode ? "text-gray-300" : "text-gray-700"}>
+                                                <FaUser className={darkMode ? "text-slate-400" : "text-slate-500"} size={14} />
+                                                <span className={darkMode ? "text-slate-300" : "text-slate-700"}>
                                                     {driverOptions.find(d => d.value === form.driver)?.label || "Driver selected"}
                                                 </span>
                                             </div>
@@ -532,15 +532,15 @@ export default function AssignRoute() {
                             </div>
 
                             {/* Action Row - Assign Button */}
-                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
+                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[#334155]" : "border-slate-100"}`}>
                                 <motion.button
                                     whileHover={{ scale: assigning ? 1 : 1.02 }}
                                     whileTap={{ scale: assigning ? 1 : 0.97 }}
                                     type="submit"
                                     disabled={assigning || !form.zone || !form.routePlan || !form.driver}
                                     className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2.5 ${assigning || !form.zone || !form.routePlan || !form.driver
-                                        ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
+                                        ? "bg-[#4f46e5] opacity-70 cursor-not-allowed"
+                                        : "bg-gradient-to-r from-[#4f46e5] to-[#4338ca] hover:from-[#4338ca] hover:to-[#3730a3] hover:shadow-[0_4px_25px_rgba(79,70,229,0.35)]"
                                         }`}
                                 >
                                     {assigning ? (

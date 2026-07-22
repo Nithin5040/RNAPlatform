@@ -218,6 +218,11 @@ export default function Sidebar({
       label: "Total Routes",
       icon: <UserPlus size={20} />
     },
+    {
+      path: "/driver-profile",
+      label: "Driver Profile",
+      icon: <UserPlus size={20} />
+    },
 
   ];
 

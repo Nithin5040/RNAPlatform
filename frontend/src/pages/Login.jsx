@@ -392,8 +392,8 @@ export default function Login() {
       margin: 0,
       padding: 0,
       background: darkMode
-        ? 'radial-gradient(ellipse at top, #1e1b7a 0%, #13102e 35%, #0d0b22 70%)'
-        : 'linear-gradient(135deg, #eef0ff 0%, #f0f2ff 50%, #e8ebff 100%)',
+        ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
+        : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
     }}>
 
       {/* Main Content */}
@@ -407,8 +407,8 @@ export default function Login() {
         margin: 0,
         padding: '20px 0',
         background: darkMode
-          ? 'radial-gradient(ellipse at top, #1e1b7a 0%, #13102e 35%, #0d0b22 70%)'
-          : 'linear-gradient(135deg, #eef0ff 0%, #f0f2ff 50%, #e8ebff 100%)',
+          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)'
+          : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
       }}>
         <div style={{
           maxWidth: '1400px',
@@ -433,12 +433,12 @@ export default function Login() {
               {/* Card */}
               <div style={{
                 ...cardStyle,
-                backgroundColor: darkMode ? 'rgba(19, 16, 46, 0.92)' : 'rgba(255, 255, 255, 0.95)',
+                backgroundColor: darkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(12px)',
-                border: darkMode ? '1px solid rgba(90, 84, 224, 0.3)' : '1px solid rgba(59, 53, 201, 0.15)',
+                border: darkMode ? '1px solid #334155' : '1px solid rgba(79, 70, 229, 0.15)',
                 boxShadow: darkMode
-                  ? '0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(90, 84, 224, 0.15)'
-                  : '0 8px 40px rgba(59, 53, 201, 0.15)',
+                  ? '0 8px 40px rgba(0, 0, 0, 0.5)'
+                  : '0 8px 40px rgba(79, 70, 229, 0.15)',
                 position: 'relative',
                 overflow: 'hidden',
                 minHeight: isMobile ? '350px' : '400px',
@@ -484,13 +484,13 @@ export default function Login() {
                   height: '100%',
                   padding: isMobile ? '20px' : '32px',
                   scrollbarWidth: 'thin',
-                  scrollbarColor: darkMode ? '#3b35c9 #13102e' : '#3b35c9 #e8e6ff',
+                  scrollbarColor: darkMode ? '#4f46e5 #1e293b' : '#4f46e5 #e8e6ff',
                   WebkitOverflowScrolling: 'touch',
                 }}>
                   {/* Greeting Section */}
                   <div style={{ marginBottom: '24px' }}>
                     <h2 style={{
-                      color: darkMode ? '#a5a0ff' : '#3b35c9',
+                      color: darkMode ? '#818cf8' : '#4f46e5',
                       fontSize: isMobile ? '20px' : '24px',
                       margin: '0 0 8px 0',
                       fontWeight: '600'
@@ -498,7 +498,7 @@ export default function Login() {
                       Hello
                     </h2>
                     <h3 style={{
-                      color: darkMode ? '#a5a0ff' : '#3b35c9',
+                      color: darkMode ? '#818cf8' : '#4f46e5',
                       fontSize: isMobile ? '18px' : '20px',
                       margin: '0 0 12px 0',
                       fontWeight: '500'
@@ -647,7 +647,7 @@ export default function Login() {
                           width: isMobile ? '16px' : '18px',
                           height: isMobile ? '16px' : '18px',
                           cursor: 'pointer',
-                          accentColor: '#3b35c9'
+                          accentColor: '#4f46e5'
                         }}
                       />
                       <label htmlFor="remember-me" style={{
@@ -666,8 +666,8 @@ export default function Login() {
                       style={{
                         width: '100%',
                         padding: isMobile ? '12px' : '14px',
-                        background: 'linear-gradient(135deg, #3b35c9 0%, #2c28a0 100%)',
-                        boxShadow: '0 4px 15px rgba(59, 53, 201, 0.4)',
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                        boxShadow: '0 4px 15px rgba(79, 70, 229, 0.4)',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
@@ -717,12 +717,12 @@ export default function Login() {
                   <svg viewBox="0 0 600 300" width="100%" height="300" style={{ overflow: 'visible' }}>
                     <defs>
                       <linearGradient id="cabinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#5a54e0" />
-                        <stop offset="100%" stopColor="#3b35c9" />
+                        <stop offset="0%" stopColor="#6366f1" />
+                        <stop offset="100%" stopColor="#4f46e5" />
                       </linearGradient>
                       <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#1e1b7a" />
-                        <stop offset="100%" stopColor="#0d0b22" />
+                        <stop offset="0%" stopColor="#1e293b" />
+                        <stop offset="100%" stopColor="#0f172a" />
                       </linearGradient>
                       <linearGradient id="lightBeam" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="rgba(255, 255, 150, 0.4)" />
@@ -741,7 +741,7 @@ export default function Login() {
                     <polygon points="480,190 600,160 600,230" fill="url(#lightBeam)" style={{ opacity: 0.8 }} />
 
                     {/* Ground/Road line with moving dash */}
-                    <line x1="-50" y1="258" x2="650" y2="258" stroke={darkMode ? '#3b35c9' : '#5a54e0'} strokeWidth="4" strokeDasharray="15, 15" className="road-line" />
+                    <line x1="-50" y1="258" x2="650" y2="258" stroke={darkMode ? '#4f46e5' : '#6366f1'} strokeWidth="4" strokeDasharray="15, 15" className="road-line" />
 
                     {/* Truck Shadow */}
                     <ellipse cx="305" cy="256" rx="190" ry="10" fill="rgba(0, 0, 0, 0.35)" />
@@ -752,16 +752,16 @@ export default function Login() {
                     <circle cx="125" cy="205" r="9" fill={darkMode ? '#1a202c' : '#edf2f7'} className="smoke-particle smoke-3" />
 
                     {/* Cargo Container */}
-                    <rect x="130" y="80" width="240" height="130" rx="8" fill="url(#bodyGrad)" stroke="#3b35c9" strokeWidth="2.5" />
+                    <rect x="130" y="80" width="240" height="130" rx="8" fill="url(#bodyGrad)" stroke="#4f46e5" strokeWidth="2.5" />
 
                     {/* Cabin */}
                     <path d="M 370,105 L 455,105 Q 480,105 480,130 L 480,210 L 370,210 Z" fill="url(#cabinGrad)" />
                     {/* Cabin Window */}
-                    <path d="M 420,115 L 465,115 Q 470,115 470,125 L 470,155 L 420,155 Z" fill={darkMode ? '#1a1838' : '#e2e8f0'} opacity="0.85" stroke="#3b35c9" strokeWidth="1.5" />
+                    <path d="M 420,115 L 465,115 Q 470,115 470,125 L 470,155 L 420,155 Z" fill={darkMode ? '#1e293b' : '#e2e8f0'} opacity="0.85" stroke="#4f46e5" strokeWidth="1.5" />
 
                     {/* Cabin Door Group */}
                     <g className="cabin-door" style={{ transformOrigin: '380px 165px' }}>
-                      <path d="M 380,125 L 425,125 L 425,205 L 380,205 Z" fill="url(#cabinGrad)" stroke={darkMode ? '#a5a0ff' : '#3b35c9'} strokeWidth="2" />
+                      <path d="M 380,125 L 425,125 L 425,205 L 380,205 Z" fill="url(#cabinGrad)" stroke={darkMode ? '#818cf8' : '#4f46e5'} strokeWidth="2" />
                       <rect x="418" y="160" width="4" height="8" rx="1" fill="#cbd5e0" />
                     </g>
 
@@ -775,14 +775,14 @@ export default function Login() {
                     {/* Brand Logo on the Container */}
                     <g transform="translate(250, 145)">
                       <text x="0" y="-15" fill="#fff" fontSize="18" fontWeight="bold" textAnchor="middle" letterSpacing="2" filter="url(#neonGlow)">VISHVIN</text>
-                      <text x="0" y="5" fill="#a5a0ff" fontSize="9" fontWeight="600" textAnchor="middle" letterSpacing="1">LOGISTICS</text>
+                      <text x="0" y="5" fill="#818cf8" fontSize="9" fontWeight="600" textAnchor="middle" letterSpacing="1">LOGISTICS</text>
                       <line x1="-60" y1="20" x2="-20" y2="20" stroke="rgba(165, 160, 255, 0.4)" strokeWidth="1.5" />
                       <line x1="-20" y1="20" x2="20" y2="20" stroke="rgba(165, 160, 255, 0.4)" strokeWidth="1.5" />
                       <line x1="20" y1="20" x2="60" y2="20" stroke="rgba(165, 160, 255, 0.4)" strokeWidth="1.5" />
-                      <circle cx="-60" cy="20" r="4" fill="#a5a0ff" />
-                      <circle cx="-20" cy="20" r="4" fill="#5a54e0" />
-                      <circle cx="20" cy="20" r="4" fill="#a5a0ff" />
-                      <circle cx="60" cy="20" r="4" fill="#5a54e0" />
+                      <circle cx="-60" cy="20" r="4" fill="#818cf8" />
+                      <circle cx="-20" cy="20" r="4" fill="#6366f1" />
+                      <circle cx="20" cy="20" r="4" fill="#818cf8" />
+                      <circle cx="60" cy="20" r="4" fill="#6366f1" />
                     </g>
 
                     {/* Screech Smoke Particles under wheels */}
@@ -823,7 +823,7 @@ export default function Login() {
                     <g className="driver-group" style={{ opacity: 0 }}>
                       <circle cx="0" cy="208" r="8" fill="#fff" />
                       {/* Body */}
-                      <path d="M -4,216 L 4,216 L 3,240 L -3,240 Z" fill="#5a54e0" />
+                      <path d="M -4,216 L 4,216 L 3,240 L -3,240 Z" fill="#6366f1" />
                       {/* Arm */}
                       <line x1="4" y1="220" x2="11" y2="228" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" className="driver-arm" />
                       {/* Left Leg */}
@@ -833,7 +833,7 @@ export default function Login() {
                     </g>
 
                     {/* Tap Ripple Effect */}
-                    <circle cx="535" cy="210" r="0" fill="none" stroke={darkMode ? '#a5a0ff' : '#3b35c9'} strokeWidth="3.5" className="tap-ripple" />
+                    <circle cx="535" cy="210" r="0" fill="none" stroke={darkMode ? '#818cf8' : '#4f46e5'} strokeWidth="3.5" className="tap-ripple" />
                   </svg>
                 </div>
 
@@ -843,7 +843,7 @@ export default function Login() {
                   animation: 'fadeInText 2s ease-out 2.5s both'
                 }}>
                   <h3 style={{
-                    color: darkMode ? '#ffffff' : '#1e1b7a',
+                    color: darkMode ? '#ffffff' : '#1e293b',
                     margin: '0 0 5px 0',
                     fontSize: '20px',
                     fontWeight: 'bold',
@@ -852,7 +852,7 @@ export default function Login() {
                     Resilient Network Architecture
                   </h3>
                   <p style={{
-                    color: darkMode ? '#a5a0ff' : '#5a54e0',
+                    color: darkMode ? '#818cf8' : '#6366f1',
                     margin: 0,
                     fontSize: '14px',
                     fontWeight: '500'

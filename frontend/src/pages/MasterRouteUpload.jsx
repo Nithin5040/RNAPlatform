@@ -27,20 +27,20 @@ const ErrorMessage = ({ message }) => {
 const getSelectStyles = (darkMode, error) => ({
     control: (base, state) => ({
         ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        borderColor: error ? "#EF4444" : (state.isFocused ? "#3b35c9" : (darkMode ? "rgba(90,84,224,0.3)" : "#D1D5DB")),
+        backgroundColor: darkMode ? "#1e293b" : "#ffffff",
+        borderColor: error ? "#EF4444" : (state.isFocused ? "#4f46e5" : (darkMode ? "#334155" : "#D1D5DB")),
         borderWidth: "1px",
         borderRadius: "0.5rem",
         minHeight: "44px",
-        boxShadow: state.isFocused ? "0 0 0 2px rgba(59, 53, 201, 0.2)" : "none",
+        boxShadow: state.isFocused ? "0 0 0 2px rgba(79, 70, 229, 0.2)" : "none",
         "&:hover": {
-            borderColor: error ? "#EF4444" : "#3b35c9"
+            borderColor: error ? "#EF4444" : "#4f46e5"
         }
     }),
     menu: (base) => ({
         ...base,
-        backgroundColor: darkMode ? "#13102e" : "#ffffff",
-        border: darkMode ? "1px solid rgba(90,84,224,0.2)" : "1px solid #e5e7eb",
+        backgroundColor: darkMode ? "#1e293b" : "#ffffff",
+        border: darkMode ? "1px solid #334155" : "1px solid #e5e7eb",
         borderRadius: "0.5rem",
         boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
         zIndex: 9999
@@ -52,25 +52,25 @@ const getSelectStyles = (darkMode, error) => ({
     option: (base, { isFocused, isSelected }) => ({
         ...base,
         backgroundColor: isSelected
-            ? "#3b35c9"
+            ? "#4f46e5"
             : isFocused
-                ? (darkMode ? "rgba(90,84,224,0.15)" : "#f3f4f6")
+                ? (darkMode ? "rgba(99,102,241,0.15)" : "#f1f5f9")
                 : "transparent",
         color: isSelected
             ? "#ffffff"
-            : (darkMode ? "#e2e0ff" : "#111827"),
+            : (darkMode ? "#f8fafc" : "#0f172a"),
         cursor: "pointer",
         "&:active": {
-            backgroundColor: "#3b35c9"
+            backgroundColor: "#4f46e5"
         }
     }),
     singleValue: (base) => ({
         ...base,
-        color: darkMode ? "#e2e0ff" : "#111827"
+        color: darkMode ? "#f8fafc" : "#0f172a"
     }),
     placeholder: (base) => ({
         ...base,
-        color: darkMode ? "rgba(165,160,255,0.5)" : "#9ca3af",
+        color: darkMode ? "#94a3b8" : "#9ca3af",
         fontSize: "0.875rem"
     })
 });
@@ -125,7 +125,7 @@ export default function MasterRouteUpload() {
                     title: "Failed to Fetch Zones",
                     text: response.data.Message || "Failed to fetch zones",
                     confirmButtonColor: "#ef4444",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
             }
@@ -136,7 +136,7 @@ export default function MasterRouteUpload() {
                 title: "Error",
                 text: error.response?.data?.Message || "Failed to fetch zones. Please try again.",
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
@@ -178,7 +178,7 @@ export default function MasterRouteUpload() {
                     title: "Failed to Fetch Route Points",
                     text: response.data.Message || "Failed to fetch route points",
                     confirmButtonColor: "#ef4444",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
                 setRoutePointOptions([]);
@@ -190,7 +190,7 @@ export default function MasterRouteUpload() {
                 title: "Error",
                 text: error.response?.data?.Message || "Failed to fetch route points. Please try again.",
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
             setRoutePointOptions([]);
@@ -328,8 +328,8 @@ export default function MasterRouteUpload() {
                         </div>
                     `,
                     confirmButtonText: "Done",
-                    confirmButtonColor: "#3b35c9",
-                    background: darkMode ? "#13102e" : "#ffffff",
+                    confirmButtonColor: "#4f46e5",
+                    background: darkMode ? "#1e293b" : "#ffffff",
                     color: darkMode ? "#ffffff" : "#000000"
                 });
 
@@ -355,7 +355,7 @@ export default function MasterRouteUpload() {
                 title: "Upload Failed!",
                 text: errorMsg,
                 confirmButtonColor: "#ef4444",
-                background: darkMode ? "#13102e" : "#ffffff",
+                background: darkMode ? "#1e293b" : "#ffffff",
                 color: darkMode ? "#ffffff" : "#000000"
             });
         } finally {
@@ -364,7 +364,7 @@ export default function MasterRouteUpload() {
     };
 
     return (
-        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0d0b22]" : "bg-gray-50"}`}>
+        <div className={`min-h-full py-12 px-6 transition-colors duration-300 ${darkMode ? "bg-[#0f172a]" : "bg-gray-50"}`}>
             <div className="max-w-[1600px] mx-auto">
 
                 {/* Status Banners */}
@@ -375,7 +375,7 @@ export default function MasterRouteUpload() {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -15, scale: 0.98 }}
                             transition={{ duration: 0.3 }}
-                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-green-950/30 border-green-800 text-green-300" : "bg-green-50 border-green-200 text-green-700"}`}
+                            className={`mb-6 p-4 border rounded-lg text-center font-semibold text-sm ${darkMode ? "bg-indigo-950/30 border-indigo-700 text-indigo-300" : "bg-indigo-50 border-indigo-200 text-indigo-700"}`}
                         >
                             {successMessage}
                         </motion.div>
@@ -400,10 +400,10 @@ export default function MasterRouteUpload() {
                         initial={{ opacity: 0, y: 25 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className={`${darkMode ? "bg-[#13102e] border-[rgba(90,84,224,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-gray-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
+                        className={`${darkMode ? "bg-[#1e293b] border-[#334155] shadow-[0_10px_35px_rgba(0,0,0,0.4)]" : "bg-white border-slate-200 shadow-sm"} rounded-2xl border min-h-[220px]`}
                     >
                         {/* Top Gradient Line */}
-                        <div className="h-1.5 bg-gradient-to-r from-[#3b35c9] via-[#5a54e0] to-[#a5a0ff] rounded-t-2xl" />
+                        <div className="h-1.5 bg-gradient-to-r from-[#4f46e5] via-[#6366f1] to-[#818cf8] rounded-t-2xl" />
 
                         <div className="p-8">
                             {/* Row containing fields */}
@@ -411,7 +411,7 @@ export default function MasterRouteUpload() {
 
                                 {/* Field 1: Select Zone Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Zone
                                     </label>
                                     <Select
@@ -432,7 +432,7 @@ export default function MasterRouteUpload() {
 
                                 {/* Field 2: Select Route Point Dropdown */}
                                 <div className="w-full sm:w-64 md:w-72 max-w-[280px]">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Select Route Point
                                     </label>
                                     <Select
@@ -453,7 +453,7 @@ export default function MasterRouteUpload() {
 
                                 {/* Field 3: Upload Document */}
                                 <div className="w-full sm:w-80 md:w-96 max-w-sm">
-                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#a5a0ff]" : "text-[#3b35c9]"}`}>
+                                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"}`}>
                                         <span className="text-red-500 mr-1">*</span>Upload Document
                                     </label>
                                     <div className="relative">
@@ -467,13 +467,13 @@ export default function MasterRouteUpload() {
                                         <label
                                             htmlFor="document-file-input"
                                             className={`w-full flex items-center justify-between px-3 py-2.5 min-h-[44px] rounded-lg border cursor-pointer transition-all ${darkMode
-                                                ? "bg-[#0d0b22] border-gray-800 text-white hover:border-[#3b35c9]"
-                                                : "bg-white border-gray-300 text-gray-900 hover:border-[#3b35c9]"
+                                                ? "bg-[#0f172a] border-slate-800 text-white hover:border-[#4f46e5]"
+                                                : "bg-white border-gray-300 text-gray-900 hover:border-[#4f46e5]"
                                                 } ${errors.file ? "border-red-500" : ""}`}
                                         >
                                             <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                                <FaFileUpload className={selectedFile ? "text-green-500" : (darkMode ? "text-gray-500" : "text-gray-400")} size={16} />
-                                                <span className={`text-sm truncate ${selectedFile ? "font-semibold text-green-500" : (darkMode ? "text-gray-400" : "text-gray-500")}`}>
+                                                <FaFileUpload className={selectedFile ? "text-indigo-500" : (darkMode ? "text-gray-500" : "text-gray-400")} size={16} />
+                                                <span className={`text-sm truncate ${selectedFile ? "font-semibold text-indigo-500" : (darkMode ? "text-gray-400" : "text-gray-500")}`}>
                                                     {selectedFile ? selectedFile.name : "Choose file (.xlsx, .csv)"}
                                                 </span>
                                             </div>
@@ -488,7 +488,7 @@ export default function MasterRouteUpload() {
                                                     <FaTrash size={14} />
                                                 </button>
                                             ) : (
-                                                <span className="px-2.5 py-1 bg-[#3b35c9] text-white rounded text-xs font-semibold flex items-center gap-1 flex-shrink-0 shadow-xs">
+                                                <span className="px-2.5 py-1 bg-[#4f46e5] text-white rounded text-xs font-semibold flex items-center gap-1 flex-shrink-0 shadow-xs">
                                                     Browse
                                                 </span>
                                             )}
@@ -500,15 +500,15 @@ export default function MasterRouteUpload() {
                             </div>
 
                             {/* Action Row - Upload Button */}
-                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[rgba(90,84,224,0.25)]" : "border-gray-100"}`}>
+                            <div className={`pt-8 border-t mt-8 flex justify-end ${darkMode ? "border-[#334155]" : "border-slate-100"}`}>
                                 <motion.button
                                     whileHover={{ scale: uploading ? 1 : 1.02 }}
                                     whileTap={{ scale: uploading ? 1 : 0.97 }}
                                     type="submit"
                                     disabled={uploading || !form.zone || !form.routePoint || !selectedFile}
                                     className={`w-full sm:w-auto px-10 py-3.5 text-sm font-semibold text-white rounded-lg transition-all transform flex items-center justify-center gap-2.5 ${uploading || !form.zone || !form.routePoint || !selectedFile
-                                        ? "bg-[#3b35c9] opacity-70 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-[#3b35c9] to-[#5a54e0] hover:from-[#2c28a0] hover:to-[#3b35c9] hover:shadow-[0_4px_25px_rgba(59,53,201,0.35)]"
+                                        ? "bg-[#4f46e5] opacity-70 cursor-not-allowed"
+                                        : "bg-gradient-to-r from-[#4f46e5] to-[#4338ca] hover:from-[#4338ca] hover:to-[#3730a3] hover:shadow-[0_4px_25px_rgba(79,70,229,0.35)]"
                                         }`}
                                 >
                                     {uploading ? (
