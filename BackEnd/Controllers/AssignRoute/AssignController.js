@@ -1,4 +1,4 @@
-import { fetchZoneDropdown, fetchAssignRoute, fecthAssignDriver,InsertAssignRoute } from "../../Models/AssignModel/assignModel.js"
+import { fetchZoneDropdown, fetchAssignRoute, fecthAssignDriver, InsertAssignRoute, fecthDriverAssignedDetails } from "../../Models/AssignModel/assignModel.js"
 
 export const fetchAssignDpdwn = async (req, res) => {
     const { flagId, ZoneMasterId } = req.body
@@ -9,7 +9,7 @@ export const fetchAssignDpdwn = async (req, res) => {
             result = await fetchZoneDropdown()
         } else if (parseInt(flagId) === 2) {
             result = await fetchAssignRoute(ZoneMasterId)
-        }else if (parseInt(flagId) === 3) {
+        } else if (parseInt(flagId) === 3) {
             result = await fecthAssignDriver()
         } else {
             return res.status(404).json({ status: false, message: "Flagid is Requireed" })
@@ -115,3 +115,63 @@ export const insertAssigneRoutesForDriver = async (req, res) => {
     }
 
 };
+
+
+export const fetchAssignRouteDetails = async (req, res) => {
+
+    const { flagId, DriverDetailId } = req.body;
+
+    try {
+
+        //=========================================
+        // Flag Validation
+        //=========================================
+
+        if (parseInt(flagId) !== 1) {
+            return res.status(400).json({
+                status: false,
+                message: "FlagId is required."
+            });
+        }
+
+        //=========================================
+        // Driver Validation
+        //=========================================
+
+        if (!DriverDetailId) {
+            return res.status(400).json({
+                status: false,
+                message: "DriverDetailId is required."
+            });
+        }
+
+        //=========================================
+        // Fetch Data
+        //=========================================
+
+        const result = await fecthDriverAssignedDetails(DriverDetailId);
+
+        if (!result) {
+            return res.status(404).json({
+                status: false,
+                message: "No Route Assigned for this Driver."
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Assigned Route Details Fetched Successfully.",
+            data: result
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+            status: false,
+            message: error.message
+        });
+
+    }
+
+};
+

@@ -263,3 +263,140 @@ export const InsertAssignRoute = async ({
     }
 
 };
+
+
+export const fecthDriverAssignedDetails = async (DriverDetailId) => {
+
+    try {
+
+        const result = await pool.query(
+            `
+            SELECT
+
+                -- Driver
+                DD."DriverDetailId",
+                DD."DriverName",
+                DD."MobileNumber",
+                DD."TruckNumber",
+                DD."RoleId",
+
+                RL."RoleName",
+
+                -- Zone
+                ZM."ZoneMasterId",
+                ZM."ZoneMasterName",
+
+                -- Route
+                RP."RoutePlanId",
+                RP."RoutePlanPoint",
+
+                -- Upload Excel
+                URE."UploadRouteExcelId",
+
+                -- Station Details
+                ED."ExcelDataId",
+                ED."Taluk",
+                ED."Station",
+                ED."VoltageClass",
+                ED."InChangreAEJEname",
+                ED."ContactNumber",
+                ED."SubStationAddress",
+                ED."PinCode",
+                ED."Latitude",
+                ED."Longitude"
+
+            FROM "DATA"."DriverDetail" DD
+
+            INNER JOIN "LKP"."Role" RL
+                ON DD."RoleId" = RL."RoleId"
+
+            INNER JOIN "DATA"."AssignRoute" AR
+                ON DD."DriverDetailId" = AR."DriverDetailId"
+
+            INNER JOIN "LKP"."ZoneMaster" ZM
+                ON AR."ZoneMasterId" = ZM."ZoneMasterId"
+
+            INNER JOIN "DATA"."RoutePlan" RP
+                ON AR."RoutePlanId" = RP."RoutePlanId"
+
+            INNER JOIN "DATA"."UploadRouteExcel" URE
+                ON
+                    URE."ZoneMasterId" = AR."ZoneMasterId"
+                    AND URE."RoutePlanId" = AR."RoutePlanId"
+                    AND URE."IsDisabled" = FALSE
+
+            INNER JOIN "DATA"."ExcelData" ED
+                ON
+                    ED."UploadRouteExcelId" = URE."UploadRouteExcelId"
+                    AND ED."IsDisabled" = FALSE
+
+            WHERE
+
+                DD."DriverDetailId" = $1
+                AND DD."IsDisabled" = FALSE
+
+            ORDER BY ED."ExcelDataId";
+            `,
+            [DriverDetailId]
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        const firstRow = result.rows[0];
+
+        return {
+
+            driverDetails: {
+
+                driverDetailId: firstRow.DriverDetailId,
+                driverName: firstRow.DriverName,
+                mobileNumber: firstRow.MobileNumber,
+                truckNumber: firstRow.TruckNumber,
+                roleId: firstRow.RoleId,
+                roleName: firstRow.RoleName
+
+            },
+
+            assignedRoute: {
+
+                zone: {
+
+                    zoneMasterId: firstRow.ZoneMasterId,
+                    zoneMasterName: firstRow.ZoneMasterName
+
+                },
+
+                route: {
+
+                    routePlanId: firstRow.RoutePlanId,
+                    routePlanPoint: firstRow.RoutePlanPoint
+
+                },
+                stationCount: result.rows.length,
+                stations: result.rows.map(row => ({
+                    excelDataId: row.ExcelDataId,
+                    taluk: row.Taluk,
+                    station: row.Station,
+                    voltageClass: row.VoltageClass,
+                    inChargeAEJEName: row.InChangreAEJEname,
+                    contactNumber: row.ContactNumber,
+                    subStationAddress: row.SubStationAddress,
+                    pinCode: row.PinCode,
+                    latitude: row.Latitude,
+                    longitude: row.Longitude
+
+                }))
+
+            }
+
+        };
+
+    } catch (error) {
+
+        throw error;
+
+    }
+
+};
