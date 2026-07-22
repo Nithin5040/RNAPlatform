@@ -247,6 +247,89 @@ export const InsertAssignRoute = async ({
             ]
         );
 
+
+        //=================================================
+        // Get UploadRouteExcelId
+        //=================================================
+
+        const uploadExcel = await client.query(
+            `
+    SELECT
+        "UploadRouteExcelId"
+    FROM "DATA"."UploadRouteExcel"
+    WHERE
+        "ZoneMasterId" = $1
+        AND "RoutePlanId" = $2
+        AND "IsDisabled" = FALSE
+    `,
+            [
+                ZoneMasterId,
+                RoutePlanId
+            ]
+        );
+
+        if (uploadExcel.rowCount === 0) {
+            throw new Error("Uploaded Excel not found.");
+        }
+
+        const uploadRouteExcelId =
+            uploadExcel.rows[0].UploadRouteExcelId;
+
+
+        //=================================================
+        // Fetch all ExcelDataIds
+        //=================================================
+
+        const excelStations = await client.query(
+            `
+    SELECT
+        "ExcelDataId"
+    FROM "DATA"."ExcelData"
+    WHERE
+        "UploadRouteExcelId" = $1
+        AND "IsDisabled" = FALSE
+    ORDER BY "ExcelDataId"
+    `,
+            [
+                uploadRouteExcelId
+            ]
+        );
+
+
+        //=================================================
+        // Insert RouteStationStatus
+        //=================================================
+
+        const assignRouteId = result.rows[0].AssignRouteId;
+
+        for (const station of excelStations.rows) {
+
+            await client.query(
+                `
+                INSERT INTO "DATA"."RouteStationStatus"
+                (
+                    "AssignRouteId",
+                    "ExcelDataId",
+                    "StatusId",
+                    "CreatedAt"
+                )
+                VALUES
+                (
+                    $1,
+                    $2,
+                    $3,
+                    NOW()
+                )
+                `,
+                [
+                    assignRouteId,
+                    station.ExcelDataId,
+                    1 // Pending
+                ]
+            );
+
+        }
+
         await client.query("COMMIT");
 
         return result.rows[0];
@@ -257,6 +340,365 @@ export const InsertAssignRoute = async ({
         throw error;
 
     } finally {
+
+        client.release();
+
+    }
+
+};
+
+
+export const fecthDriverAssignedDetails = async (DriverDetailId) => {
+
+    try {
+
+        const result = await pool.query(
+            `
+           SELECT
+
+            -- Driver
+            DD."DriverDetailId",
+            DD."DriverName",
+            DD."MobileNumber",
+            DD."TruckNumber",
+            DD."RoleId",
+
+            RL."RoleName",
+
+            -- Assign Route
+            AR."AssignRouteId",
+
+            -- Zone
+            ZM."ZoneMasterId",
+            ZM."ZoneMasterName",
+
+            -- Route
+            RP."RoutePlanId",
+            RP."RoutePlanPoint",
+
+            -- Upload Excel
+            URE."UploadRouteExcelId",
+
+            -- Station Details
+            ED."ExcelDataId",
+            ED."Taluk",
+            ED."Station",
+            ED."VoltageClass",
+            ED."InChangreAEJEname",
+            ED."ContactNumber",
+            ED."SubStationAddress",
+            ED."PinCode",
+            ED."Latitude",
+            ED."Longitude",
+
+            -- Station Status
+            RSS."RouteStationStatusId",
+            RSS."StatusId",
+            SM."StatusName",
+            RSS."VisitedAt",
+            RSS."Remarks"
+
+        FROM "DATA"."DriverDetail" DD
+
+        INNER JOIN "LKP"."Role" RL
+            ON DD."RoleId" = RL."RoleId"
+
+        INNER JOIN "DATA"."AssignRoute" AR
+            ON DD."DriverDetailId" = AR."DriverDetailId"
+
+        INNER JOIN "LKP"."ZoneMaster" ZM
+            ON AR."ZoneMasterId" = ZM."ZoneMasterId"
+
+        INNER JOIN "DATA"."RoutePlan" RP
+            ON AR."RoutePlanId" = RP."RoutePlanId"
+
+        INNER JOIN "DATA"."UploadRouteExcel" URE
+            ON URE."ZoneMasterId" = AR."ZoneMasterId"
+            AND URE."RoutePlanId" = AR."RoutePlanId"
+            AND URE."IsDisabled" = FALSE
+
+        INNER JOIN "DATA"."ExcelData" ED
+            ON ED."UploadRouteExcelId" = URE."UploadRouteExcelId"
+            AND ED."IsDisabled" = FALSE
+
+        LEFT JOIN "DATA"."RouteStationStatus" RSS
+            ON RSS."AssignRouteId" = AR."AssignRouteId"
+            AND RSS."ExcelDataId" = ED."ExcelDataId"
+
+        LEFT JOIN "LKP"."StatusMaster" SM
+            ON SM."StatusId" = RSS."StatusId"
+
+        WHERE
+            DD."DriverDetailId" = $1
+            AND DD."IsDisabled" = FALSE
+
+        ORDER BY ED."ExcelDataId";
+                    `,
+            [DriverDetailId]
+        );
+
+        if (result.rowCount === 0) {
+            return null;
+        }
+
+        const firstRow = result.rows[0];
+
+        return {
+
+            driverDetails: {
+
+                driverDetailId: firstRow.DriverDetailId,
+                driverName: firstRow.DriverName,
+                mobileNumber: firstRow.MobileNumber,
+                truckNumber: firstRow.TruckNumber,
+                roleId: firstRow.RoleId,
+                roleName: firstRow.RoleName
+
+            },
+
+            assignedRoute: {
+
+                zone: {
+
+                    zoneMasterId: firstRow.ZoneMasterId,
+                    zoneMasterName: firstRow.ZoneMasterName
+
+                },
+
+                route: {
+
+                    routePlanId: firstRow.RoutePlanId,
+                    routePlanPoint: firstRow.RoutePlanPoint
+
+                },
+                stationCount: result.rows.length,
+                stations: result.rows.map(row => ({
+                    excelDataId: row.ExcelDataId,
+                    taluk: row.Taluk,
+                    station: row.Station,
+                    voltageClass: row.VoltageClass,
+                    inChargeAEJEName: row.InChangreAEJEname,
+                    contactNumber: row.ContactNumber,
+                    subStationAddress: row.SubStationAddress,
+                    pinCode: row.PinCode,
+                    latitude: row.Latitude,
+                    longitude: row.Longitude,
+
+                    status: {
+                        routeStationStatusId: row.RouteStationStatusId,
+                        statusId: row.StatusId,
+                        statusName: row.StatusName,
+                        visitedAt: row.VisitedAt
+                        // remarks: row.Remarks
+                    }
+                }))
+
+            }
+
+        };
+
+    } catch (error) {
+
+        throw error;
+
+    }
+
+};
+
+export const insertStationDetail = async ({
+    RouteStationStatusId,
+    DriverDetailId,
+    DCNumber,
+    AnnexureNumber,
+    Remarks,
+    FileTypeIds,
+    Files
+}) => {
+
+    const client = await pool.connect();
+
+    try {
+
+        await client.query("BEGIN");
+
+        //=================================================
+        // Check Route Station Status Exists
+        //=================================================
+
+        const checkRouteStation = await client.query(
+            `
+            SELECT
+                "RouteStationStatusId",
+                "StatusId"
+            FROM "DATA"."RouteStationStatus"
+            WHERE
+                "RouteStationStatusId" = $1
+            `,
+            [RouteStationStatusId]
+        );
+
+        if (checkRouteStation.rowCount === 0) {
+            throw new Error("Invalid Route Station.");
+        }
+
+        //=================================================
+        // Already Completed
+        //=================================================
+
+        if (checkRouteStation.rows[0].StatusId == 2) {
+            throw new Error("This station is already completed.");
+        }
+
+        //=================================================
+        // Check Driver
+        //=================================================
+
+        const checkDriver = await client.query(
+            `
+            SELECT 1
+            FROM "DATA"."DriverDetail"
+            WHERE
+                "DriverDetailId" = $1
+                AND "IsDisabled" = FALSE
+            `,
+            [DriverDetailId]
+        );
+
+        if (checkDriver.rowCount === 0) {
+            throw new Error("Invalid Driver.");
+        }
+
+        //=================================================
+        // Prevent Duplicate Submission
+        //=================================================
+
+        const checkSubmission = await client.query(
+            `
+            SELECT 1
+            FROM "DATA"."StationSubmission"
+            WHERE
+                "RouteStationStatusId" = $1
+            `,
+            [RouteStationStatusId]
+        );
+
+        if (checkSubmission.rowCount > 0) {
+            throw new Error("Station already submitted.");
+        }
+
+        //=================================================
+        // Insert StationSubmission
+        //=================================================
+
+        const submission = await client.query(
+            `
+            INSERT INTO "DATA"."StationSubmission"
+            (
+                "RouteStationStatusId",
+                "DCNumber",
+                "AnnexureNumber",
+                "Remarks",
+                "CreatedAt",
+                "CreatedByDriverId"
+            )
+            VALUES
+            (
+                $1,
+                $2,
+                $3,
+                $4,
+                NOW(),
+                $5
+            )
+            RETURNING "StationSubmissionId";
+            `,
+            [
+                RouteStationStatusId,
+                DCNumber,
+                AnnexureNumber,
+                Remarks,
+                DriverDetailId
+            ]
+        );
+
+        const stationSubmissionId =
+            submission.rows[0].StationSubmissionId;
+
+        //=================================================
+        // Insert Files
+        //=================================================
+
+        for (let i = 0; i < Files.length; i++) {
+
+            await client.query(
+                `
+                INSERT INTO "DATA"."StationSubmissionFile"
+                (
+                    "StationSubmissionId",
+                    "FileTypeId",
+                    "FileName",
+                    "FilePath",
+                    "CreatedAt"
+                )
+                VALUES
+                (
+                    $1,
+                    $2,
+                    $3,
+                    $4,
+                    NOW()
+                )
+                `,
+                [
+                    stationSubmissionId,
+                    FileTypeIds[i],
+                    Files[i].originalname,
+                    Files[i].path
+                ]
+            );
+
+        }
+
+        //=================================================
+        // Update Route Station Status
+        //=================================================
+
+        await client.query(
+            `
+            UPDATE "DATA"."RouteStationStatus"
+            SET
+                "StatusId" = 3,
+                "VisitedAt" = NOW(),
+                "UpdatedAt" = NOW()
+            WHERE
+                "RouteStationStatusId" = $1
+            `,
+            [
+                RouteStationStatusId
+            ]
+        );
+
+        await client.query("COMMIT");
+
+        return {
+
+            stationSubmissionId,
+
+            totalFiles: Files.length,
+
+            status: "Completed"
+
+        };
+
+    }
+    catch (error) {
+
+        await client.query("ROLLBACK");
+
+        throw error;
+
+    }
+    finally {
 
         client.release();
 
