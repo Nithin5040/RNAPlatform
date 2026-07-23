@@ -1,5 +1,6 @@
 import { pool } from "../../Config/DbConfig.js"
 
+import axios from "axios";
 
 
 export const fetchZoneDropdown = async () => {
@@ -354,86 +355,86 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 
         const result = await pool.query(
             `
-           SELECT
+            SELECT
 
-            -- Driver
-            DD."DriverDetailId",
-            DD."DriverName",
-            DD."MobileNumber",
-            DD."TruckNumber",
-            DD."RoleId",
+                -- Driver
+                DD."DriverDetailId",
+                DD."DriverName",
+                DD."MobileNumber",
+                DD."TruckNumber",
+                DD."RoleId",
 
-            RL."RoleName",
+                RL."RoleName",
 
-            -- Assign Route
-            AR."AssignRouteId",
+                -- Assign Route
+                AR."AssignRouteId",
 
-            -- Zone
-            ZM."ZoneMasterId",
-            ZM."ZoneMasterName",
+                -- Zone
+                ZM."ZoneMasterId",
+                ZM."ZoneMasterName",
 
-            -- Route
-            RP."RoutePlanId",
-            RP."RoutePlanPoint",
+                -- Route
+                RP."RoutePlanId",
+                RP."RoutePlanPoint",
 
-            -- Upload Excel
-            URE."UploadRouteExcelId",
+                -- Upload Excel
+                URE."UploadRouteExcelId",
 
-            -- Station Details
-            ED."ExcelDataId",
-            ED."Taluk",
-            ED."Station",
-            ED."VoltageClass",
-            ED."InChangreAEJEname",
-            ED."ContactNumber",
-            ED."SubStationAddress",
-            ED."PinCode",
-            ED."Latitude",
-            ED."Longitude",
+                -- Station
+                ED."ExcelDataId",
+                ED."Taluk",
+                ED."Station",
+                ED."VoltageClass",
+                ED."InChangreAEJEname",
+                ED."ContactNumber",
+                ED."SubStationAddress",
+                ED."PinCode",
+                ED."Latitude",
+                ED."Longitude",
 
-            -- Station Status
-            RSS."RouteStationStatusId",
-            RSS."StatusId",
-            SM."StatusName",
-            RSS."VisitedAt",
-            RSS."Remarks"
+                -- Status
+                RSS."RouteStationStatusId",
+                RSS."StatusId",
+                SM."StatusName",
+                RSS."VisitedAt",
+                RSS."Remarks"
 
-        FROM "DATA"."DriverDetail" DD
+            FROM "DATA"."DriverDetail" DD
 
-        INNER JOIN "LKP"."Role" RL
-            ON DD."RoleId" = RL."RoleId"
+            INNER JOIN "LKP"."Role" RL
+                ON DD."RoleId" = RL."RoleId"
 
-        INNER JOIN "DATA"."AssignRoute" AR
-            ON DD."DriverDetailId" = AR."DriverDetailId"
+            INNER JOIN "DATA"."AssignRoute" AR
+                ON DD."DriverDetailId" = AR."DriverDetailId"
 
-        INNER JOIN "LKP"."ZoneMaster" ZM
-            ON AR."ZoneMasterId" = ZM."ZoneMasterId"
+            INNER JOIN "LKP"."ZoneMaster" ZM
+                ON AR."ZoneMasterId" = ZM."ZoneMasterId"
 
-        INNER JOIN "DATA"."RoutePlan" RP
-            ON AR."RoutePlanId" = RP."RoutePlanId"
+            INNER JOIN "DATA"."RoutePlan" RP
+                ON AR."RoutePlanId" = RP."RoutePlanId"
 
-        INNER JOIN "DATA"."UploadRouteExcel" URE
-            ON URE."ZoneMasterId" = AR."ZoneMasterId"
-            AND URE."RoutePlanId" = AR."RoutePlanId"
-            AND URE."IsDisabled" = FALSE
+            INNER JOIN "DATA"."UploadRouteExcel" URE
+                ON URE."ZoneMasterId" = AR."ZoneMasterId"
+                AND URE."RoutePlanId" = AR."RoutePlanId"
+                AND URE."IsDisabled" = FALSE
 
-        INNER JOIN "DATA"."ExcelData" ED
-            ON ED."UploadRouteExcelId" = URE."UploadRouteExcelId"
-            AND ED."IsDisabled" = FALSE
+            INNER JOIN "DATA"."ExcelData" ED
+                ON ED."UploadRouteExcelId" = URE."UploadRouteExcelId"
+                AND ED."IsDisabled" = FALSE
 
-        LEFT JOIN "DATA"."RouteStationStatus" RSS
-            ON RSS."AssignRouteId" = AR."AssignRouteId"
-            AND RSS."ExcelDataId" = ED."ExcelDataId"
+            LEFT JOIN "DATA"."RouteStationStatus" RSS
+                ON RSS."AssignRouteId" = AR."AssignRouteId"
+                AND RSS."ExcelDataId" = ED."ExcelDataId"
 
-        LEFT JOIN "LKP"."StatusMaster" SM
-            ON SM."StatusId" = RSS."StatusId"
+            LEFT JOIN "LKP"."StatusMaster" SM
+                ON SM."StatusId" = RSS."StatusId"
 
-        WHERE
-            DD."DriverDetailId" = $1
-            AND DD."IsDisabled" = FALSE
+            WHERE
+                DD."DriverDetailId" = $1
+                AND DD."IsDisabled" = FALSE
 
-        ORDER BY ED."ExcelDataId";
-                    `,
+            ORDER BY ED."ExcelDataId";
+            `,
             [DriverDetailId]
         );
 
@@ -441,7 +442,53 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
             return null;
         }
 
+        //-------------------------------------------------
+        // Build OSRM Coordinates
+        //-------------------------------------------------
+
+        const coordinates = result.rows
+            .map(row => `${row.Longitude},${row.Latitude}`)
+            .join(";");
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=false`;
+
+        const { data } = await axios.get(url);
+
+        const route = data.routes[0];
+        const legs = route.legs;
+
+//===============================================================================
+        //-------------------------------------------------
+        // Vishvin Office -> First Station
+        //-------------------------------------------------
+
+        const companyLatitude = "12.971600";
+        const companyLongitude = "77.594600";
+
+        const companyUrl =
+            `https://router.project-osrm.org/route/v1/driving/${companyLongitude},${companyLatitude};${result.rows[0].Longitude},${result.rows[0].Latitude}?overview=false`;
+
+        const companyResponse = await axios.get(companyUrl);
+
+        const companyRoute = companyResponse.data.routes[0];
+//===========================================================================
+
+        //-------------------------------------------------
+        // First Row
+        //-------------------------------------------------
+
         const firstRow = result.rows[0];
+
+        //-------------------------------------------------
+        // Running Distance
+        //-------------------------------------------------
+
+        let totalDistance = 0;
+        let totalDuration = 0;
+
+        //-------------------------------------------------
+        // Response
+        //-------------------------------------------------
 
         return {
 
@@ -468,30 +515,108 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
                 route: {
 
                     routePlanId: firstRow.RoutePlanId,
-                    routePlanPoint: firstRow.RoutePlanPoint
+                    routePlanPoint: firstRow.RoutePlanPoint,
+
+                    totalRouteDistanceKM: Number((route.distance / 1000).toFixed(2)),
+                    totalRouteDurationMinutes: Number((route.duration / 60).toFixed(2))
 
                 },
-                stationCount: result.rows.length,
-                stations: result.rows.map(row => ({
-                    excelDataId: row.ExcelDataId,
-                    taluk: row.Taluk,
-                    station: row.Station,
-                    voltageClass: row.VoltageClass,
-                    inChargeAEJEName: row.InChangreAEJEname,
-                    contactNumber: row.ContactNumber,
-                    subStationAddress: row.SubStationAddress,
-                    pinCode: row.PinCode,
-                    latitude: row.Latitude,
-                    longitude: row.Longitude,
 
-                    status: {
-                        routeStationStatusId: row.RouteStationStatusId,
-                        statusId: row.StatusId,
-                        statusName: row.StatusName,
-                        visitedAt: row.VisitedAt
-                        // remarks: row.Remarks
+                stationCount: result.rows.length,
+
+                stations: result.rows.map((row, index) => {
+
+                    let distance = null;
+
+                    if (row.StatusId == 3) {
+
+                        if (index === 0) {
+
+                            totalDistance += companyRoute.distance;
+                            totalDuration += companyRoute.duration;
+
+                            distance = {
+
+                                previousStation: "Vishvin Technology Pvt. Ltd.",
+                                previousStationAddress: "Above Super Market, Bengaluru",
+
+                                startLatitude: companyLatitude,
+                                startLongitude: companyLongitude,
+
+                                distanceFromPreviousMeters:
+                                    Number(companyRoute.distance.toFixed(2)),
+
+                                distanceFromPreviousKM:
+                                    Number((companyRoute.distance / 1000).toFixed(2)),
+
+                                durationFromPreviousSeconds:
+                                    Number(companyRoute.duration.toFixed(2)),
+
+                                durationFromPreviousMinutes:
+                                    Number((companyRoute.duration / 60).toFixed(2)),
+
+                                totalTravelledKM:
+                                    Number((totalDistance / 1000).toFixed(2))
+
+                            };
+
+                        } else {
+
+                            totalDistance += legs[index - 1].distance;
+                            totalDuration += legs[index - 1].duration;
+
+                            distance = {
+
+                                previousStation: result.rows[index - 1].Station,
+
+                                distanceFromPreviousMeters:
+                                    Number(legs[index - 1].distance.toFixed(2)),
+
+                                distanceFromPreviousKM:
+                                    Number((legs[index - 1].distance / 1000).toFixed(2)),
+
+                                durationFromPreviousSeconds:
+                                    Number(legs[index - 1].duration.toFixed(2)),
+
+                                durationFromPreviousMinutes:
+                                    Number((legs[index - 1].duration / 60).toFixed(2)),
+
+                                totalTravelledKM:
+                                    Number((totalDistance / 1000).toFixed(2))
+
+                            };
+
+                        }
+
                     }
-                }))
+
+                    return {
+
+                        excelDataId: row.ExcelDataId,
+                        taluk: row.Taluk,
+                        station: row.Station,
+                        voltageClass: row.VoltageClass,
+                        inChargeAEJEName: row.InChangreAEJEname,
+                        contactNumber: row.ContactNumber,
+                        subStationAddress: row.SubStationAddress,
+                        pinCode: row.PinCode,
+                        latitude: row.Latitude,
+                        longitude: row.Longitude,
+
+                        status: {
+
+                            routeStationStatusId: row.RouteStationStatusId,
+                            statusId: row.StatusId,
+                            statusName: row.StatusName,
+                            visitedAt: row.VisitedAt
+
+                        },
+
+                        distance
+
+                    };
+
+                })
 
             }
 
@@ -697,3 +822,83 @@ export const insertStationDetail = async ({
     }
 
 };
+
+
+
+// export const fecthDistanceLocations = async () => {
+
+//     try {
+
+//         const query = `
+//             SELECT
+//                 "ExcelDataId",
+//                 "Station",
+//                 "Latitude",
+//                 "Longitude"
+//             FROM "DATA"."ExcelData"
+//             WHERE "IsDisabled" = false
+//             ORDER BY "ExcelDataId";
+//         `;
+
+//         const { rows } = await pool.query(query);
+
+//         if (rows.length < 2) {
+//             return {
+//                 totalDistanceInMeters: 0,
+//                 totalDistanceInKM: 0,
+//                 stationDistances: []
+//             };
+//         }
+
+//         const coordinates = rows
+//             .map(item => `${item.Longitude},${item.Latitude}`)
+//             .join(";");
+
+//         const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=false`;
+
+//         const { data } = await axios.get(url);
+
+//         const route = data.routes[0];
+
+//         // Station-to-Station distance
+//         const stationDistances = [];
+
+//         for (let i = 0; i < route.legs.length; i++) {
+
+//             stationDistances.push({
+
+//                 FromStationId: rows[i].ExcelDataId,
+//                 FromStation: rows[i].Station,
+
+//                 ToStationId: rows[i + 1].ExcelDataId,
+//                 ToStation: rows[i + 1].Station,
+
+//                 DistanceInMeters: Number(route.legs[i].distance.toFixed(2)),
+//                 DistanceInKM: Number((route.legs[i].distance / 1000).toFixed(2)),
+
+//                 DurationInSeconds: Number(route.legs[i].duration.toFixed(2)),
+//                 DurationInMinutes: Number((route.legs[i].duration / 60).toFixed(2))
+
+//             });
+
+//         }
+
+//         return {
+
+//             TotalDistanceInMeters: Number(route.distance.toFixed(2)),
+//             TotalDistanceInKM: Number((route.distance / 1000).toFixed(2)),
+
+//             TotalDurationInSeconds: Number(route.duration.toFixed(2)),
+//             TotalDurationInMinutes: Number((route.duration / 60).toFixed(2)),
+
+//             StationDistances: stationDistances
+
+//         };
+
+//     } catch (error) {
+
+//         throw error;
+
+//     }
+
+// };
