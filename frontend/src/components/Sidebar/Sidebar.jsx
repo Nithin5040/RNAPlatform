@@ -208,19 +208,19 @@ export default function Sidebar({
       label: "Assign Route",
       icon: <UserPlus size={20} />
     },
-    {
-      path: "/route-monitoring",
-      label: "Route Monitoring",
-      icon: <UserPlus size={20} />
-    },
-    {
-      path: "/total-routes",
-      label: "Total Routes",
-      icon: <UserPlus size={20} />
-    },
+    // {
+    //   path: "/route-monitoring",
+    //   label: "Route Monitoring",
+    //   icon: <UserPlus size={20} />
+    // },
+    // {
+    //   path: "/total-routes",
+    //   label: "Total Routes",
+    //   icon: <UserPlus size={20} />
+    // },
     {
       path: "/driver-profile",
-      label: "Driver Profile",
+      label: "Driver Details",
       icon: <UserPlus size={20} />
     },
 

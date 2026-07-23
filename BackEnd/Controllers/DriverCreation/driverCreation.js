@@ -30,7 +30,8 @@ export const internalDriverDetails = async (req, res) => {
         TruckNumber,
         Password,
         CreatedByUserId,
-        FileTypeIds
+        FileTypeIds,
+        OdometerReading
     } = req.body;
 
     try {
@@ -144,7 +145,8 @@ export const internalDriverDetails = async (req, res) => {
 
             FileTypeIds: parsedFileTypeIds,
 
-            Files: req.files
+            Files: req.files,
+            OdometerReading
 
         });
 
