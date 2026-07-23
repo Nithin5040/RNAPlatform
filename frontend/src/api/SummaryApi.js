@@ -60,6 +60,15 @@ export const SummaryApi = {
     url: "/rna-service/View/ViewDriverDetails",
     method: "post"
   },
+  editdriverdetails: {
+    url: "/rna-service/Update/UpdateDriverDetails",
+    method: "post"
+  },
+  adminzone: {
+    url: "/rna-service/zone/zoneDrpDwn",
+    method: "post"
+  },
+
 
 
 

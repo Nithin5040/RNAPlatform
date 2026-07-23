@@ -2,7 +2,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-const uploadPath = "D:\\RNAPlatform\\RNAUpload\\excelUpload";
+const uploadPath = "E:\\RNAPlatform\\RNAUpload\\excelUpload";
 
 // Create folder if it doesn't exist
 if (!fs.existsSync(uploadPath)) {

@@ -5,8 +5,9 @@ import { uploadExcel, MasterRouteDropdown } from "../../Controllers/Upload/xlupl
 const router = express.Router();
 
 
+router.post("/Upload",upload.array("excelSheet"),uploadExcel);
 router.post("/masterDropdwn", MasterRouteDropdown);
 
-router.post("/Upload", upload.single("excel"), uploadExcel);
+
 
 export default router;

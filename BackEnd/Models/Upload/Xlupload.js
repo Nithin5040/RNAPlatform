@@ -1,4 +1,3 @@
-
 import { pool } from "../../Config/DbConfig.js";
 
 
@@ -173,7 +172,6 @@ if (checkUpload.rowCount > 0) {
                     longitude
                 ]
             );
-
         }
 
         await client.query("COMMIT");

@@ -24,7 +24,10 @@ import {
     FaAddressCard,
     FaFileContract,
     FaCertificate,
-    FaSpinner
+    FaSpinner,
+    FaEdit,
+    FaSave,
+    FaTimes as FaTimesIcon
 } from "react-icons/fa";
 import { SummaryApi } from "../api/SummaryApi";
 import { useTheme } from "../contexts/ThemeContext";
@@ -44,34 +47,267 @@ const DOCUMENT_FIELDS = [
     { id: "permitFile", label: "Permit File", fileTypeId: 7, icon: FaCertificate }
 ];
 
-// Document Status Badge Component
-const DocumentStatusBadge = ({ status }) => {
-    const statusConfig = {
-        'verified': {
-            icon: FaCheckCircle,
-            color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-            label: 'Verified'
-        },
-        'pending': {
-            icon: FaClock,
-            color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-            label: 'Pending'
-        },
-        'rejected': {
-            icon: FaTimesCircle,
-            color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-            label: 'Rejected'
+// Edit Driver Modal Component
+const EditDriverModal = ({ isOpen, onClose, driverData, onSave, loading, darkMode }) => {
+    const [formData, setFormData] = useState({
+        driverName: "",
+        mobileNumber: "",
+        truckNumber: "",
+        odometerReading: ""
+    });
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
+    useEffect(() => {
+        if (driverData) {
+            setFormData({
+                driverName: driverData.driverName || "",
+                mobileNumber: driverData.mobileNumber || "",
+                truckNumber: driverData.truckNumber || "",
+                odometerReading: driverData.odometerReading || ""
+            });
+        }
+    }, [driverData]);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === "mobileNumber") {
+            const numericValue = value.replace(/\D/g, "");
+            if (numericValue.length <= 10) {
+                setFormData(prev => ({ ...prev, [name]: numericValue }));
+            }
+        } else if (name === "odometerReading") {
+            const numericValue = value.replace(/\D/g, "");
+            setFormData(prev => ({ ...prev, [name]: numericValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
+        setErrors(prev => ({ ...prev, [name]: "" }));
+        setTouched(prev => ({ ...prev, [name]: true }));
+    };
+
+    const handleBlur = (e) => {
+        const { name } = e.target;
+        setTouched(prev => ({ ...prev, [name]: true }));
+
+        if (!formData[name] && name !== 'odometerReading') {
+            setErrors(prev => ({ ...prev, [name]: `${name.replace(/([A-Z])/g, ' $1')} is required` }));
+        }
+        if (name === "mobileNumber" && formData.mobileNumber.length !== 10) {
+            setErrors(prev => ({ ...prev, [name]: "Mobile number must be 10 digits" }));
         }
     };
 
-    const config = statusConfig[status] || statusConfig['pending'];
-    const Icon = config.icon;
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.driverName) newErrors.driverName = "Driver name is required";
+        if (!formData.mobileNumber) newErrors.mobileNumber = "Mobile number is required";
+        if (formData.mobileNumber.length !== 10) newErrors.mobileNumber = "Mobile number must be 10 digits";
+        if (!formData.truckNumber) newErrors.truckNumber = "Truck number is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const allTouched = {};
+        Object.keys(formData).forEach(key => {
+            allTouched[key] = true;
+        });
+        setTouched(allTouched);
+
+        if (validateForm()) {
+            onSave({
+                driverDetailId: driverData?.id,
+                driverName: formData.driverName,
+                mobileNumber: formData.mobileNumber,
+                truckNumber: formData.truckNumber,
+                odometerReading: formData.odometerReading || null
+            });
+        }
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.color}`}>
-            <Icon size={12} />
-            {config.label}
-        </span>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden ${darkMode ? "bg-[#1e293b] border border-[rgba(79,70,229,0.3)]" : "bg-white border border-gray-200"}`}
+            >
+                <div className={`px-6 py-4 border-b ${darkMode ? 'border-[rgba(79,70,229,0.25)]' : 'border-gray-200'}`}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-xl ${darkMode ? 'bg-indigo-900/50' : 'bg-indigo-100'}`}>
+                                <FaEdit className={darkMode ? 'text-[#818cf8]' : 'text-[#4f46e5]'} size={18} />
+                            </div>
+                            <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                Edit Driver
+                            </h2>
+                        </div>
+                        <button
+                            onClick={onClose}
+                            className={`p-1.5 rounded-lg transition-colors ${darkMode ? 'hover:bg-white/10 text-gray-400 hover:text-gray-200' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
+                        >
+                            <FaTimes size={16} />
+                        </button>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label className={`block text-xs font-medium mb-1.5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Driver Name <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <FaUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                <input
+                                    type="text"
+                                    name="driverName"
+                                    value={formData.driverName}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    placeholder="Enter driver name"
+                                    className={`w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors
+                                        ${darkMode
+                                            ? 'bg-[#0f172a] border-[rgba(79,70,229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
+                                        }
+                                        ${errors.driverName && touched.driverName ? 'border-red-500 focus:ring-red-400 focus:border-red-400' : ''}`}
+                                />
+                            </div>
+                            {errors.driverName && touched.driverName && (
+                                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                    <FaTimesIcon size={10} />
+                                    {errors.driverName}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className={`block text-xs font-medium mb-1.5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Mobile Number <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <FaPhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                <input
+                                    type="text"
+                                    name="mobileNumber"
+                                    value={formData.mobileNumber}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    placeholder="Enter 10-digit mobile number"
+                                    maxLength="10"
+                                    className={`w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors
+                                        ${darkMode
+                                            ? 'bg-[#0f172a] border-[rgba(79,70,229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
+                                        }
+                                        ${errors.mobileNumber && touched.mobileNumber ? 'border-red-500 focus:ring-red-400 focus:border-red-400' : ''}`}
+                                />
+                            </div>
+                            {errors.mobileNumber && touched.mobileNumber && (
+                                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                    <FaTimesIcon size={10} />
+                                    {errors.mobileNumber}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className={`block text-xs font-medium mb-1.5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Truck Number <span className="text-red-500">*</span>
+                            </label>
+                            <div className="relative">
+                                <FaTruck className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                <input
+                                    type="text"
+                                    name="truckNumber"
+                                    value={formData.truckNumber}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    placeholder="Enter truck number"
+                                    className={`w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors
+                                        ${darkMode
+                                            ? 'bg-[#0f172a] border-[rgba(79,70,229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
+                                        }
+                                        ${errors.truckNumber && touched.truckNumber ? 'border-red-500 focus:ring-red-400 focus:border-red-400' : ''}`}
+                                />
+                            </div>
+                            {errors.truckNumber && touched.truckNumber && (
+                                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                                    <FaTimesIcon size={10} />
+                                    {errors.truckNumber}
+                                </p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className={`block text-xs font-medium mb-1.5 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                Odometer Reading <span className="text-gray-400 text-xs">(Optional)</span>
+                            </label>
+                            <div className="relative">
+                                <FaTachometerAlt className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={14} />
+                                <input
+                                    type="text"
+                                    name="odometerReading"
+                                    value={formData.odometerReading}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    placeholder="Enter odometer reading"
+                                    className={`w-full pl-9 pr-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors
+                                        ${darkMode
+                                            ? 'bg-[#0f172a] border-[rgba(79,70,229,0.35)] text-white placeholder-gray-500 focus:ring-[#4f46e5]/30 focus:border-[#4f46e5]'
+                                            : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-[#4f46e5]/20 focus:border-[#4f46e5]'
+                                        }`}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={`flex justify-end gap-3 mt-6 pt-4 border-t ${darkMode ? 'border-[rgba(79,70,229,0.25)]' : 'border-gray-200'}`}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${darkMode
+                                ? 'bg-white/5 text-gray-300 hover:bg-white/10 border border-[rgba(79,70,229,0.3)]'
+                                : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                                }`}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors flex items-center gap-2 ${loading
+                                ? 'bg-[#4f46e5]/60 cursor-not-allowed'
+                                : 'bg-[#4f46e5] hover:bg-[#2e29a8]'
+                                }`}
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    <span>Updating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <FaSave size={14} />
+                                    Update Driver
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </motion.div>
+        </div>
     );
 };
 
@@ -91,9 +327,7 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
         return field ? field.label : `Document ${fileTypeId}`;
     };
 
-    // Handle document view click - Fetch only when clicked
     const handleDocumentView = async (fileTypeId, driverDetailId) => {
-        // Set loading for this specific document
         setDocumentsStatus(prev => ({ ...prev, [fileTypeId]: 'loading' }));
 
         try {
@@ -104,17 +338,13 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     fileTypeId: fileTypeId,
                     DriverDetailId: driverDetailId
                 },
-                responseType: 'blob' // Important: Tell axios to expect binary data
+                responseType: 'blob'
             });
 
-            // Check content type from headers
             const contentType = response.headers['content-type'];
 
             if (contentType && contentType.startsWith('image/')) {
-                // It's an image - create a URL from the blob
                 const imageUrl = URL.createObjectURL(response.data);
-
-                // Get filename from content-disposition header
                 const contentDisposition = response.headers['content-disposition'];
                 let filename = getFileTypeName(fileTypeId);
                 if (contentDisposition) {
@@ -124,7 +354,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     }
                 }
 
-                // Store the document data
                 setDocumentsStatus(prev => ({
                     ...prev,
                     [fileTypeId]: 'loaded',
@@ -135,14 +364,12 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     }
                 }));
 
-                // Show image in a modal
                 MySwal.fire({
                     title: getFileTypeName(fileTypeId),
                     html: `
                         <div style="padding: 10px;">
                             <img src="${imageUrl}" alt="${getFileTypeName(fileTypeId)}" style="max-width: 100%; max-height: 500px; border-radius: 8px;" />
                             ${filename ? `<p style="margin-top: 10px; font-size: 13px; color: #666;">File: ${filename}</p>` : ''}
-                            <p style="font-size: 13px; color: #666;">Type: ${contentType}</p>
                         </div>
                     `,
                     confirmButtonColor: "#4f46e5",
@@ -150,12 +377,10 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     color: darkMode ? '#ffffff' : '#000000',
                     width: '600px',
                     willUnmount: () => {
-                        // Clean up the object URL when modal closes
                         URL.revokeObjectURL(imageUrl);
                     }
                 });
             } else if (contentType && contentType === 'application/json') {
-                // It's a JSON response with error message
                 const text = await response.data.text();
                 const jsonData = JSON.parse(text);
                 const message = jsonData.message || "Document not available";
@@ -171,7 +396,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     color: darkMode ? '#ffffff' : '#000000'
                 });
             } else {
-                // Unknown response type
                 setDocumentsStatus(prev => ({ ...prev, [fileTypeId]: 'error' }));
                 MySwal.fire({
                     icon: "info",
@@ -186,7 +410,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
             console.error("Error fetching document:", error);
             setDocumentsStatus(prev => ({ ...prev, [fileTypeId]: 'error' }));
 
-            // Check if error response is a blob
             if (error.response && error.response.data instanceof Blob) {
                 try {
                     const text = await error.response.data.text();
@@ -226,7 +449,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
         }
     };
 
-    // Check if document data is loaded for a specific type
     const getDocumentData = (fileTypeId) => {
         return documentsStatus[`${fileTypeId}_data`] || null;
     };
@@ -243,7 +465,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className={`relative w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden ${darkMode ? "bg-[#1e293b] border border-[rgba(79,70,229,0.3)]" : "bg-white border border-gray-200"}`}
             >
-                {/* Modal Header */}
                 <div className={`px-6 py-4 border-b ${darkMode ? 'border-[rgba(79,70,229,0.25)]' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -263,7 +484,6 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                     </div>
                 </div>
 
-                {/* Modal Body */}
                 <div className="p-6">
                     {driverData && (
                         <div className="flex flex-wrap items-center gap-4 mb-6 p-4 rounded-lg bg-gray-50 dark:bg-[#0f172a]">
@@ -307,51 +527,31 @@ const DocumentViewModal = ({ isOpen, onClose, driverData, darkMode }) => {
                                             : "bg-gray-50 border-gray-200 hover:border-[#4f46e5] hover:shadow-md"
                                         }`}
                                 >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-start gap-3">
-                                            <div className={`p-2 rounded-lg ${isLoading
-                                                ? darkMode ? "bg-indigo-900/30" : "bg-indigo-50/50"
-                                                : darkMode ? "bg-indigo-900/40" : "bg-indigo-50"
-                                                }`}>
-                                                {isLoading ? (
-                                                    <FaSpinner className="animate-spin text-[#4f46e5]" size={20} />
-                                                ) : (
-                                                    <Icon className={darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"} size={20} />
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className={`font-medium text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
-                                                    {field.label}
-                                                </p>
-                                                <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                                    {isLoading ? "Loading..." : (hasDocument ? "Click to view" : "Click to check")}
-                                                </p>
-                                            </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className={`p-2 rounded-lg ${isLoading
+                                            ? darkMode ? "bg-indigo-900/30" : "bg-indigo-50/50"
+                                            : darkMode ? "bg-indigo-900/40" : "bg-indigo-50"
+                                            }`}>
+                                            {isLoading ? (
+                                                <FaSpinner className="animate-spin text-[#4f46e5]" size={20} />
+                                            ) : (
+                                                <Icon className={darkMode ? "text-[#818cf8]" : "text-[#4f46e5]"} size={20} />
+                                            )}
                                         </div>
-                                        {hasDocument && !isLoading && (
-                                            <DocumentStatusBadge status={docData?.status || 'verified'} />
-                                        )}
-                                        {!hasDocument && !isLoading && (
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${darkMode ? "bg-gray-800 text-gray-500" : "bg-gray-200 text-gray-500"}`}>
-                                                Not Found
-                                            </span>
-                                        )}
-                                        {isLoading && (
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${darkMode ? "bg-indigo-900/30 text-indigo-400" : "bg-indigo-100 text-indigo-600"}`}>
-                                                Loading...
-                                            </span>
-                                        )}
+                                        <div>
+                                            <p className={`font-medium text-sm ${darkMode ? "text-white" : "text-gray-900"}`}>
+                                                {field.label}
+                                            </p>
+                                            <p className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                                {isLoading ? "Loading..." : (hasDocument ? "Click to view" : "Click to check")}
+                                            </p>
+                                        </div>
                                     </div>
                                     {hasDocument && !isLoading && docData && (
                                         <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                                            <div className="flex items-center justify-between">
-                                                <span className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
-                                                    {docData.fileName || 'File'}
-                                                </span>
-                                                <span className={`text-xs ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
-                                                    {docData.fileType || ''}
-                                                </span>
-                                            </div>
+                                            <span className={`text-xs ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+                                                {docData.fileName || 'File'}
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -376,13 +576,13 @@ export default function DriverProfile() {
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [selectedDriver, setSelectedDriver] = useState(null);
     const [showDocumentModal, setShowDocumentModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editLoading, setEditLoading] = useState(false);
 
-    // Fetch Drivers on component mount
     useEffect(() => {
         fetchDrivers();
     }, []);
 
-    // Fetch Drivers from API using SummaryApi.driverdetails
     const fetchDrivers = async () => {
         setLoading(true);
         try {
@@ -419,7 +619,53 @@ export default function DriverProfile() {
         }
     };
 
-    // Filter drivers based on search term
+    const handleEditDriver = async (formData) => {
+        setEditLoading(true);
+        try {
+            const response = await axiosClient({
+                method: SummaryApi.editdriverdetails.method,
+                url: SummaryApi.editdriverdetails.url,
+                data: {
+                    flagId: 2,
+                    DriverName: formData.driverName,
+                    MobileNumber: formData.mobileNumber,
+                    TruckNumber: formData.truckNumber,
+                    OdometerReading: formData.odometerReading ? parseInt(formData.odometerReading) : null,
+                    DriverDetailId: formData.driverDetailId
+                }
+            });
+
+            if (response.data?.status === true) {
+                MySwal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: response.data.message || "Driver updated successfully",
+                    timer: 1500,
+                    showConfirmButton: false,
+                    background: darkMode ? '#1e293b' : '#ffffff',
+                    color: darkMode ? '#ffffff' : '#000000'
+                });
+                fetchDrivers();
+                setShowEditModal(false);
+                setSelectedDriver(null);
+            } else {
+                throw new Error(response.data?.message || "Failed to update driver");
+            }
+        } catch (error) {
+            console.error("Error updating driver:", error);
+            MySwal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.response?.data?.message || error.message || "Failed to update driver",
+                confirmButtonColor: "#ef4444",
+                background: darkMode ? '#1e293b' : '#ffffff',
+                color: darkMode ? '#ffffff' : '#000000'
+            });
+        } finally {
+            setEditLoading(false);
+        }
+    };
+
     const filteredDrivers = useMemo(() => {
         if (!searchTerm.trim()) return drivers;
         const term = searchTerm.toLowerCase();
@@ -430,7 +676,6 @@ export default function DriverProfile() {
         );
     }, [drivers, searchTerm]);
 
-    // Pagination calculations
     const totalPages = Math.ceil(filteredDrivers.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -461,11 +706,21 @@ export default function DriverProfile() {
         setShowDocumentModal(true);
     };
 
+    const handleEditClick = (driver) => {
+        setSelectedDriver({
+            id: driver.DriverDetailId,
+            driverName: driver.DriverName,
+            mobileNumber: driver.MobileNumber,
+            truckNumber: driver.TruckNumber,
+            odometerReading: driver.OdometerReading || ""
+        });
+        setShowEditModal(true);
+    };
+
     return (
         <div className={`min-h-full py-8 px-6 transition-colors duration-300 ${darkMode ? 'bg-[#0f172a] text-white' : 'bg-gray-50 text-gray-900'}`}>
             <div className="max-w-[1600px] mx-auto space-y-6">
 
-                {/* Header Section */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className={`text-2xl font-bold flex items-center gap-2.5 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
@@ -473,12 +728,11 @@ export default function DriverProfile() {
                             Driver Profiles
                         </h1>
                         <p className={`text-xs mt-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                            View and manage driver profiles across all operating zones
+                            View, edit and manage driver profiles across all operating zones
                         </p>
                     </div>
                 </div>
 
-                {/* Search Bar */}
                 <div className={`p-5 rounded-2xl border ${darkMode ? 'bg-[#1e293b] border-[rgba(79,70,229,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
                     <div className="w-full sm:w-96 relative">
                         <FaSearch
@@ -506,10 +760,9 @@ export default function DriverProfile() {
                     </div>
                 </div>
 
-                {/* Drivers Table */}
                 <div className={`rounded-2xl border overflow-hidden ${darkMode ? 'bg-[#1e293b] border-[rgba(79,70,229,0.25)] shadow-[0_10px_35px_rgba(0,0,0,0.3)]' : 'bg-white border-gray-200 shadow-sm'}`}>
                     <div className="overflow-x-auto">
-                        <table className="w-full min-w-[800px] text-left text-xs">
+                        <table className="w-full min-w-[900px] text-left text-xs">
                             <thead className={`${darkMode
                                 ? 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white'
                                 : 'bg-gradient-to-r from-[#4f46e5] to-[#6366f1] text-white'} uppercase tracking-wider`}>
@@ -591,17 +844,28 @@ export default function DriverProfile() {
                                                 </div>
                                             </td>
                                             <td className="py-3.5 px-4 text-center">
-                                                <button
-                                                    onClick={() => handleViewDocuments(driver)}
-                                                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 mx-auto ${darkMode
-                                                        ? 'bg-[rgba(79,70,229,0.15)] text-[#818cf8] hover:bg-[rgba(79,70,229,0.25)]'
-                                                        : 'bg-indigo-50 text-[#4f46e5] hover:bg-indigo-100'
-                                                        }`}
-                                                    title="View Documents"
-                                                >
-                                                    <FaEye size={14} />
-                                                    View Documents
-                                                </button>
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={() => handleEditClick(driver)}
+                                                        className={`p-2 rounded-lg transition-colors ${darkMode
+                                                            ? 'text-[#818cf8] hover:bg-white/10'
+                                                            : 'text-[#4f46e5] hover:bg-indigo-50'
+                                                            }`}
+                                                        title="Edit Driver"
+                                                    >
+                                                        <FaEdit size={15} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewDocuments(driver)}
+                                                        className={`p-2 rounded-lg transition-colors ${darkMode
+                                                            ? 'text-[#818cf8] hover:bg-white/10'
+                                                            : 'text-[#4f46e5] hover:bg-indigo-50'
+                                                            }`}
+                                                        title="View Documents"
+                                                    >
+                                                        <FaEye size={15} />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))
@@ -610,7 +874,6 @@ export default function DriverProfile() {
                         </table>
                     </div>
 
-                    {/* Pagination */}
                     {!loading && filteredDrivers.length > 0 && (
                         <Pagination
                             currentPage={currentPage}
@@ -628,7 +891,22 @@ export default function DriverProfile() {
                 </div>
             </div>
 
-            {/* Document View Modal */}
+            <AnimatePresence>
+                {showEditModal && (
+                    <EditDriverModal
+                        isOpen={showEditModal}
+                        onClose={() => {
+                            setShowEditModal(false);
+                            setSelectedDriver(null);
+                        }}
+                        driverData={selectedDriver}
+                        onSave={handleEditDriver}
+                        loading={editLoading}
+                        darkMode={darkMode}
+                    />
+                )}
+            </AnimatePresence>
+
             <AnimatePresence>
                 {showDocumentModal && (
                     <DocumentViewModal

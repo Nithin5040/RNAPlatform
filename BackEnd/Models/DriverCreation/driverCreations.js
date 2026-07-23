@@ -22,7 +22,8 @@ export const insertDriverDetail = async ({
     Password,
     CreatedByUserId,
     FileTypeIds,
-    Files
+    Files,
+    OdometerReading
 }) => {
 
     const client = await pool.connect();
@@ -102,7 +103,8 @@ export const insertDriverDetail = async ({
                 "Password",
                 "CreatedAt",
                 "CreatedByUserId",
-                "RoleId"
+                "RoleId",
+                "OdometerReading"
             )
             VALUES
             (
@@ -112,7 +114,8 @@ export const insertDriverDetail = async ({
                 $4,
                 NOW(),
                 $5,
-                $6
+                $6,
+                $7
             )
             RETURNING "DriverDetailId";
             `,
@@ -122,7 +125,8 @@ export const insertDriverDetail = async ({
                 TruckNumber,
                 Password,
                 CreatedByUserId,
-                3
+                3,
+                OdometerReading
             ]
         );
 
