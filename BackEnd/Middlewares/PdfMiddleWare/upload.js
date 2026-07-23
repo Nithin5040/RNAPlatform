@@ -33,7 +33,7 @@ export const upload = multer({
 
     fileFilter: (req, file, cb) => {
 
-        const allowedExtensions = [".xlsx", ".xls"];
+        const allowedExtensions = [".xlsx", ".xls",".csv"];
 
         const extension = path.extname(file.originalname).toLowerCase();
 

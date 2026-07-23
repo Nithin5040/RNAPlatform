@@ -8,16 +8,14 @@ export const fetchZoneDropdown = async () => {
         const result = await pool.query(`
             
             SELECT
-                URE."ZoneMasterId",
+                DIstinct URE."ZoneMasterId",
                 ZM."ZoneMasterName"
             FROM "DATA"."UploadRouteExcel" URE
             INNER JOIN "LKP"."ZoneMaster" ZM
                 ON URE."ZoneMasterId" = ZM."ZoneMasterId"
             WHERE
                 URE."IsDisabled" = FALSE
-                AND ZM."IsDisabled" = FALSE
-                -- AND URE."IsRouteSuccess" = FALSE
-
+                
             ORDER BY
                 ZM."ZoneMasterName";
             
@@ -58,8 +56,23 @@ export const fecthAssignDriver = async () => {
     try {
         const result = await pool.query(`
             
-        SELECT "DriverDetailId", "DriverName"  FROM  "DATA"."DriverDetail" WHERE "IsDisabled" =  false
-
+SELECT
+    D."DriverDetailId",
+    D."DriverName",
+    D."TruckNumber",
+    D."MobileNumber"
+FROM "DATA"."DriverDetail" D
+WHERE
+    D."IsDisabled" = FALSE
+    AND NOT EXISTS
+    (
+        SELECT 1
+        FROM "DATA"."AssignRoute" AR
+        WHERE
+            AR."DriverDetailId" = D."DriverDetailId"
+            AND AR."IsRouteSuccess" = true
+    )
+ORDER BY D."DriverName";
 
             `)
         return result.rows
@@ -184,7 +197,7 @@ export const InsertAssignRoute = async ({
             SELECT 1
             FROM "DATA"."AssignRoute"
             WHERE
-                "DriverDetailId"=$1
+                "DriverDetailId"=$1 AND "IsRouteSuccess" = true
             `,
             [DriverDetailId]
         );
@@ -404,8 +417,17 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
             INNER JOIN "LKP"."Role" RL
                 ON DD."RoleId" = RL."RoleId"
 
-            INNER JOIN "DATA"."AssignRoute" AR
-                ON DD."DriverDetailId" = AR."DriverDetailId"
+            INNER JOIN
+            (
+                SELECT *
+                FROM "DATA"."AssignRoute"
+                WHERE
+                    "DriverDetailId" = $1
+                    AND "IsRouteSuccess" = TRUE
+                ORDER BY "AssignRouteId" DESC
+                LIMIT 1
+            ) AR
+            ON DD."DriverDetailId" = AR."DriverDetailId"
 
             INNER JOIN "LKP"."ZoneMaster" ZM
                 ON AR."ZoneMasterId" = ZM."ZoneMasterId"
@@ -794,6 +816,68 @@ export const insertStationDetail = async ({
                 RouteStationStatusId
             ]
         );
+
+        //=================================================
+// Get AssignRouteId
+//=================================================
+
+const assignRouteResult = await client.query(
+    `
+    SELECT
+        "AssignRouteId"
+    FROM "DATA"."RouteStationStatus"
+    WHERE
+        "RouteStationStatusId" = $1
+    `,
+    [RouteStationStatusId]
+);
+
+const assignRouteId =
+    assignRouteResult.rows[0].AssignRouteId;
+
+
+
+    //=================================================
+// Check Pending Stations
+//=================================================
+
+const pendingStations = await client.query(
+    `
+    SELECT
+        COUNT(*) AS "PendingCount"
+    FROM "DATA"."RouteStationStatus"
+    WHERE
+        "AssignRouteId" = $1
+        AND "StatusId" <> 3
+    `,
+    [assignRouteId]
+);
+
+const pendingCount =
+    Number(pendingStations.rows[0].PendingCount);
+
+
+
+
+    //=================================================
+// Update Assign Route
+//=================================================
+
+if (pendingCount === 0) {
+
+    await client.query(
+        `
+        UPDATE "DATA"."AssignRoute"
+        SET
+            "IsRouteSuccess" = FALSE,
+            "UpdatedAt" = NOW()
+        WHERE
+            "AssignRouteId" = $1
+        `,
+        [assignRouteId]
+    );
+
+}
 
         await client.query("COMMIT");
 
