@@ -10,3 +10,6 @@ export const ASSIGN_ROUTE = "/rna-service/assignDetail"
 
 export const DRIVER_VIEW="/rna-service/View";
 export const DRIVER_DETAILS_FETCH="/rna-service/Fetch"
+export const UPDATE_DETAILS_UPDATE="/rna-service/Update"
+export const ZONE_DROPDOWN="/rna-service/zone";
+export const ASSIGN_COUNT="/rna-service/statuscount"

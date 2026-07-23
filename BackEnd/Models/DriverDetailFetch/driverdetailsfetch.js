@@ -22,6 +22,23 @@ export const FetchDrvrDetails = async () => {
     }
 };
 
+export const updateDriverDetails=async(DriverName,MobileNumber,TruckNumber,OdometerReading,DriverDetailId)=>{
+    try {
+        let query=`UPDATE "DATA"."DriverDetail" 
+        SET 
+        "DriverName"=$1,
+        "MobileNumber"=$2,
+        "TruckNumber"=$3,
+        "OdometerReading"=$4
+        WHERE "DriverDetailId"=$5
+           RETURNING *`;
+        let result=await pool.query(query,[DriverName,MobileNumber,TruckNumber,OdometerReading,DriverDetailId]);
+        return result.rows[0]
+    } catch (error) {
+        throw error
+    }
+}
+
 
 
 
