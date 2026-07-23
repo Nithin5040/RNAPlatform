@@ -32,7 +32,7 @@ import axios from "axios";
 const axiosClient = axios.create({
 
 
-  baseURL: "http://192.168.23.67:5080",
+  baseURL: "http://192.168.23.79:5080",
   //   baseURL: "http://192.168.23.67:5000",
   //   baseURL: "http://192.168.23.60:5000",
 

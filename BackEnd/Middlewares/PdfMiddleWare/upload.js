@@ -2,7 +2,7 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-const uploadPath = "E:\\RNAPlatform\\RNAUpload\\excelUpload";
+const uploadPath = "D:\\RNAPlatform\\RNAUpload\\excelUpload";
 
 // Create folder if it doesn't exist
 if (!fs.existsSync(uploadPath)) {
@@ -33,7 +33,7 @@ export const upload = multer({
 
     fileFilter: (req, file, cb) => {
 
-        const allowedExtensions = [".xlsx", ".xls"];
+        const allowedExtensions = [".xlsx", ".xls",".csv"];
 
         const extension = path.extname(file.originalname).toLowerCase();
 

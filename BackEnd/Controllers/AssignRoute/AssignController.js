@@ -1,4 +1,4 @@
-import { fetchZoneDropdown, fetchAssignRoute, fecthAssignDriver, InsertAssignRoute, fecthDriverAssignedDetails,insertStationDetail } from "../../Models/AssignModel/assignModel.js"
+import { fetchZoneDropdown, fetchAssignRoute, fecthAssignDriver, InsertAssignRoute, fecthDriverAssignedDetails, insertStationDetail } from "../../Models/AssignModel/assignModel.js"
 import fs from "fs"
 
 
@@ -358,3 +358,36 @@ export const submitStationDetail = async (req, res) => {
     }
 
 };
+
+
+// export const fetchLocationDistance = async (req, res) => {
+//     try {
+
+//         const { flagId } = req.body;
+
+//         if (parseInt(flagId) !== 1) {
+//             return res.status(400).json({
+//                 status: false,
+//                 message: "Invalid FlagId"
+//             });
+//         }
+
+//         const result = await fecthDistanceLocations();
+
+//         return res.status(200).json({
+//             status: true,
+//             message: "Distance fetched successfully",
+//             data: result
+//         });
+
+//     } catch (error) {
+
+//         console.log(error);
+
+//         return res.status(500).json({
+//             status: false,
+//             message: "Internal Server Error"
+//         });
+
+//     }
+// };

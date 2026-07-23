@@ -6,7 +6,7 @@ import path from "path";
 // Upload Folder
 //====================================================
 
-const uploadPath = "E:\\RNAPlatform\\RNAUpload\\DriverDetails";
+const uploadPath = "D:\\RNAPlatform\\RNAUpload\\DriverDetails";
 
 // Create folder if it doesn't exist
 

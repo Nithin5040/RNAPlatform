@@ -20,8 +20,13 @@ router.post("/submitStationDetail", stationUpload.array("files", 20), submitStat
 
 
 
-
-
+// //fetchig the distance of the latitude and the longitude
+// router.post("/fetchlocationDistance", fetchLocationDistance)
 
 
 export default router
+
+
+
+
+
