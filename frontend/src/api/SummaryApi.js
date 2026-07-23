@@ -52,6 +52,23 @@ export const SummaryApi = {
     url: "/rna-service/assignDetail/insertAssigndriver",
     method: "post"
   },
+  driverdetails: {
+    url: "/rna-service/Fetch/FetchDriverDetails",
+    method: "post"
+  },
+  viewdriverdoc: {
+    url: "/rna-service/View/ViewDriverDetails",
+    method: "post"
+  },
+  editdriverdetails: {
+    url: "/rna-service/Update/UpdateDriverDetails",
+    method: "post"
+  },
+  adminzone: {
+    url: "/rna-service/zone/zoneDrpDwn",
+    method: "post"
+  },
+
 
 
 
