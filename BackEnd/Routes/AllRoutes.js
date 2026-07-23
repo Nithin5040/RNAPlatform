@@ -30,6 +30,7 @@ const applyRoutes = (app) => {
     app.use(backendHelpers.DRIVER_VIEW,ViewDriver);
     app.use(backendHelpers.DRIVER_DETAILS_FETCH,fetchDriverDetails)
     app.use(backendHelpers.UPDATE_DETAILS_UPDATE,updateDriverDetails)
+    
     app.use(backendHelpers.ZONE_DROPDOWN,zoneDrpDwn);
     app.use(backendHelpers.ASSIGN_COUNT,assignRouteStatuscount)
 }
