@@ -1,6 +1,6 @@
 import XLSX from "xlsx";
 import fs from "fs";
-
+//import { pool } from "../Config/DbConfig.js";
 import { insertXl, fetchZoneMaster, fecthRoutes } from "../../Models/Upload/Xlupload.js"
 
 export const uploadExcel = async (req, res) => {
