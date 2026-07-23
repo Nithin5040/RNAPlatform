@@ -8,7 +8,10 @@ import driverlogin from "../Routes/DriverCreation/driverlogin.js"
 import AssignRoute from "../Routes/AssignRoute/assignRoute.js"
 import ViewDriver  from "../Routes/DriverDetailsView/viewRoute.js";
 import fetchDriverDetails from "../Routes/DriverDetailfetchRoute/detailsfetch.js"
+import updateDriverDetails from "../Routes/DriverDetailUpdateRoute/detailsupdate.js";
+import zoneDrpDwn from "../Routes/zoneRouteStationstatusRoutes/stationstatus.js"
 
+import assignRouteStatuscount from "../Routes/zoneRouteStationstatusRoutes/stationstatus.js"
 const applyRoutes = (app) => {
     app.use(backendHelpers.USER_CREATION, userRoute);
     app.use(backendHelpers.LOGIN_USER, loginRoute);
@@ -26,10 +29,9 @@ const applyRoutes = (app) => {
     //View Driver Details
     app.use(backendHelpers.DRIVER_VIEW,ViewDriver);
     app.use(backendHelpers.DRIVER_DETAILS_FETCH,fetchDriverDetails)
-
-
-
-
+    app.use(backendHelpers.UPDATE_DETAILS_UPDATE,updateDriverDetails)
+    app.use(backendHelpers.ZONE_DROPDOWN,zoneDrpDwn);
+    app.use(backendHelpers.ASSIGN_COUNT,assignRouteStatuscount)
 }
 
 
