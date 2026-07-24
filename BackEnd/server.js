@@ -10,14 +10,22 @@ const app = express();
 
 app.use(express.json());
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  process.env.FRONTEND_URL, // Set this in Vercel dashboard to your frontend domain
-].filter(Boolean);
-
+// Dynamically allow localhost, any Vercel deployment, or a custom domain via env var
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+
+    const isLocalhost = origin.startsWith("http://localhost");
+    const isVercel = origin.endsWith(".vercel.app");
+    const isCustom = process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL;
+
+    if (isLocalhost || isVercel || isCustom) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
