@@ -1,4 +1,4 @@
-import { ZoneDrpDwn, AssignRouteStatuscount } from "../../Models/AssignRoute/AssignRoute.js";
+import { ZoneDrpDwn, AssignRouteStatuscount } from "../../Models/AssignRoute/assignRoute.js";
 
 
 
