@@ -22,7 +22,7 @@ const connectDb = async () => {
     client.release(); 
   } catch (error) {
     console.error('PostgreSQL Connection Failed:', error.message);
-    process.exit(1);
+    throw error; // Let the caller handle it — never call process.exit() in serverless
   }
 };
 
