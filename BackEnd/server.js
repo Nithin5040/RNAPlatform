@@ -10,17 +10,18 @@ const app = express();
 
 app.use(express.json());
 
-// Dynamically allow localhost, any Vercel deployment, or a custom domain via env var
+// Allow localhost, any *.vercel.app, *.onrender.com, or a custom domain via FRONTEND_URL env var
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
+    // Allow requests with no origin (Postman, mobile apps, curl)
     if (!origin) return callback(null, true);
 
     const isLocalhost = origin.startsWith("http://localhost");
     const isVercel = origin.endsWith(".vercel.app");
+    const isRender = origin.endsWith(".onrender.com");
     const isCustom = process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL;
 
-    if (isLocalhost || isVercel || isCustom) {
+    if (isLocalhost || isVercel || isRender || isCustom) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked: ${origin}`));
@@ -30,13 +31,12 @@ app.use(cors({
   credentials: true
 }));
 
-try {
-  await connectDb();
-} catch (err) {
-  console.error("DB connection failed at startup:", err.message);
-  // Don't crash the function — individual requests will fail gracefully
-}
-
 applyRoutes(app);
 
-export default app;
+// Render provides PORT automatically; fallback to 3000 for local dev
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, async () => {
+  await connectDb();
+  console.log(`Server is running on port ${PORT}`);
+});
