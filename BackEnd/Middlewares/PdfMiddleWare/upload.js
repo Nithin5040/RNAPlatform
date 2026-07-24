@@ -2,7 +2,8 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-const uploadPath = "D:\\RNAPlatform\\RNAUpload\\excelUpload";
+// On Vercel, only /tmp is writable. Locally, use UPLOAD_BASE_PATH from .env
+const uploadPath = process.env.UPLOAD_BASE_PATH || "/tmp/uploads";
 
 // Create folder if it doesn't exist
 if (!fs.existsSync(uploadPath)) {

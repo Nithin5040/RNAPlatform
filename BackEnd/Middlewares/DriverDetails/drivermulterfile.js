@@ -6,7 +6,8 @@ import path from "path";
 // Upload Folder
 //====================================================
 
-const uploadPath = "D:\\RNAPlatform\\RNAUpload\\DriverDetails";
+// On Vercel, only /tmp is writable. Locally, use UPLOAD_BASE_PATH from .env
+const uploadPath = process.env.UPLOAD_DRIVER_PATH || "/tmp/uploads/DriverDetails";
 
 // Create folder if it doesn't exist
 
