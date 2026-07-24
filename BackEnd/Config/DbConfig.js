@@ -9,9 +9,10 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT,
-//   max: 10,                  // max connections
-//   idleTimeoutMillis: 30000, // close idle clients
-//   connectionTimeoutMillis: 2000,
+  ssl: { rejectUnauthorized: false }, // Required for Supabase pooler
+  max: 5,                              // Keep low for serverless
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
 });
 
 // Function to test DB connection
