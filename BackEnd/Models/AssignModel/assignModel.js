@@ -515,6 +515,16 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
         let totalDistance = 0;
         let totalDuration = 0;
 
+        //-------------------------------------------------
+        // Company -> Last Station Total Journey
+        //-------------------------------------------------
+
+        const onwardDistance =
+            companyRoute.distance + route.distance;
+
+        const onwardDuration =
+            companyRoute.duration + route.duration;
+
         return {
 
             driverDetails: {
@@ -547,11 +557,16 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 
                     onwardJourney: {
 
-                        fromStation: firstStation.Station,
+                        fromStation: "Vishvin Technology Pvt. Ltd.",
+                        fromStationAddress: "Above Super Market, Bengaluru",
+
+                        // latitude: companyLatitude,
+                        // longitude: companyLongitude,
+
                         toStation: lastStation.Station,
 
-                        totalDistanceKM: Number((route.distance / 1000).toFixed(2)),
-                        totalDurationMinutes: Number((route.duration / 60).toFixed(2))
+                        totalDistanceKM: Number((onwardDistance / 1000).toFixed(2)),
+                        totalDurationMinutes: Number((onwardDuration / 60).toFixed(2))
 
                     },
 
