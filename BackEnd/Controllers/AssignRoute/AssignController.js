@@ -153,12 +153,12 @@ export const fetchAssignRouteDetails = async (req, res) => {
 
         const result = await fecthDriverAssignedDetails(DriverDetailId);
 
-        if (!result) {
-            return res.status(404).json({
-                status: false,
-                message: "No Route Assigned for this Driver."
-            });
-        }
+        // if (!result) {
+        //     return res.status(404).json({
+        //         status: false,
+        //         message: "No Route Assigned for this Driver."
+        //     });
+        // }
 
         return res.status(200).json({
             status: true,
@@ -361,6 +361,7 @@ export const submitStationDetail = async (req, res) => {
 
 
 // export const fetchLocationDistance = async (req, res) => {
+    
 //     try {
 
 //         const { flagId } = req.body;

@@ -381,6 +381,7 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 
                 -- Assign Route
                 AR."AssignRouteId",
+                AR."IsRouteSuccess",
 
                 -- Zone
                 ZM."ZoneMasterId",
@@ -423,11 +424,10 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
                 FROM "DATA"."AssignRoute"
                 WHERE
                     "DriverDetailId" = $1
-                    AND "IsRouteSuccess" = TRUE
                 ORDER BY "AssignRouteId" DESC
                 LIMIT 1
             ) AR
-            ON DD."DriverDetailId" = AR."DriverDetailId"
+                ON DD."DriverDetailId" = AR."DriverDetailId"
 
             INNER JOIN "LKP"."ZoneMaster" ZM
                 ON AR."ZoneMasterId" = ZM."ZoneMasterId"
@@ -479,9 +479,8 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
         const route = data.routes[0];
         const legs = route.legs;
 
-//===============================================================================
         //-------------------------------------------------
-        // Vishvin Office -> First Station
+        // Company -> First Station
         //-------------------------------------------------
 
         const companyLatitude = "12.971600";
@@ -493,24 +492,28 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
         const companyResponse = await axios.get(companyUrl);
 
         const companyRoute = companyResponse.data.routes[0];
-//===========================================================================
+        //-------------------------------------------------
+        // First Station & Last Station
+        //-------------------------------------------------
+
+        const firstStation = result.rows[0];
+        const lastStation = result.rows[result.rows.length - 1];
 
         //-------------------------------------------------
-        // First Row
+        // Last Station -> Company
         //-------------------------------------------------
+
+        const returnCompanyUrl =
+            `https://router.project-osrm.org/route/v1/driving/${lastStation.Longitude},${lastStation.Latitude};${companyLongitude},${companyLatitude}?overview=false`;
+
+        const returnCompanyResponse = await axios.get(returnCompanyUrl);
+
+        const returnCompanyRoute = returnCompanyResponse.data.routes[0];
 
         const firstRow = result.rows[0];
 
-        //-------------------------------------------------
-        // Running Distance
-        //-------------------------------------------------
-
         let totalDistance = 0;
         let totalDuration = 0;
-
-        //-------------------------------------------------
-        // Response
-        //-------------------------------------------------
 
         return {
 
@@ -527,6 +530,9 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 
             assignedRoute: {
 
+                assignRouteId: firstRow.AssignRouteId,
+                isRouteSuccess: firstRow.IsRouteSuccess,
+
                 zone: {
 
                     zoneMasterId: firstRow.ZoneMasterId,
@@ -539,8 +545,29 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
                     routePlanId: firstRow.RoutePlanId,
                     routePlanPoint: firstRow.RoutePlanPoint,
 
-                    totalRouteDistanceKM: Number((route.distance / 1000).toFixed(2)),
-                    totalRouteDurationMinutes: Number((route.duration / 60).toFixed(2))
+                    onwardJourney: {
+
+                        fromStation: firstStation.Station,
+                        toStation: lastStation.Station,
+
+                        totalDistanceKM: Number((route.distance / 1000).toFixed(2)),
+                        totalDurationMinutes: Number((route.duration / 60).toFixed(2))
+
+                    },
+
+                    returnJourney: {
+
+                        fromStation: lastStation.Station,
+                        toStation: "Vishvin Technology Pvt. Ltd.",
+                        toStationAddress: "Above Super Market, Bengaluru",
+
+                        latitude: companyLatitude,
+                        longitude: companyLongitude,
+
+                        totalDistanceKM: Number((returnCompanyRoute.distance / 1000).toFixed(2)),
+                        totalDurationMinutes: Number((returnCompanyRoute.duration / 60).toFixed(2))
+
+                    }
 
                 },
 
@@ -565,20 +592,13 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
                                 startLatitude: companyLatitude,
                                 startLongitude: companyLongitude,
 
-                                distanceFromPreviousMeters:
-                                    Number(companyRoute.distance.toFixed(2)),
+                                distanceFromPreviousMeters: Number(companyRoute.distance.toFixed(2)),
+                                distanceFromPreviousKM: Number((companyRoute.distance / 1000).toFixed(2)),
 
-                                distanceFromPreviousKM:
-                                    Number((companyRoute.distance / 1000).toFixed(2)),
+                                durationFromPreviousSeconds: Number(companyRoute.duration.toFixed(2)),
+                                durationFromPreviousMinutes: Number((companyRoute.duration / 60).toFixed(2)),
 
-                                durationFromPreviousSeconds:
-                                    Number(companyRoute.duration.toFixed(2)),
-
-                                durationFromPreviousMinutes:
-                                    Number((companyRoute.duration / 60).toFixed(2)),
-
-                                totalTravelledKM:
-                                    Number((totalDistance / 1000).toFixed(2))
+                                totalTravelledKM: Number((totalDistance / 1000).toFixed(2))
 
                             };
 
@@ -591,20 +611,13 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
 
                                 previousStation: result.rows[index - 1].Station,
 
-                                distanceFromPreviousMeters:
-                                    Number(legs[index - 1].distance.toFixed(2)),
+                                distanceFromPreviousMeters: Number(legs[index - 1].distance.toFixed(2)),
+                                distanceFromPreviousKM: Number((legs[index - 1].distance / 1000).toFixed(2)),
 
-                                distanceFromPreviousKM:
-                                    Number((legs[index - 1].distance / 1000).toFixed(2)),
+                                durationFromPreviousSeconds: Number(legs[index - 1].duration.toFixed(2)),
+                                durationFromPreviousMinutes: Number((legs[index - 1].duration / 60).toFixed(2)),
 
-                                durationFromPreviousSeconds:
-                                    Number(legs[index - 1].duration.toFixed(2)),
-
-                                durationFromPreviousMinutes:
-                                    Number((legs[index - 1].duration / 60).toFixed(2)),
-
-                                totalTravelledKM:
-                                    Number((totalDistance / 1000).toFixed(2))
+                                totalTravelledKM: Number((totalDistance / 1000).toFixed(2))
 
                             };
 
@@ -630,7 +643,8 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
                             routeStationStatusId: row.RouteStationStatusId,
                             statusId: row.StatusId,
                             statusName: row.StatusName,
-                            visitedAt: row.VisitedAt
+                            visitedAt: row.VisitedAt,
+                            remarks: row.Remarks
 
                         },
 
@@ -645,9 +659,7 @@ export const fecthDriverAssignedDetails = async (DriverDetailId) => {
         };
 
     } catch (error) {
-
         throw error;
-
     }
 
 };
@@ -818,31 +830,31 @@ export const insertStationDetail = async ({
         );
 
         //=================================================
-// Get AssignRouteId
-//=================================================
+        // Get AssignRouteId
+        //=================================================
 
-const assignRouteResult = await client.query(
-    `
+        const assignRouteResult = await client.query(
+            `
     SELECT
         "AssignRouteId"
     FROM "DATA"."RouteStationStatus"
     WHERE
         "RouteStationStatusId" = $1
     `,
-    [RouteStationStatusId]
-);
+            [RouteStationStatusId]
+        );
 
-const assignRouteId =
-    assignRouteResult.rows[0].AssignRouteId;
+        const assignRouteId =
+            assignRouteResult.rows[0].AssignRouteId;
 
 
 
-    //=================================================
-// Check Pending Stations
-//=================================================
+        //=================================================
+        // Check Pending Stations
+        //=================================================
 
-const pendingStations = await client.query(
-    `
+        const pendingStations = await client.query(
+            `
     SELECT
         COUNT(*) AS "PendingCount"
     FROM "DATA"."RouteStationStatus"
@@ -850,23 +862,23 @@ const pendingStations = await client.query(
         "AssignRouteId" = $1
         AND "StatusId" <> 3
     `,
-    [assignRouteId]
-);
+            [assignRouteId]
+        );
 
-const pendingCount =
-    Number(pendingStations.rows[0].PendingCount);
-
-
+        const pendingCount =
+            Number(pendingStations.rows[0].PendingCount);
 
 
-    //=================================================
-// Update Assign Route
-//=================================================
 
-if (pendingCount === 0) {
 
-    await client.query(
-        `
+        //=================================================
+        // Update Assign Route
+        //=================================================
+
+        if (pendingCount === 0) {
+
+            await client.query(
+                `
         UPDATE "DATA"."AssignRoute"
         SET
             "IsRouteSuccess" = FALSE,
@@ -874,10 +886,10 @@ if (pendingCount === 0) {
         WHERE
             "AssignRouteId" = $1
         `,
-        [assignRouteId]
-    );
+                [assignRouteId]
+            );
 
-}
+        }
 
         await client.query("COMMIT");
 
@@ -910,6 +922,7 @@ if (pendingCount === 0) {
 
 
 // export const fecthDistanceLocations = async () => {
+
 
 //     try {
 
