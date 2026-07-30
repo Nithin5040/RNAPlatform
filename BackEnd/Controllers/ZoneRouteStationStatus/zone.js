@@ -1,4 +1,4 @@
-import { ZoneDrpDwn, AssignRoutecount ,AssignRootFetchbasedonZoneMaster,SubstationCountBasedonAssignedRoot} from "../../Models/AssignRoute/AssignRoute.js";
+import { ZoneDrpDwn, AssignRoutecount ,AssignRootFetchbasedonZoneMaster,SubstationCountBasedonAssignedRoot} from "../../Models/AssignRoute/assignRoute.js";
 
 
 
