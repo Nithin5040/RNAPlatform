@@ -25,8 +25,3 @@ router.post("/submitStationDetail", stationUpload.array("files", 20), submitStat
 
 
 export default router
-
-
-
-
-
