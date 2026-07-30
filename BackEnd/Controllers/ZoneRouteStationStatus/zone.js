@@ -1,4 +1,4 @@
-import { ZoneDrpDwn, AssignRoutecount, AssignRootFetchbasedonZoneMaster, SubstationCountBasedonAssignedRoot } from "../../Models/AssignRoute/assignRoute.js";
+import { ZoneDrpDwn, AssignRoutecount ,AssignRootFetchbasedonZoneMaster,SubstationCountBasedonAssignedRoot} from "../../Models/AssignRoute/AssignRoute.js";
 
 
 
@@ -37,7 +37,7 @@ export const zoneDrpDwn = async (req, res) => {
 }
 
 export const assignRoutescount = async (req, res) => {
-    const { flagId } = req.body
+    const{flagId}=req.body
     try {
         if (!flagId) {
             return res.status(400).json({
@@ -46,7 +46,7 @@ export const assignRoutescount = async (req, res) => {
             });
         }
 
-        else if (Number(flagId) === 2) {
+       else  if (Number(flagId) === 2) {
             const result = await AssignRoutecount();
 
             return res.status(200).json({
@@ -70,8 +70,8 @@ export const assignRoutescount = async (req, res) => {
 }
 
 
-export const assignRootFetchbasedonZoneMaster = async (req, res) => {
-    const { flagId, ZoneMasterId } = req.body
+export const assignRootFetchbasedonZoneMaster=async(req,res)=>{
+  const{flagId,ZoneMasterId}=req.body
     try {
         if (!flagId) {
             return res.status(400).json({
@@ -86,7 +86,7 @@ export const assignRootFetchbasedonZoneMaster = async (req, res) => {
             return res.status(200).json({
                 status: true,
                 message: "AssignRouteFetch details Fetched Successfully",
-                data: result
+                data:result
 
             });
         }
@@ -101,14 +101,14 @@ export const assignRootFetchbasedonZoneMaster = async (req, res) => {
             error: error.message
         });
     }
-
-
+        
+    
 }
 
-export const substationCountBasedonAssignedRoot = async (req, res) => {
-    const { flagId, AssignRouteId } = req.body
-
-    try {
+export const substationCountBasedonAssignedRoot=async(req,res)=>{
+    const{flagId,AssignRouteId}=req.body
+    
+        try {
         if (!flagId) {
             return res.status(400).json({
                 status: false,

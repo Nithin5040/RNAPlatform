@@ -62,9 +62,9 @@ FROM
 };
 
 
-export const AssignRootFetchbasedonZoneMaster = async (ZoneMasterId) => {
+export const AssignRootFetchbasedonZoneMaster=async(ZoneMasterId)=>{
     try {
-        let query = `SELECT
+        let query=`SELECT
     COALESCE
     (
         json_agg
@@ -106,17 +106,17 @@ INNER JOIN "DATA"."RoutePlan" rp
     ON rp."RoutePlanId" = ar."RoutePlanId"
 
 WHERE ar."ZoneMasterId" = $1;`;
-        let result = await pool.query(query, [ZoneMasterId]);
-        return result.rows
+let result=await pool.query(query,[ZoneMasterId]);
+return result.rows
     } catch (error) {
         throw error
     }
 }
 
 
-export const SubstationCountBasedonAssignedRoot = async (AssignRouteId) => {
+export const SubstationCountBasedonAssignedRoot=async(AssignRouteId)=>{
     try {
-        let query = `SELECT
+        let query=`SELECT
     json_build_object
     (
         'AssignRouteId', ar."AssignRouteId",
@@ -195,9 +195,16 @@ INNER JOIN "DATA"."RoutePlan" rp
     ON rp."RoutePlanId" = ar."RoutePlanId"
 
 WHERE ar."AssignRouteId" = $1;`;
-        let result = await pool.query(query, [AssignRouteId])
-        return result.rows
+let result=await pool.query(query,[AssignRouteId])
+return result.rows
     } catch (error) {
         throw error
     }
 }
+
+
+
+
+
+
+

@@ -10,30 +10,35 @@ import ViewDriver  from "../Routes/DriverDetailsView/viewRoute.js";
 import fetchDriverDetails from "../Routes/DriverDetailfetchRoute/detailsfetch.js"
 import updateDriverDetails from "../Routes/DriverDetailUpdateRoute/detailsupdate.js";
 import zoneDrpDwn from "../Routes/zoneRouteStationstatusRoutes/stationstatus.js"
-
 import assignRouteStatuscount from "../Routes/zoneRouteStationstatusRoutes/stationstatus.js"
+import submitedDriverDetail from "../Routes/SubmitDriverDetails/submitDriverDetail.js"
+
 const applyRoutes = (app) => {
+
     app.use(backendHelpers.USER_CREATION, userRoute);
     app.use(backendHelpers.LOGIN_USER, loginRoute);
-
     //this is the master excel upload screen api 
     app.use(backendHelpers.XL_UPLOAD, uploadXl)
     app.use(backendHelpers.ROUTE_PLAN, RoutePlan)
-
     //Driver Creation
     app.use(backendHelpers.DRIVER_CREATION, driverCreation);
     app.use(backendHelpers.DRIVER_LOGIN, driverlogin)
     //AssignRoute
     app.use(backendHelpers.ASSIGN_ROUTE, AssignRoute)
-
     //View Driver Details
     app.use(backendHelpers.DRIVER_VIEW,ViewDriver);
     app.use(backendHelpers.DRIVER_DETAILS_FETCH,fetchDriverDetails)
     app.use(backendHelpers.UPDATE_DETAILS_UPDATE,updateDriverDetails)
-    
     app.use(backendHelpers.ZONE_DROPDOWN,zoneDrpDwn);
-    app.use(backendHelpers.ASSIGN_COUNT,assignRouteStatuscount)
+
+    //this is the fecthing the drivers submitted dcs and the annexure details 
+    app.use(backendHelpers.SUBMITED_DRIVER_DETAIL,submitedDriverDetail)
+
+    app.use(backendHelpers.ASSIGN_COUNT,assignRouteStatuscount);
+   
 }
 
 
 export default applyRoutes;
+
+
