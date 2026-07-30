@@ -49,8 +49,8 @@ export const fecthDriverSubmittedDetail = async () => {
             INNER JOIN "DATA"."StationSubmission" SS
                 ON RSS."RouteStationStatusId" = SS."RouteStationStatusId"
 
-            WHERE
-                AR."IsRouteSuccess" = FALSE
+            -- WHERE
+                -- AR."IsRouteSuccess" = FALSE
 
             GROUP BY
 
@@ -85,6 +85,7 @@ export const fecthDriverSubmittedDetail = async () => {
 export const fetchDriverSubmittedStationDetail = async (AssignRouteId) => {
     try {
 
+        // Fetch uploaded station details
         const result = await pool.query(
             `
             SELECT
@@ -133,76 +134,111 @@ export const fetchDriverSubmittedStationDetail = async (AssignRouteId) => {
             [AssignRouteId]
         );
 
-       const stations = [];
+        // Total stations
+        const totalResult = await pool.query(
+            `
+            SELECT COUNT(*) AS "TotalSubStationCount"
+            FROM "DATA"."RouteStationStatus"
+            WHERE "AssignRouteId" = $1;
+            `,
+            [AssignRouteId]
+        );
 
-for (const row of result.rows) {
+        // Uploaded stations
+        const uploadedResult = await pool.query(
+            `
+            SELECT COUNT(*) AS "UploadedCount"
+            FROM "DATA"."RouteStationStatus"
+            WHERE
+                "AssignRouteId" = $1
+                AND "StatusId" = 3;
+            `,
+            [AssignRouteId]
+        );
 
-    let station = stations.find(
-        item => item.stationSubmissionId === row.StationSubmissionId
-    );
+        const totalSubStationCount = Number(
+            totalResult.rows[0].TotalSubStationCount
+        );
 
-    if (!station) {
+        const uploadedCount = Number(
+            uploadedResult.rows[0].UploadedCount
+        );
 
-        station = {
+        const remainingCount = totalSubStationCount - uploadedCount;
 
-            routeStationStatusId: row.RouteStationStatusId,
-            statusId: row.StatusId,
-            visitedAt: row.VisitedAt,
+        const stations = [];
 
-            stationSubmissionId: row.StationSubmissionId,
-            remarks: row.Remarks,
+        for (const row of result.rows) {
 
-            excelDataId: row.ExcelDataId,
-            taluk: row.Taluk,
-            station: row.Station,
-            voltageClass: row.VoltageClass,
-            inChargeAEJEName: row.InChangreAEJEname,
-            contactNumber: row.ContactNumber,
-            subStationAddress: row.SubStationAddress,
-            pinCode: row.PinCode,
-            latitude: row.Latitude,
-            longitude: row.Longitude,
+            let station = stations.find(
+                item => item.stationSubmissionId === row.StationSubmissionId
+            );
 
-            files: []
+            if (!station) {
 
+                station = {
+
+                    routeStationStatusId: row.RouteStationStatusId,
+                    statusId: row.StatusId,
+                    visitedAt: row.VisitedAt,
+
+                    stationSubmissionId: row.StationSubmissionId,
+                    remarks: row.Remarks,
+
+                    excelDataId: row.ExcelDataId,
+                    taluk: row.Taluk,
+                    station: row.Station,
+                    voltageClass: row.VoltageClass,
+                    inChargeAEJEName: row.InChangreAEJEname,
+                    contactNumber: row.ContactNumber,
+                    subStationAddress: row.SubStationAddress,
+                    pinCode: row.PinCode,
+                    latitude: row.Latitude,
+                    longitude: row.Longitude,
+
+                    files: []
+
+                };
+
+                stations.push(station);
+            }
+
+            if (row.StationSubmissionFileId) {
+
+                station.files.push({
+
+                    stationSubmissionFileId: row.StationSubmissionFileId,
+
+                    fileTypeId: row.FileTypeId,
+
+                    fileTypeName:
+                        row.FileTypeId == 8
+                            ? "DC Photo"
+                            : row.FileTypeId == 9
+                                ? "Annexure Photo"
+                                : row.FileTypeId == 10
+                                    ? "Box Photo"
+                                    : "Unknown",
+
+                    fileName: row.FileName
+
+                });
+
+            }
+
+        }
+
+        return {
+            totalSubStationCount,
+            uploadedCount,
+            remainingCount,
+            stations
         };
-
-        stations.push(station);
-    }
-
-    if (row.StationSubmissionFileId) {
-
-        station.files.push({
-
-            stationSubmissionFileId: row.StationSubmissionFileId,
-
-            fileTypeId: row.FileTypeId,
-
-            fileTypeName:
-                row.FileTypeId == 8
-                    ? "DC Photo"
-                    : row.FileTypeId == 9
-                    ? "Annexure Photo"
-                    : row.FileTypeId == 10
-                    ? "Box Photo"
-                    : "Unknown",
-
-            fileName: row.FileName
-
-        });
-
-    }
-
-}
-
-return stations;
 
     } catch (error) {
         throw error;
     }
 };
-
-
 export const fetchFileView = async (StationSubmissionFileId, FileTypeId) => {
     try {
 
