@@ -1,7 +1,4 @@
 
-import fs from "fs";
-import path from "path";
-import mime from "mime-types";
 
 import { fecthDriverSubmittedDetail, fetchDriverSubmittedStationDetail, fetchFileView } from "../../Models/SubmittedDriverDetail/submittedDriverDetail.js"
 
