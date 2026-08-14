@@ -8,6 +8,7 @@ const connectionString = process.env.DATABASE_URL;
 const poolConfig = connectionString
   ? {
       connectionString,
+      options: "-c search_path=DATA,LKP,public",
       ssl: { rejectUnauthorized: false },
       max: 10,
       idleTimeoutMillis: 30000,
@@ -19,6 +20,7 @@ const poolConfig = connectionString
       password: process.env.DB_PASSWORD || "Nithin@9190",
       database: process.env.DB_DATABASE || "postgres",
       port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 6543,
+      options: "-c search_path=DATA,LKP,public",
       ssl: { rejectUnauthorized: false },
       max: 10,
       idleTimeoutMillis: 30000,

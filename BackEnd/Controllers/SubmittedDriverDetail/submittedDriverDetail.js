@@ -2,6 +2,7 @@
 import fs from "fs";
 import path from "path";
 import mime from "mime-types";
+import { pool } from "../../Config/DbConfig.js";
 
 import { fecthDriverSubmittedDetail, fetchDriverSubmittedStationDetail, fetchFileView } from "../../Models/SubmittedDriverDetail/submittedDriverDetail.js"
 
@@ -20,16 +21,18 @@ export const fetchDriverSubmittedDetails = async (req, res) => {
         let result;
 
         if (parseInt(flagId) === 1) {
-
-            result = await fecthDriverSubmittedDetail();
-
+            const query = `
+                SELECT "ZoneMasterId", "ZoneMasterName" 
+                FROM "LKP"."ZoneMaster" 
+                WHERE "IsDisabled" = false OR "IsDisabled" IS NULL 
+                ORDER BY "ZoneMasterId" ASC;
+            `;
+            const { rows } = await pool.query(query);
             return res.status(200).json({
                 status: true,
-                message: "The Details Fetched Successfully.",
-                count: result.length,
-                result
+                message: "The DropDown Fetched Successfully.",
+                result: rows
             });
-
         }
         else if (parseInt(flagId) === 2) {
 
