@@ -21,18 +21,16 @@ export const fetchDriverSubmittedDetails = async (req, res) => {
         let result;
 
         if (parseInt(flagId) === 1) {
-            const query = `
-                SELECT "ZoneMasterId", "ZoneMasterName" 
-                FROM "LKP"."ZoneMaster" 
-                WHERE "IsDisabled" = false OR "IsDisabled" IS NULL 
-                ORDER BY "ZoneMasterId" ASC;
-            `;
-            const { rows } = await pool.query(query);
+
+            result = await fecthDriverSubmittedDetail();
+
             return res.status(200).json({
                 status: true,
-                message: "The DropDown Fetched Successfully.",
-                result: rows
+                message: "The Details Fetched Successfully.",
+                count: result.length,
+                result
             });
+
         }
         else if (parseInt(flagId) === 2) {
 
@@ -111,4 +109,67 @@ export const fetchDriverSubmittedDetails = async (req, res) => {
 
     }
 
+};
+
+export const fetchDriverDetailDropdwon = async (req, res) => {
+    try {
+        const { flagId, ZoneMasterId } = req.body;
+        // Flag 1: Fetch Zone Dropdown
+        if (parseInt(flagId) === 1) {
+            const query = `
+                SELECT "ZoneMasterId", "ZoneMasterName" 
+                FROM "LKP"."ZoneMaster" 
+                WHERE "IsDisabled" = false OR "IsDisabled" IS NULL 
+                ORDER BY "ZoneMasterId" ASC;
+            `;
+            const { rows } = await pool.query(query);
+            return res.status(200).json({
+                status: true,
+                message: "The DropDown Fetched Successfully.",
+                result: rows
+            });
+        }
+        // Flag 2: Fetch Route Plans Dropdown for selected Zone
+        else if (parseInt(flagId) === 2) {
+            const query = `
+                SELECT "RoutePlanId", "RoutePlanPoint" 
+                FROM "DATA"."RoutePlan" 
+                WHERE "ZoneMasterId" = $1 AND ("IsDisabled" = false OR "IsDisabled" IS NULL) 
+                ORDER BY "RoutePlanId" ASC;
+            `;
+            const { rows } = await pool.query(query, [parseInt(ZoneMasterId)]);
+            return res.status(200).json({
+                status: true,
+                message: "The DropDown Fetched Successfully.",
+                result: rows
+            });
+        }
+        // Flag 3: Fetch Drivers Dropdown
+        else if (parseInt(flagId) === 3) {
+            const query = `
+                SELECT "DriverDetailId", "DriverName", "MobileNumber", "TruckNumber" 
+                FROM "DATA"."DriverDetail" 
+                WHERE ("IsDisabled" = false OR "IsDisabled" IS NULL) 
+                ORDER BY "DriverName" ASC;
+            `;
+            const { rows } = await pool.query(query);
+            return res.status(200).json({
+                status: true,
+                message: "The DropDown Fetched Successfully.",
+                result: rows
+            });
+        }
+        else {
+            return res.status(400).json({
+                status: false,
+                message: "Valid flagId is required."
+            });
+        }
+    } catch (error) {
+        console.error("Error in fetchDriverDetailDropdwon:", error);
+        return res.status(500).json({
+            status: false,
+            message: error.message || "Internal Server Error"
+        });
+    }
 };
